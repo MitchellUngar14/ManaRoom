@@ -1,0 +1,100 @@
+'use client';
+
+import { useDraggable } from '@dnd-kit/core';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import type { GameCard, BoardCard, ZoneType } from '@/types';
+import { useGameStore } from '@/store/gameStore';
+
+interface CardProps {
+  card: GameCard;
+  zone: ZoneType;
+  isOpponent?: boolean;
+  isDragging?: boolean;
+  showBack?: boolean;
+  onClick?: () => void;
+}
+
+export function Card({
+  card,
+  zone,
+  isOpponent = false,
+  isDragging = false,
+  showBack = false,
+  onClick,
+}: CardProps) {
+  const { tapCard } = useGameStore();
+  const boardCard = card as BoardCard;
+  const isTapped = boardCard.tapped;
+  const isBattlefield = zone === 'battlefield';
+
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: card.instanceId,
+    data: { card, zone },
+    disabled: isOpponent,
+  });
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (isBattlefield && !isOpponent) {
+      tapCard(card.instanceId);
+    }
+  };
+
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
+  const imageUrl = showBack
+    ? '/card-back.png'
+    : card.imageUrl || card.card?.imageUris?.normal || '';
+
+  return (
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={`card-container relative cursor-pointer select-none ${
+        isDragging ? 'opacity-50' : ''
+      }`}
+      animate={{ rotate: isTapped ? 90 : 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={handleClick}
+    >
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt={card.cardName}
+          fill
+          className="object-cover rounded"
+          draggable={false}
+          sizes="(max-width: 768px) 80px, 120px"
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
+          <span className="text-xs text-center text-gray-400 break-words">
+            {card.cardName}
+          </span>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// Card back component for library/hidden cards
+export function CardBack({ count }: { count?: number }) {
+  return (
+    <div className="card-container relative bg-gray-700 rounded border border-gray-600">
+      <div className="absolute inset-0 flex items-center justify-center">
+        {count !== undefined && (
+          <span className="text-2xl font-bold text-gray-500">{count}</span>
+        )}
+      </div>
+      <div className="absolute inset-2 border border-gray-600 rounded" />
+    </div>
+  );
+}
