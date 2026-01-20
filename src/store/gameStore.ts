@@ -64,7 +64,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return new Promise((resolve, reject) => {
       const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
       const socket = io(socketUrl, {
-        path: '/api/socket',
         transports: ['websocket', 'polling'],
       });
 
