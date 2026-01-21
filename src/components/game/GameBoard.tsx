@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -19,6 +19,34 @@ import { Exile } from './zones/Exile';
 import { CommandZone } from './zones/CommandZone';
 import { CardPreviewPane } from './CardPreviewPane';
 import type { GameCard, ZoneType, PlayerState } from '@/types';
+
+// Global state for hovered card (used by keyboard shortcut)
+let hoveredCard: GameCard | null = null;
+let lastHoveredCard: GameCard | null = null; // Persists even when mouse leaves for preview
+export function setHoveredCard(card: GameCard | null) {
+  if (card) {
+    hoveredCard = card;
+    lastHoveredCard = card;
+  } else {
+    hoveredCard = null;
+  }
+}
+// Clear hovered card only if it matches the card being left
+// This prevents race conditions when moving fast between cards
+export function clearHoveredCard(card: GameCard) {
+  if (hoveredCard?.instanceId === card.instanceId) {
+    hoveredCard = null;
+  }
+}
+export function getHoveredCard() {
+  return hoveredCard;
+}
+export function getLastHoveredCard() {
+  return lastHoveredCard;
+}
+export function clearLastHoveredCard() {
+  lastHoveredCard = null;
+}
 
 function DropZone({
   id,
@@ -110,6 +138,45 @@ export function GameBoard() {
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
   const [bottomBarCollapsed, setBottomBarCollapsed] = useState(false);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl key toggles bottom bar
+      if (e.key === 'Control') {
+        setBottomBarCollapsed(prev => !prev);
+      }
+
+      // P key toggles preview for hovered card
+      if (e.key === 'p' || e.key === 'P') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+
+        const hovered = getHoveredCard();
+
+        if (previewCard) {
+          // If preview is open, close it
+          // Set lastHovered to the preview card so P can re-open it
+          clearLastHoveredCard();
+          setHoveredCard(previewCard);
+          setHoveredCard(null);
+          setPreviewCard(null);
+        } else {
+          // Try to open preview - prefer currently hovered, fall back to last hovered
+          const lastHovered = getLastHoveredCard();
+          const targetCard = hovered || lastHovered;
+          if (targetCard) {
+            setPreviewCard(targetCard);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [previewCard, setPreviewCard]);
 
   const myPlayer = myId ? players[myId] : null;
   const opponents = Object.values(players).filter((p) => p.odId !== myId);
@@ -266,22 +333,22 @@ export function GameBoard() {
 
           <div
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              bottomBarCollapsed ? 'h-0' : 'h-32'
+              bottomBarCollapsed ? 'h-0' : 'h-44'
             }`}
           >
-            <div className="h-32 border-t border-gray-800 bg-gray-900/80 flex">
+            <div className="h-44 border-t border-gray-800 bg-gray-900/80 flex">
               {/* My zones (left side) */}
               <div className="shrink-0 border-r border-gray-800 px-2 py-1 flex items-center gap-1">
-                <DropZone id="commandZone" className="w-20 shrink-0">
+                <DropZone id="commandZone" className="w-24 shrink-0">
                   <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                 </DropZone>
-                <DropZone id="library" className="w-20 shrink-0">
+                <DropZone id="library" className="w-24 shrink-0">
                   <Library cards={myPlayer.zones.library} isOpponent={false} />
                 </DropZone>
-                <DropZone id="graveyard" className="w-20 shrink-0">
+                <DropZone id="graveyard" className="w-24 shrink-0">
                   <Graveyard cards={myPlayer.zones.graveyard} isOpponent={false} />
                 </DropZone>
-                <DropZone id="exile" className="w-20 shrink-0">
+                <DropZone id="exile" className="w-24 shrink-0">
                   <Exile cards={myPlayer.zones.exile} isOpponent={false} />
                 </DropZone>
               </div>
@@ -298,7 +365,7 @@ export function GameBoard() {
       {/* Drag overlay - shows the card being dragged */}
       <DragOverlay>
         {activeCard && (
-          <div className="w-20 opacity-90 pointer-events-none">
+          <div className="w-28 opacity-90 pointer-events-none">
             <Card
               card={activeCard}
               zone={activeZone || 'hand'}

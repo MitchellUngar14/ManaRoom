@@ -7,6 +7,7 @@ import Image from 'next/image';
 import type { GameCard, BoardCard, ZoneType } from '@/types';
 import { useGameStore } from '@/store/gameStore';
 import { CardContextMenu } from './CardContextMenu';
+import { setHoveredCard, clearHoveredCard } from './GameBoard';
 
 interface CardProps {
   card: GameCard;
@@ -94,6 +95,8 @@ export function Card({
         className="h-full"
         onContextMenu={handleContextMenu}
         onPointerDown={handlePointerDown}
+        onPointerEnter={() => setHoveredCard(card)}
+        onPointerLeave={() => clearHoveredCard(card)}
       >
         <motion.div
           ref={setNodeRef}
@@ -107,6 +110,8 @@ export function Card({
           transition={{ duration: 0.2 }}
           onClick={handleClick}
           onContextMenu={handleContextMenu}
+          onPointerEnter={() => setHoveredCard(card)}
+          onPointerMove={() => setHoveredCard(card)}
         >
           {imageUrl ? (
             <Image

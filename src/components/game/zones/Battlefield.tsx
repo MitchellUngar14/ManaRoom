@@ -22,7 +22,7 @@ export function Battlefield({ cards, isOpponent, mirrorCards = false }: Battlefi
           return (
             <div
               key={card.instanceId}
-              className={`w-16 absolute ${mirrorCards ? 'rotate-180' : ''}`}
+              className={`w-28 absolute ${mirrorCards ? 'rotate-180' : ''}`}
               style={{
                 left: `${displayX * 100}%`,
                 top: `${displayY * 100}%`,

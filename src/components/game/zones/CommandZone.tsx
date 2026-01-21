@@ -12,7 +12,7 @@ export function CommandZone({ cards, isOpponent }: CommandZoneProps) {
   return (
     <div className="h-full flex flex-col">
       <span className="text-[9px] text-gray-500 mb-0.5 text-center">Command</span>
-      <div className="flex-1 w-20">
+      <div className="flex-1 w-24">
         {cards.length > 0 ? (
           <div className="h-full hover:brightness-110 transition-all">
             <Card card={cards[0]} zone="commandZone" isOpponent={isOpponent} />

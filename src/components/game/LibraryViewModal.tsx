@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { GameCard } from '@/types';
+import { useGameStore } from '@/store/gameStore';
 
 interface LibraryViewModalProps {
   isOpen: boolean;
@@ -14,6 +15,12 @@ interface LibraryViewModalProps {
 
 export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { moveCard } = useGameStore();
+
+  const handleTutorToHand = useCallback((card: GameCard) => {
+    moveCard(card.instanceId, 'library', 'hand');
+    onClose();
+  }, [moveCard, onClose]);
 
   const filteredCards = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -108,7 +115,7 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {filteredCards.map((card, index) => {
+                  {filteredCards.map((card) => {
                     const imageUrl = card.imageUrl || card.card?.imageUris?.small || '';
                     const originalIndex = cards.indexOf(card);
 
@@ -148,10 +155,19 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
 
                         {/* Card type (if available) */}
                         {card.card?.typeLine && (
-                          <span className="text-xs text-gray-500 hidden sm:block">
+                          <span className="text-xs text-gray-500 hidden sm:block mr-2">
                             {card.card.typeLine}
                           </span>
                         )}
+
+                        {/* Tutor to hand button */}
+                        <button
+                          onClick={() => handleTutorToHand(card)}
+                          className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Add to hand"
+                        >
+                          To Hand
+                        </button>
                       </div>
                     );
                   })}
@@ -161,7 +177,7 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
 
             {/* Footer hint */}
             <div className="p-3 border-t border-gray-700 text-center text-xs text-gray-500">
-              Top of library is position 1
+              Top of library is position 1 · Hover over a card and click &quot;To Hand&quot; to tutor
             </div>
           </motion.div>
         </motion.div>

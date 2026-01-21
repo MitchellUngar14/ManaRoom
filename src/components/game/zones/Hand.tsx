@@ -2,12 +2,23 @@
 
 import type { GameCard } from '@/types';
 import { Card } from '../Card';
+import { setHoveredCard } from '../GameBoard';
 
 interface HandProps {
   cards: GameCard[];
 }
 
 export function Hand({ cards }: HandProps) {
+  // Clear hover when pointer is in the hand container but not on a card
+  const handleContainerMouseMove = (e: React.PointerEvent) => {
+    // Check if the target is the container or the wrapper div (not the card itself)
+    const target = e.target as HTMLElement;
+    // If we're on the container or a wrapper div (not on an actual card element), clear hover
+    if (e.target === e.currentTarget || target.classList.contains('shrink-0')) {
+      setHoveredCard(null);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
@@ -17,14 +28,17 @@ export function Hand({ cards }: HandProps) {
 
       {/* Cards */}
       <div className="flex-1 min-h-0 px-2 pb-1 overflow-x-auto overflow-y-hidden">
-        <div className="h-full flex items-center gap-1">
+        <div
+          className="h-full flex items-center gap-1"
+          onPointerMove={handleContainerMouseMove}
+        >
           {cards.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-gray-600 text-sm">
               Your hand is empty
             </div>
           ) : (
             cards.map((card) => (
-              <div key={card.instanceId} className="w-20 shrink-0">
+              <div key={card.instanceId} className="w-28 shrink-0">
                 <Card card={card} zone="hand" />
               </div>
             ))
