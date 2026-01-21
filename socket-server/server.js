@@ -48,6 +48,7 @@ function initializePlayerZones(deckData) {
       cardName: deckData.commander.name,
       scryfallId: deckData.commander.scryfallId,
       imageUrl: deckData.commander.imageUrl,
+      card: deckData.commander.card || null, // Full Scryfall card data
     });
   }
 
@@ -60,6 +61,7 @@ function initializePlayerZones(deckData) {
           cardName: card.name,
           scryfallId: card.scryfallId,
           imageUrl: card.imageUrl,
+          card: card.card || null, // Full Scryfall card data
         });
       }
     }

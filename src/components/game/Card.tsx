@@ -1,10 +1,12 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import type { GameCard, BoardCard, ZoneType } from '@/types';
 import { useGameStore } from '@/store/gameStore';
+import { CardContextMenu } from './CardContextMenu';
 
 interface CardProps {
   card: GameCard;
@@ -23,10 +25,15 @@ export function Card({
   showBack = false,
   onClick,
 }: CardProps) {
-  const { tapCard } = useGameStore();
+  const { tapCard, setPreviewCard } = useGameStore();
   const boardCard = card as BoardCard;
   const isTapped = boardCard.tapped;
   const isBattlefield = zone === 'battlefield';
+
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    position: { x: number; y: number };
+  }>({ isOpen: false, position: { x: 0, y: 0 } });
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: card.instanceId,
@@ -42,6 +49,23 @@ export function Card({
     }
   };
 
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      isOpen: true,
+      position: { x: e.clientX, y: e.clientY },
+    });
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handlePreview = useCallback(() => {
+    setPreviewCard(card);
+  }, [card, setPreviewCard]);
+
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -52,36 +76,50 @@ export function Card({
     ? '/card-back.png'
     : card.imageUrl || card.card?.imageUris?.normal || '';
 
+  const contextMenuOptions = [
+    { label: 'Preview', onClick: handlePreview },
+  ];
+
   return (
-    <motion.div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className={`card-container relative cursor-pointer select-none ${
-        isDragging ? 'opacity-50' : ''
-      }`}
-      animate={{ rotate: isTapped ? 90 : 0 }}
-      transition={{ duration: 0.2 }}
-      onClick={handleClick}
-    >
-      {imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={card.cardName}
-          fill
-          className="object-cover rounded"
-          draggable={false}
-          sizes="(max-width: 768px) 80px, 120px"
-        />
-      ) : (
-        <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
-          <span className="text-xs text-center text-gray-400 break-words">
-            {card.cardName}
-          </span>
-        </div>
-      )}
-    </motion.div>
+    <>
+      <motion.div
+        ref={setNodeRef}
+        style={style}
+        {...listeners}
+        {...attributes}
+        className={`card-container relative cursor-pointer select-none ${
+          isDragging ? 'opacity-50' : ''
+        }`}
+        animate={{ rotate: isTapped ? 90 : 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={handleClick}
+        onContextMenu={handleContextMenu}
+      >
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={card.cardName}
+            fill
+            className="object-cover rounded"
+            draggable={false}
+            sizes="(max-width: 768px) 80px, 120px"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
+            <span className="text-xs text-center text-gray-400 break-words">
+              {card.cardName}
+            </span>
+          </div>
+        )}
+      </motion.div>
+
+      <CardContextMenu
+        isOpen={contextMenu.isOpen}
+        position={contextMenu.position}
+        options={contextMenuOptions}
+        onClose={closeContextMenu}
+      />
+    </>
   );
 }
 

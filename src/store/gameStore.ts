@@ -28,6 +28,9 @@ interface GameStore {
   myId: string | null;
   players: Record<string, PlayerState>;
 
+  // UI state
+  previewCard: GameCard | null;
+
   // Actions
   connect: () => Promise<void>;
   disconnect: () => void;
@@ -50,6 +53,9 @@ interface GameStore {
   addToken: (tokenData: TokenData, position: { x: number; y: number }) => void;
   drawCard: () => void;
 
+  // UI actions
+  setPreviewCard: (card: GameCard | null) => void;
+
   // Internal state updates
   _setConnected: (connected: boolean) => void;
   _setRoom: (roomKey: string, gameState: 'waiting' | 'active' | 'ended') => void;
@@ -67,6 +73,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   gameState: null,
   myId: null,
   players: {},
+  previewCard: null,
 
   connect: async () => {
     return new Promise((resolve, reject) => {
@@ -401,6 +408,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const topCard = player.zones.library[player.zones.library.length - 1];
     moveCard(topCard.instanceId, 'library', 'hand');
   },
+
+  setPreviewCard: (card) => set({ previewCard: card }),
 
   // Internal setters
   _setConnected: (connected) => set({ connected }),

@@ -55,21 +55,36 @@ export default function RoomPage() {
           return;
         }
 
-        // Fetch deck data from API
-        const deckRes = await fetch(`/api/decks/${deckId}`);
+        // Fetch enriched deck data from API (includes full Scryfall card data)
+        const deckRes = await fetch(`/api/decks/${deckId}/enrich`);
         if (!deckRes.ok) {
           throw new Error('Failed to load deck');
         }
         const { deck } = await deckRes.json();
 
-        // Transform deck data for socket server
+        // Get commander from enriched data
+        const commander = deck.cardList?.commanders?.[0];
+
+        // Transform deck data for socket server (includes full Card objects)
         const deckData = {
-          commander: {
+          commander: commander ? {
+            name: commander.name,
+            scryfallId: commander.scryfallId || '',
+            imageUrl: commander.imageUrl || '',
+            card: commander.card || null,
+          } : {
             name: deck.commander,
-            scryfallId: deck.cardList?.commander?.scryfallId || '',
-            imageUrl: deck.cardList?.commander?.imageUrl || '',
+            scryfallId: '',
+            imageUrl: '',
+            card: null,
           },
-          cards: deck.cardList?.cards || [],
+          cards: (deck.cardList?.cards || []).map((c: { name: string; quantity: number; scryfallId?: string; imageUrl?: string; card?: unknown }) => ({
+            name: c.name,
+            quantity: c.quantity,
+            scryfallId: c.scryfallId || '',
+            imageUrl: c.imageUrl || '',
+            card: c.card || null,
+          })),
         };
 
         if (isCreator) {

@@ -17,6 +17,7 @@ import { Library } from './zones/Library';
 import { Graveyard } from './zones/Graveyard';
 import { Exile } from './zones/Exile';
 import { CommandZone } from './zones/CommandZone';
+import { CardPreviewPane } from './CardPreviewPane';
 import type { GameCard, ZoneType, PlayerState } from '@/types';
 
 function DropZone({
@@ -104,7 +105,7 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
 }
 
 export function GameBoard() {
-  const { myId, players, moveCard, repositionCard } = useGameStore();
+  const { myId, players, moveCard, repositionCard, previewCard, setPreviewCard } = useGameStore();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
@@ -306,6 +307,12 @@ export function GameBoard() {
           </div>
         )}
       </DragOverlay>
+
+      {/* Card preview pane */}
+      <CardPreviewPane
+        card={previewCard}
+        onClose={() => setPreviewCard(null)}
+      />
     </DndContext>
   );
 }
