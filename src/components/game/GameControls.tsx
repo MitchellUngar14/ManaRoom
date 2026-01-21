@@ -11,6 +11,7 @@ export function GameControls() {
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleCopyRoomKey = () => {
     if (roomKey) {
@@ -20,10 +21,13 @@ export function GameControls() {
   };
 
   const handleRestart = () => {
-    if (confirm('Are you sure you want to restart the game? This will reset all players.')) {
-      restart();
-    }
     setShowMenu(false);
+    // Use setTimeout to ensure menu closes before confirm dialog
+    setTimeout(() => {
+      if (confirm('Are you sure you want to restart the game? This will reset all players.')) {
+        restart();
+      }
+    }, 0);
   };
 
   const handleMenuToggle = () => {
@@ -42,9 +46,11 @@ export function GameControls() {
     if (!showMenu) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuButtonRef.current && !menuButtonRef.current.contains(e.target as Node)) {
-        setShowMenu(false);
-      }
+      const target = e.target as Node;
+      // Don't close if clicking the menu button or inside the menu
+      if (menuButtonRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setShowMenu(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -80,6 +86,7 @@ export function GameControls() {
 
         {showMenu && createPortal(
           <div
+            ref={menuRef}
             className="fixed bg-gray-800 rounded-lg shadow-lg py-1 min-w-[160px] z-[9999]"
             style={{
               top: menuPosition.top,

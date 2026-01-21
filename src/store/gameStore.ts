@@ -237,6 +237,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
 
       socket.on('game:restarted', (data) => {
+        console.log('game:restarted received:', data);
         set({ gameState: 'active', players: data.players });
       });
 
@@ -601,8 +602,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   restart: () => {
     const { socket } = get();
+    console.log('restart called, socket:', !!socket, 'connected:', socket?.connected);
     if (socket) {
+      console.log('Emitting game:restart');
       socket.emit('game:restart');
+    } else {
+      console.error('Cannot restart: no socket connection');
     }
   },
 
