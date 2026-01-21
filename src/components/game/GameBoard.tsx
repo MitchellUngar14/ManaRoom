@@ -349,6 +349,8 @@ export function GameBoard() {
                     <Battlefield
                       cards={opponent.zones.battlefield}
                       isOpponent={true}
+                      ownerId={opponent.odId}
+                      allowTakeControl={true}
                       mirrorCards={!mirrorOpponent}
                     />
                   </div>

@@ -560,6 +560,37 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Take control of opponent's card
+  socket.on('game:takeControl', ({ cardId, fromPlayerId }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const fromPlayer = room.players.get(fromPlayerId);
+    const toPlayer = room.players.get(playerId);
+    if (!fromPlayer || !toPlayer) return;
+
+    // Find the card on the opponent's battlefield
+    const cardIndex = fromPlayer.zones.battlefield.findIndex((c) => c.instanceId === cardId);
+    if (cardIndex === -1) return;
+
+    // Remove from opponent's battlefield
+    const [card] = fromPlayer.zones.battlefield.splice(cardIndex, 1);
+
+    // Add to our battlefield (keeping position and other properties)
+    toPlayer.zones.battlefield.push(card);
+    room.lastActivity = new Date();
+
+    // Broadcast to all players
+    io.to(currentRoom).emit('game:controlChanged', {
+      fromPlayerId,
+      toPlayerId: playerId,
+      cardId,
+      cardData: card,
+    });
+  });
+
   // Add token
   socket.on('game:addToken', ({ tokenData, position }) => {
     if (!currentRoom || !playerId) return;

@@ -6,13 +6,15 @@ import { Card } from '../Card';
 interface BattlefieldProps {
   cards: GameCard[];
   isOpponent: boolean;
+  ownerId?: string;
+  allowTakeControl?: boolean;
   mirrorCards?: boolean;
   readOnly?: boolean;
   fullScreen?: boolean;
   largeCards?: boolean;
 }
 
-export function Battlefield({ cards, isOpponent, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false }: BattlefieldProps) {
   // Card width class based on size
   const cardWidthClass = largeCards ? 'w-40' : 'w-28';
 
@@ -35,7 +37,7 @@ export function Battlefield({ cards, isOpponent, mirrorCards = false, readOnly =
                 transform: 'translate(-50%, -50%)',
               }}
             >
-              <Card card={card} zone="battlefield" isOpponent={isOpponent} readOnly={readOnly} />
+              <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} />
             </div>
           );
         })}

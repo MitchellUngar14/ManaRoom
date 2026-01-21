@@ -58,6 +58,7 @@ interface GameStore {
   addToken: (tokenData: TokenData, position: { x: number; y: number }) => void;
   removeCard: (cardId: string, zone: ZoneType) => void;
   drawCard: () => void;
+  takeControl: (cardId: string, fromPlayerId: string) => void;
 
   // UI actions
   setPreviewCard: (card: GameCard | null) => void;
@@ -232,6 +233,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       socket.on('game:restarted', (data) => {
         set({ gameState: 'active', players: data.players });
+      });
+
+      socket.on('game:controlChanged', (data: { fromPlayerId: string; toPlayerId: string; cardId: string; cardData: BoardCard }) => {
+        set((state) => {
+          const fromPlayer = state.players[data.fromPlayerId];
+          const toPlayer = state.players[data.toPlayerId];
+          if (!fromPlayer || !toPlayer) return state;
+
+          // Remove card from original owner's battlefield
+          const fromBattlefield = fromPlayer.zones.battlefield.filter(
+            (c) => c.instanceId !== data.cardId
+          );
+
+          // Add card to new owner's battlefield
+          const toBattlefield = [...toPlayer.zones.battlefield, data.cardData as GameCard];
+
+          return {
+            players: {
+              ...state.players,
+              [data.fromPlayerId]: {
+                ...fromPlayer,
+                zones: {
+                  ...fromPlayer.zones,
+                  battlefield: fromBattlefield,
+                },
+              },
+              [data.toPlayerId]: {
+                ...toPlayer,
+                zones: {
+                  ...toPlayer.zones,
+                  battlefield: toBattlefield,
+                },
+              },
+            },
+          };
+        });
       });
 
       socket.on('error', (error) => {
@@ -535,6 +572,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const topCard = player.zones.library[player.zones.library.length - 1];
     moveCard(topCard.instanceId, 'library', 'hand');
+  },
+
+  takeControl: (cardId, fromPlayerId) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    socket.emit('game:takeControl', { cardId, fromPlayerId });
   },
 
   setPreviewCard: (card) => set({ previewCard: card }),

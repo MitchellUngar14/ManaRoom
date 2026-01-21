@@ -6,6 +6,10 @@ import { Battlefield } from './zones/Battlefield';
 import { CardPreviewPane } from './CardPreviewPane';
 import { useGameStore } from '@/store/gameStore';
 import { setHoveredCard, getHoveredCard, getLastHoveredCard, clearLastHoveredCard } from './GameBoard';
+import { CommandZone } from './zones/CommandZone';
+import { Library } from './zones/Library';
+import { Graveyard } from './zones/Graveyard';
+import { Exile } from './zones/Exile';
 
 interface OpponentBattlefieldPopoutProps {
   opponent: PlayerState;
@@ -15,6 +19,7 @@ interface OpponentBattlefieldPopoutProps {
 export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlefieldPopoutProps) {
   const { previewCard, setPreviewCard } = useGameStore();
   const [zoom, setZoom] = useState(1);
+  const [zonesModalOpen, setZonesModalOpen] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -60,13 +65,30 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
 
   return (
     <div className="h-screen flex flex-col bg-gray-950">
-      {/* Minimal header */}
+      {/* Header with opponent info */}
       <header className="bg-gray-900 px-4 py-2 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-4">
           <h1 className="font-semibold text-lg">{opponent.displayName}&apos;s Battlefield</h1>
           <span className="text-gray-500 text-sm">Room: {roomKey}</span>
         </div>
         <div className="flex items-center gap-4">
+          {/* Zone counts */}
+          <div className="flex items-center gap-3 text-sm">
+            <span className="text-gray-400">
+              Hand: <span className="text-white font-medium">{opponent.zones.hand.length}</span>
+            </span>
+            <span className="text-gray-400">
+              Library: <span className="text-white font-medium">{opponent.zones.library.length}</span>
+            </span>
+            <button
+              onClick={() => setZonesModalOpen(true)}
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              View Zones
+            </button>
+          </div>
+          <span className="text-gray-600">|</span>
+          {/* Life total */}
           <div className="flex items-center gap-2">
             <span className="text-gray-400 text-sm">Life:</span>
             <span className="text-2xl font-bold text-red-400">{opponent.life}</span>
@@ -118,11 +140,55 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
           <Battlefield
             cards={opponent.zones.battlefield}
             isOpponent={false}
-            readOnly={true}
+            ownerId={opponent.odId}
+            allowTakeControl={true}
+            readOnly={false}
             largeCards={true}
           />
         </div>
       </div>
+
+      {/* Zones modal */}
+      {zonesModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          onClick={() => setZonesModalOpen(false)}
+        >
+          <div
+            className="bg-gray-900 rounded-lg p-6 max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">{opponent.displayName}&apos;s Zones</h3>
+              <button
+                onClick={() => setZonesModalOpen(false)}
+                className="text-gray-400 hover:text-white text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex justify-center gap-2">
+              <div className="h-32">
+                <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
+              </div>
+              <div className="h-32">
+                <Library cards={opponent.zones.library} isOpponent={true} />
+              </div>
+              <div className="h-32">
+                <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
+              </div>
+              <div className="h-32">
+                <Exile cards={opponent.zones.exile} isOpponent={true} />
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-700 text-center text-sm text-gray-400">
+              Hand: {opponent.zones.hand.length} cards
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Card preview pane */}
       <CardPreviewPane

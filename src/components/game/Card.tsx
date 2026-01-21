@@ -13,6 +13,8 @@ interface CardProps {
   card: GameCard;
   zone: ZoneType;
   isOpponent?: boolean;
+  ownerId?: string;
+  allowTakeControl?: boolean;
   showBack?: boolean;
   readOnly?: boolean;
   isDragOverlay?: boolean;
@@ -40,17 +42,23 @@ export function Card({
   card,
   zone,
   isOpponent = false,
+  ownerId,
+  allowTakeControl = false,
   showBack = false,
   readOnly = false,
   isDragOverlay = false,
   onClick,
 }: CardProps) {
-  const { tapCard, setPreviewCard, moveCard, removeCard } = useGameStore();
+  const { tapCard, setPreviewCard, moveCard, removeCard, takeControl } = useGameStore();
   const boardCard = card as BoardCard;
   const isTapped = boardCard.tapped;
   const isBattlefield = zone === 'battlefield';
   const isHand = zone === 'hand';
+  const isGraveyard = zone === 'graveyard';
+  const isExile = zone === 'exile';
   const showHoverEffects = isHand || isBattlefield;
+  // Cards in graveyard/exile should not have their own context menu - the zone handles it
+  const disableContextMenu = isGraveyard || isExile;
 
   const [isHovered, setIsHovered] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
@@ -61,7 +69,8 @@ export function Card({
   const { attributes, listeners: dndListeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.instanceId,
     data: { card, zone },
-    disabled: isOpponent || readOnly || isDragOverlay,
+    // Disable dragging for opponent cards, readOnly, overlay, and graveyard/exile (use modal to move those)
+    disabled: isOpponent || readOnly || isDragOverlay || isGraveyard || isExile,
   });
 
   // Merge our pointer handlers with dnd-kit's listeners
@@ -85,13 +94,17 @@ export function Card({
   };
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    // Don't show card context menu for graveyard/exile - let the zone handle it
+    if (disableContextMenu) {
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     setContextMenu({
       isOpen: true,
       position: { x: e.clientX, y: e.clientY },
     });
-  }, []);
+  }, [disableContextMenu]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     // Right click is button 2
@@ -123,6 +136,13 @@ export function Card({
     }
   }, [card, moveCard, removeCard]);
 
+  const handleTakeControl = useCallback(() => {
+    if (ownerId) {
+      takeControl(card.instanceId, ownerId);
+    }
+    closeContextMenu();
+  }, [card.instanceId, ownerId, takeControl, closeContextMenu]);
+
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -149,6 +169,16 @@ export function Card({
       label: 'Graveyard',
       icon: 'destroy',
       onClick: handleGoToGraveyard,
+    });
+  }
+
+  // Add "Take Control" option for opponent battlefield cards
+  // Shows when viewing opponent's battlefield (isOpponent) or when explicitly allowed (allowTakeControl for popout)
+  if (isBattlefield && (isOpponent || allowTakeControl) && ownerId) {
+    contextMenuOptions.push({
+      label: 'Take Control',
+      icon: 'steal',
+      onClick: handleTakeControl,
     });
   }
 
