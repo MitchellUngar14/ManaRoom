@@ -328,6 +328,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
       });
 
+      socket.on('game:tokenAdded', (data: { playerId: string; token: BoardCard }) => {
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield: [...player.zones.battlefield, data.token],
+                },
+              },
+            },
+          };
+        });
+      });
+
       socket.on('error', (error) => {
         console.error('Socket error:', error);
       });
