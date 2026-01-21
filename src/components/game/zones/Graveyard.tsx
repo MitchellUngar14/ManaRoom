@@ -16,18 +16,30 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
   return (
     <>
       <div
-        className="h-full bg-gray-800/50 rounded p-1 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-700/50 transition-colors"
-        onClick={() => setExpanded(true)}
+        className="h-full flex flex-col cursor-pointer"
         title="View graveyard"
       >
-        {topCard ? (
-          <div className="w-full max-w-[40px]">
-            <Card card={topCard} zone="graveyard" isOpponent={isOpponent} />
-          </div>
-        ) : (
-          <div className="w-full max-w-[40px] aspect-[488/680] bg-gray-700/50 rounded border border-dashed border-gray-600" />
-        )}
-        <span className="text-[9px] text-gray-500 mt-1">Grave ({cards.length})</span>
+        <span
+          className="text-[9px] text-gray-500 mb-0.5 text-center"
+          onClick={() => setExpanded(true)}
+        >
+          Grave ({cards.length})
+        </span>
+        <div className="flex-1 w-20">
+          {topCard ? (
+            <div
+              className="h-full hover:brightness-110 transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Card card={topCard} zone="graveyard" isOpponent={isOpponent} />
+            </div>
+          ) : (
+            <div
+              className="card-container bg-gray-700/30 rounded border-2 border-dashed border-gray-600 hover:border-gray-500 transition-colors"
+              onClick={() => setExpanded(true)}
+            />
+          )}
+        </div>
       </div>
 
       {/* Expanded view modal */}

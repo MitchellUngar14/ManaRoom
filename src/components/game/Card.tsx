@@ -58,6 +58,14 @@ export function Card({
     });
   }, []);
 
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    // Right click is button 2
+    if (e.button === 2) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, []);
+
   const closeContextMenu = useCallback(() => {
     setContextMenu((prev) => ({ ...prev, isOpen: false }));
   }, []);
@@ -77,41 +85,47 @@ export function Card({
     : card.imageUrl || card.card?.imageUris?.normal || '';
 
   const contextMenuOptions = [
-    { label: 'Preview', onClick: handlePreview },
+    { label: 'Preview', icon: 'preview' as const, onClick: handlePreview },
   ];
 
   return (
     <>
-      <motion.div
-        ref={setNodeRef}
-        style={style}
-        {...listeners}
-        {...attributes}
-        className={`card-container relative cursor-pointer select-none ${
-          isDragging ? 'opacity-50' : ''
-        }`}
-        animate={{ rotate: isTapped ? 90 : 0 }}
-        transition={{ duration: 0.2 }}
-        onClick={handleClick}
+      <div
+        className="h-full"
         onContextMenu={handleContextMenu}
+        onPointerDown={handlePointerDown}
       >
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={card.cardName}
-            fill
-            className="object-cover rounded"
-            draggable={false}
-            sizes="(max-width: 768px) 80px, 120px"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
-            <span className="text-xs text-center text-gray-400 break-words">
-              {card.cardName}
-            </span>
-          </div>
-        )}
-      </motion.div>
+        <motion.div
+          ref={setNodeRef}
+          style={style}
+          {...listeners}
+          {...attributes}
+          className={`card-container relative cursor-pointer select-none ${
+            isDragging ? 'opacity-50' : ''
+          }`}
+          animate={{ rotate: isTapped ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={handleClick}
+          onContextMenu={handleContextMenu}
+        >
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={card.cardName}
+              fill
+              className="object-cover rounded"
+              draggable={false}
+              sizes="(max-width: 768px) 80px, 120px"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
+              <span className="text-xs text-center text-gray-400 break-words">
+                {card.cardName}
+              </span>
+            </div>
+          )}
+        </motion.div>
+      </div>
 
       <CardContextMenu
         isOpen={contextMenu.isOpen}
@@ -126,13 +140,20 @@ export function Card({
 // Card back component for library/hidden cards
 export function CardBack({ count }: { count?: number }) {
   return (
-    <div className="card-container relative bg-gray-700 rounded border border-gray-600">
-      <div className="absolute inset-0 flex items-center justify-center">
-        {count !== undefined && (
-          <span className="text-2xl font-bold text-gray-500">{count}</span>
-        )}
-      </div>
-      <div className="absolute inset-2 border border-gray-600 rounded" />
+    <div className="card-container relative rounded overflow-hidden">
+      <Image
+        src="/mtg-card-back.jpg"
+        alt="Card back"
+        fill
+        className="object-cover"
+        draggable={false}
+        sizes="80px"
+      />
+      {count !== undefined && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+          <span className="text-2xl font-bold text-white drop-shadow-lg">{count}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -372,7 +372,11 @@ io.on('connection', (socket) => {
     shuffleArray(player.zones.library);
     room.lastActivity = new Date();
 
-    io.to(currentRoom).emit('game:shuffled', { playerId });
+    // Send shuffled library to the player who shuffled
+    socket.emit('game:shuffled', { playerId, library: player.zones.library });
+
+    // Notify other players (they don't need to see the library contents)
+    socket.to(currentRoom).emit('game:shuffled', { playerId });
   });
 
   // Restart game

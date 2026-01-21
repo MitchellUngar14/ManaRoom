@@ -16,18 +16,30 @@ export function Exile({ cards, isOpponent }: ExileProps) {
   return (
     <>
       <div
-        className="h-full bg-purple-950/30 rounded p-1 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-900/30 transition-colors"
-        onClick={() => setExpanded(true)}
+        className="h-full flex flex-col cursor-pointer"
         title="View exile"
       >
-        {topCard ? (
-          <div className="w-full max-w-[40px]">
-            <Card card={topCard} zone="exile" isOpponent={isOpponent} />
-          </div>
-        ) : (
-          <div className="w-full max-w-[40px] aspect-[488/680] bg-purple-900/20 rounded border border-dashed border-purple-800" />
-        )}
-        <span className="text-[9px] text-gray-500 mt-1">Exile ({cards.length})</span>
+        <span
+          className="text-[9px] text-gray-500 mb-0.5 text-center"
+          onClick={() => setExpanded(true)}
+        >
+          Exile ({cards.length})
+        </span>
+        <div className="flex-1 w-20">
+          {topCard ? (
+            <div
+              className="h-full hover:brightness-110 transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Card card={topCard} zone="exile" isOpponent={isOpponent} />
+            </div>
+          ) : (
+            <div
+              className="card-container bg-purple-900/20 rounded border-2 border-dashed border-purple-700 hover:border-purple-500 transition-colors"
+              onClick={() => setExpanded(true)}
+            />
+          )}
+        </div>
       </div>
 
       {/* Expanded view modal */}

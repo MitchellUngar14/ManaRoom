@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { GameCard } from '@/types';
+import { ManaText } from '@/components/ui/ManaSymbol';
 
 interface CardPreviewPaneProps {
   card: GameCard | null;
@@ -41,12 +42,11 @@ export function CardPreviewPane({ card, onClose }: CardPreviewPaneProps) {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed right-0 top-0 bottom-0 w-96 bg-gray-900 z-50 shadow-2xl flex flex-col"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-              <h2 className="text-lg font-semibold truncate">{card.cardName}</h2>
+            {/* Close button */}
+            <div className="absolute top-2 right-2 z-10">
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white text-2xl leading-none p-1"
+                className="text-gray-400 hover:text-white text-2xl leading-none p-1 bg-gray-900/80 rounded"
               >
                 &times;
               </button>
@@ -78,9 +78,10 @@ export function CardPreviewPane({ card, onClose }: CardPreviewPaneProps) {
                 {/* Mana cost and type */}
                 <div className="space-y-1">
                   {cardData.manaCost && (
-                    <p className="text-sm text-gray-300">
-                      <span className="text-gray-500">Mana:</span> {cardData.manaCost}
-                    </p>
+                    <div className="text-sm text-gray-300 flex items-center gap-2">
+                      <span className="text-gray-500">Mana:</span>
+                      <ManaText text={cardData.manaCost} symbolSize={16} />
+                    </div>
                   )}
                   <p className="text-sm text-gray-300">
                     <span className="text-gray-500">Type:</span> {cardData.typeLine}
@@ -90,9 +91,11 @@ export function CardPreviewPane({ card, onClose }: CardPreviewPaneProps) {
                 {/* Oracle text */}
                 {cardData.oracleText && (
                   <div className="bg-gray-800 rounded p-3">
-                    <p className="text-sm text-gray-200 whitespace-pre-wrap">
-                      {cardData.oracleText}
-                    </p>
+                    <ManaText
+                      text={cardData.oracleText}
+                      symbolSize={14}
+                      className="text-sm text-gray-200 whitespace-pre-wrap"
+                    />
                   </div>
                 )}
 
@@ -120,9 +123,11 @@ export function CardPreviewPane({ card, onClose }: CardPreviewPaneProps) {
                       <div key={index} className="mb-3">
                         <p className="text-sm font-medium text-gray-300">{face.name}</p>
                         {face.oracleText && (
-                          <p className="text-xs text-gray-400 mt-1 whitespace-pre-wrap">
-                            {face.oracleText}
-                          </p>
+                          <ManaText
+                            text={face.oracleText}
+                            symbolSize={12}
+                            className="text-xs text-gray-400 mt-1 whitespace-pre-wrap block"
+                          />
                         )}
                       </div>
                     ))}

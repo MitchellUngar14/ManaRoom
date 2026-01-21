@@ -154,7 +154,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
       });
 
-      socket.on('game:shuffled', (data) => {
+      socket.on('game:shuffled', (data: { playerId: string; library?: GameCard[] }) => {
+        // If we received the library (meaning we're the player who shuffled), update our state
+        if (data.library && data.playerId === get().myId) {
+          set((state) => {
+            const player = state.players[data.playerId];
+            if (!player) return state;
+
+            return {
+              players: {
+                ...state.players,
+                [data.playerId]: {
+                  ...player,
+                  zones: {
+                    ...player.zones,
+                    library: data.library!,
+                  },
+                },
+              },
+            };
+          });
+        }
         console.log(`Player ${data.playerId} shuffled their library`);
       });
 

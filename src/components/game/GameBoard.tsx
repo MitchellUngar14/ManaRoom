@@ -79,18 +79,18 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
               </button>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
-              <div className="flex flex-col items-center">
+            <div className="flex justify-center gap-2">
+              <div className="h-32">
+                <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
+              </div>
+              <div className="h-32">
                 <Library cards={opponent.zones.library} isOpponent={true} />
               </div>
-              <div className="flex flex-col items-center">
+              <div className="h-32">
                 <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
               </div>
-              <div className="flex flex-col items-center">
+              <div className="h-32">
                 <Exile cards={opponent.zones.exile} isOpponent={true} />
-              </div>
-              <div className="flex flex-col items-center">
-                <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
               </div>
             </div>
 
@@ -266,28 +266,28 @@ export function GameBoard() {
 
           <div
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              bottomBarCollapsed ? 'h-0' : 'h-36'
+              bottomBarCollapsed ? 'h-0' : 'h-32'
             }`}
           >
-            <div className="h-36 border-t border-gray-800 bg-gray-900/80 flex">
+            <div className="h-32 border-t border-gray-800 bg-gray-900/80 flex">
               {/* My zones (left side) */}
-              <div className="w-64 border-r border-gray-800 p-2 flex items-center gap-2">
-                <DropZone id="commandZone" className="w-14 shrink-0">
+              <div className="shrink-0 border-r border-gray-800 px-2 py-1 flex items-center gap-1">
+                <DropZone id="commandZone" className="w-20 shrink-0">
                   <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                 </DropZone>
-                <DropZone id="library" className="w-14 shrink-0">
+                <DropZone id="library" className="w-20 shrink-0">
                   <Library cards={myPlayer.zones.library} isOpponent={false} />
                 </DropZone>
-                <DropZone id="graveyard" className="w-14 shrink-0">
+                <DropZone id="graveyard" className="w-20 shrink-0">
                   <Graveyard cards={myPlayer.zones.graveyard} isOpponent={false} />
                 </DropZone>
-                <DropZone id="exile" className="w-14 shrink-0">
+                <DropZone id="exile" className="w-20 shrink-0">
                   <Exile cards={myPlayer.zones.exile} isOpponent={false} />
                 </DropZone>
               </div>
 
               {/* Hand (right side, takes remaining space) */}
-              <DropZone id="hand" className="flex-1">
+              <DropZone id="hand" className="flex-1 min-w-0 overflow-hidden">
                 <Hand cards={myPlayer.zones.hand} />
               </DropZone>
             </div>
