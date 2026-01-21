@@ -561,14 +561,19 @@ io.on('connection', (socket) => {
   });
 
   // Take control of opponent's card
-  socket.on('game:takeControl', ({ cardId, fromPlayerId }) => {
-    if (!currentRoom || !playerId) return;
+  // toPlayerId can be passed explicitly (for spectator/popout windows acting on behalf of a player)
+  socket.on('game:takeControl', ({ cardId, fromPlayerId, toPlayerId }) => {
+    if (!currentRoom) return;
 
     const room = rooms.get(currentRoom);
     if (!room) return;
 
+    // Use toPlayerId if provided (from popout), otherwise use socket's playerId
+    const effectiveToPlayerId = toPlayerId || playerId;
+    if (!effectiveToPlayerId) return;
+
     const fromPlayer = room.players.get(fromPlayerId);
-    const toPlayer = room.players.get(playerId);
+    const toPlayer = room.players.get(effectiveToPlayerId);
     if (!fromPlayer || !toPlayer) return;
 
     // Find the card on the opponent's battlefield
@@ -585,7 +590,7 @@ io.on('connection', (socket) => {
     // Broadcast to all players
     io.to(currentRoom).emit('game:controlChanged', {
       fromPlayerId,
-      toPlayerId: playerId,
+      toPlayerId: effectiveToPlayerId,
       cardId,
       cardData: card,
     });

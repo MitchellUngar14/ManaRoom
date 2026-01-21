@@ -158,8 +158,9 @@ export function Card({
     { label: 'Preview', icon: 'preview', onClick: handlePreview },
   ];
 
-  // Add tap/untap option for battlefield cards (own cards only, not in readOnly mode)
-  if (isBattlefield && !isOpponent && !readOnly) {
+  // Add tap/untap and graveyard options for battlefield cards (own cards only, not in readOnly mode)
+  // Don't show these options if allowTakeControl is true (means we're viewing opponent's cards in popout)
+  if (isBattlefield && !isOpponent && !readOnly && !allowTakeControl) {
     contextMenuOptions.push({
       label: isTapped ? 'Untap' : 'Tap',
       icon: isTapped ? 'untap' : 'tap',

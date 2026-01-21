@@ -30,6 +30,8 @@ interface GameStore {
 
   // Spectator mode (for popout windows)
   spectatorMode: boolean;
+  // When in spectator mode, this allows emitting actions on behalf of a player
+  actingAsPlayerId: string | null;
 
   // UI state
   previewCard: GameCard | null;
@@ -40,7 +42,7 @@ interface GameStore {
   createRoom: (deckId: string, deckData: DeckData, displayName: string) => Promise<string>;
   joinRoom: (roomKey: string, deckId: string, deckData: DeckData, displayName: string) => Promise<void>;
   rejoinRoom: (roomKey: string, playerId: string) => Promise<boolean>;
-  connectAsSpectator: (roomKey: string) => Promise<void>;
+  connectAsSpectator: (roomKey: string, actAsPlayerId?: string) => Promise<void>;
   leaveRoom: () => void;
 
   // Game actions
@@ -81,6 +83,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   myId: null,
   players: {},
   spectatorMode: false,
+  actingAsPlayerId: null,
   previewCard: null,
 
   connect: async () => {
@@ -343,7 +346,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
-  connectAsSpectator: async (roomKey: string) => {
+  connectAsSpectator: async (roomKey: string, actAsPlayerId?: string) => {
     const { socket } = get();
     if (!socket) throw new Error('Not connected');
 
@@ -358,6 +361,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               roomKey: response.roomKey,
               gameState: response.gameState || null,
               players: response.players || {},
+              actingAsPlayerId: actAsPlayerId || null,
             });
             resolve();
           } else {
@@ -575,10 +579,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   takeControl: (cardId, fromPlayerId) => {
-    const { socket, myId } = get();
-    if (!socket || !myId) return;
+    const { socket, myId, actingAsPlayerId } = get();
+    const effectivePlayerId = myId || actingAsPlayerId;
+    if (!socket || !effectivePlayerId) return;
 
-    socket.emit('game:takeControl', { cardId, fromPlayerId });
+    socket.emit('game:takeControl', { cardId, fromPlayerId, toPlayerId: effectivePlayerId });
   },
 
   setPreviewCard: (card) => set({ previewCard: card }),

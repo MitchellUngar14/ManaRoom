@@ -296,7 +296,7 @@ export function GameBoard() {
 
                   {/* Pop out button */}
                   <button
-                    onClick={() => roomKey && openPopout(roomKey, opponent.odId)}
+                    onClick={() => roomKey && myId && openPopout(roomKey, opponent.odId, myId)}
                     className="absolute top-2 right-24 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-1.5 transition-colors"
                     title="Pop out opponent's battlefield to separate window"
                   >

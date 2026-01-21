@@ -38,13 +38,16 @@ export default function OpponentViewPage() {
           return;
         }
 
+        // Get main player ID (to act on their behalf for actions like Take Control)
+        const storedMyPlayerId = sessionStorage.getItem('popout_myPlayerId');
+
         setOpponentId(storedOpponentId);
 
         // Connect to socket
         await connect();
 
-        // Connect as spectator to the room
-        await connectAsSpectator(roomKey);
+        // Connect as spectator to the room, with ability to act as the main player
+        await connectAsSpectator(roomKey, storedMyPlayerId || undefined);
 
         setLoading(false);
       } catch (err) {

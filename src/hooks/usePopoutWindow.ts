@@ -7,10 +7,11 @@ export function usePopoutWindow() {
   const [isPopoutOpen, setIsPopoutOpen] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const openPopout = useCallback((roomKey: string, opponentId: string) => {
-    // Store opponent ID for popout to read
+  const openPopout = useCallback((roomKey: string, opponentId: string, myPlayerId: string) => {
+    // Store IDs for popout to read
     sessionStorage.setItem('popout_opponentId', opponentId);
     sessionStorage.setItem('popout_roomKey', roomKey);
+    sessionStorage.setItem('popout_myPlayerId', myPlayerId);
 
     const url = `/room/${roomKey}/opponent-view`;
     const features = 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes';
