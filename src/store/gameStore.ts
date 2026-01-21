@@ -44,6 +44,7 @@ interface GameStore {
   ) => void;
   repositionCard: (cardId: string, position: { x: number; y: number }) => void;
   tapCard: (cardId: string) => void;
+  setLife: (amount: number) => void;
   shuffle: () => void;
   restart: () => void;
   addToken: (tokenData: TokenData, position: { x: number; y: number }) => void;
@@ -148,6 +149,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       socket.on('game:shuffled', (data) => {
         console.log(`Player ${data.playerId} shuffled their library`);
+      });
+
+      socket.on('game:lifeChanged', (data: { playerId: string; life: number }) => {
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                life: data.life,
+              },
+            },
+          };
+        });
       });
 
       socket.on('game:restarted', (data) => {
@@ -329,6 +347,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
     socket.emit('game:tapCard', { cardId });
   },
 
+  setLife: (amount) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            life: amount,
+          },
+        },
+      };
+    });
+
+    socket.emit('game:setLife', { life: amount });
+  },
+
   shuffle: () => {
     const { socket } = get();
     if (socket) {
@@ -384,8 +425,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         (c) => c.instanceId !== event.cardId
       );
 
-      // Add to destination
-      const toCards = [...player.zones[event.toZone], event.cardData];
+      // Remove from destination first (in case of optimistic update duplicate), then add
+      const toCardsFiltered = player.zones[event.toZone].filter(
+        (c) => c.instanceId !== event.cardId
+      );
+      const toCards = [...toCardsFiltered, event.cardData];
 
       return {
         players: {

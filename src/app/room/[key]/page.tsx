@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { GameBoard } from '@/components/game/GameBoard';
 import { GameControls } from '@/components/game/GameControls';
+import { LifeCounter } from '@/components/game/LifeCounter';
 import { useGameStore } from '@/store/gameStore';
 
 export default function RoomPage() {
@@ -25,6 +26,7 @@ export default function RoomPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(true);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
 
   // Use actual room key from store, falling back to URL param
   const displayRoomKey = actualRoomKey || roomKey;
@@ -158,18 +160,49 @@ export default function RoomPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="bg-gray-900 px-4 py-2 flex justify-between items-center shrink-0">
-        <div className="flex items-center gap-4">
-          <h1 className="font-semibold">ManaRoom</h1>
-          <span className="text-gray-500">Room: {displayRoomKey}</span>
-        </div>
-        <GameControls />
-      </header>
+      {/* Header with collapse toggle */}
+      <div
+        className={`relative shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
+          headerCollapsed ? 'h-0' : 'h-auto'
+        }`}
+      >
+        <header className="bg-gray-900 px-4 py-2 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <h1 className="font-semibold">ManaRoom</h1>
+            <span className="text-gray-500 text-sm">Room: {displayRoomKey}</span>
+          </div>
+          <LifeCounter />
+          <GameControls />
+        </header>
+      </div>
 
       {/* Game board */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         <GameBoard />
+
+        {/* Collapse toggle button - positioned at top of game board area */}
+        <button
+          onClick={() => setHeaderCollapsed(!headerCollapsed)}
+          className="absolute top-0 left-1/2 -translate-x-1/2 z-20 bg-gray-800 hover:bg-gray-700 px-3 py-0.5 rounded-b"
+          title={headerCollapsed ? 'Show header' : 'Hide header'}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`text-gray-400 transition-transform duration-300 ${
+              headerCollapsed ? 'rotate-180' : ''
+            }`}
+          >
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
       </div>
     </div>
   );

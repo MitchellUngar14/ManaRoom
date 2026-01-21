@@ -112,6 +112,7 @@ io.on('connection', (socket) => {
           commander: deckData?.commander?.name || 'Unknown Commander',
         },
         zones: initializePlayerZones(deckData || {}),
+        life: 40,
       };
 
       const room = {
@@ -174,6 +175,7 @@ io.on('connection', (socket) => {
           commander: deckData?.commander?.name || 'Unknown Commander',
         },
         zones: initializePlayerZones(deckData || {}),
+        life: 40,
       };
 
       room.players.set(playerId, playerState);
@@ -332,6 +334,26 @@ io.on('connection', (socket) => {
       playerId,
       cardId,
       tapped: card.tapped,
+    });
+  });
+
+  // Set life total
+  socket.on('game:setLife', ({ life }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    player.life = life;
+    room.lastActivity = new Date();
+
+    // Broadcast to other players (not sender, they already updated optimistically)
+    socket.to(currentRoom).emit('game:lifeChanged', {
+      playerId,
+      life,
     });
   });
 

@@ -6,36 +6,26 @@ import { Card } from '../Card';
 interface BattlefieldProps {
   cards: GameCard[];
   isOpponent: boolean;
-  playerName?: string;
-  life?: number;
+  mirrorCards?: boolean;
 }
 
-export function Battlefield({ cards, isOpponent, playerName, life = 40 }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, mirrorCards = false }: BattlefieldProps) {
   return (
     <div className="h-full bg-gray-900/40 relative overflow-hidden">
-      {/* Player info overlay */}
-      <div className={`absolute ${isOpponent ? 'bottom-2 right-2' : 'top-2 left-2'} z-10 flex items-center gap-3`}>
-        {playerName && (
-          <span className="text-xs text-gray-500 bg-gray-900/80 px-2 py-1 rounded">
-            {playerName}
-          </span>
-        )}
-        <span className="text-lg font-bold text-gray-400 bg-gray-900/80 px-2 py-1 rounded">
-          {life}
-        </span>
-      </div>
-
       {/* Cards on battlefield */}
       <div className="absolute inset-0 p-2">
         {cards.map((card) => {
           const boardCard = card as BoardCard;
+          // For opponent cards: mirror the x position (1 - x) so cards appear in correct relative position
+          const displayX = isOpponent ? (1 - (boardCard.position?.x ?? 0.5)) : (boardCard.position?.x ?? 0.5);
+          const displayY = isOpponent ? (1 - (boardCard.position?.y ?? 0.5)) : (boardCard.position?.y ?? 0.5);
           return (
             <div
               key={card.instanceId}
-              className="w-16 absolute"
+              className={`w-16 absolute ${mirrorCards ? 'rotate-180' : ''}`}
               style={{
-                left: boardCard.position ? `${boardCard.position.x * 100}%` : '10px',
-                top: boardCard.position ? `${boardCard.position.y * 100}%` : '10px',
+                left: `${displayX * 100}%`,
+                top: `${displayY * 100}%`,
                 transform: 'translate(-50%, -50%)',
               }}
             >
