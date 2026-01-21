@@ -10,6 +10,11 @@ import type {
   TokenData,
 } from '@/types';
 
+interface DeckData {
+  commander: { name: string; scryfallId: string; imageUrl: string };
+  cards: Array<{ name: string; quantity: number; scryfallId: string; imageUrl: string }>;
+}
+
 interface GameStore {
   // Connection state
   socket: Socket | null;
@@ -26,7 +31,8 @@ interface GameStore {
   // Actions
   connect: () => Promise<void>;
   disconnect: () => void;
-  joinRoom: (roomKey: string, deckId: string) => Promise<void>;
+  createRoom: (deckId: string, deckData: DeckData, displayName: string) => Promise<string>;
+  joinRoom: (roomKey: string, deckId: string, deckData: DeckData, displayName: string) => Promise<void>;
   leaveRoom: () => void;
 
   // Game actions
@@ -134,18 +140,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  joinRoom: async (roomKey: string, deckId: string) => {
+  createRoom: async (deckId: string, deckData: DeckData, displayName: string) => {
     const { socket } = get();
     if (!socket) throw new Error('Not connected');
 
     return new Promise((resolve, reject) => {
-      socket.emit('room:join', { roomKey, deckId }, (response: { success: boolean; error?: string }) => {
-        if (response.success) {
-          resolve();
-        } else {
-          reject(new Error(response.error || 'Failed to join room'));
+      socket.emit(
+        'room:create',
+        { deckId, deckData, displayName },
+        (response: { success: boolean; roomKey?: string; error?: string }) => {
+          if (response.success && response.roomKey) {
+            resolve(response.roomKey);
+          } else {
+            reject(new Error(response.error || 'Failed to create room'));
+          }
         }
-      });
+      );
+    });
+  },
+
+  joinRoom: async (roomKey: string, deckId: string, deckData: DeckData, displayName: string) => {
+    const { socket } = get();
+    if (!socket) throw new Error('Not connected');
+
+    return new Promise((resolve, reject) => {
+      socket.emit(
+        'room:join',
+        { roomKey, deckId, deckData, displayName },
+        (response: { success: boolean; error?: string }) => {
+          if (response.success) {
+            resolve();
+          } else {
+            reject(new Error(response.error || 'Failed to join room'));
+          }
+        }
+      );
     });
   },
 

@@ -31,8 +31,17 @@ export function CreateRoom({ selectedDeckId, onRoomCreated, disabled }: CreateRo
         throw new Error(data.error || 'Failed to create room');
       }
 
-      // Store selected deck for the room page
+      // Store selected deck and creator flag for the room page
       sessionStorage.setItem('selectedDeckId', selectedDeckId);
+      sessionStorage.setItem('isRoomCreator', 'true');
+
+      // Get display name from auth
+      const authRes = await fetch('/api/auth/me');
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        sessionStorage.setItem('displayName', authData.user?.displayName || 'Player');
+      }
+
       onRoomCreated(data.roomKey);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create room');

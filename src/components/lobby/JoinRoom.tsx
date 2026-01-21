@@ -11,7 +11,7 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
   const [roomKey, setRoomKey] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!roomKey.trim()) {
       setError('Please enter a room code');
       return;
@@ -22,8 +22,21 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
       return;
     }
 
-    // Store selected deck for the room page
+    // Store selected deck for the room page (not creator)
     sessionStorage.setItem('selectedDeckId', selectedDeckId);
+    sessionStorage.removeItem('isRoomCreator'); // Ensure we're joining, not creating
+
+    // Get display name from auth
+    try {
+      const authRes = await fetch('/api/auth/me');
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        sessionStorage.setItem('displayName', authData.user?.displayName || 'Player');
+      }
+    } catch {
+      // Ignore auth errors, use default name
+    }
+
     onJoin(roomKey.toUpperCase().trim());
   };
 

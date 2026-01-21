@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { GameBoard } from '@/components/game/GameBoard';
 import { GameControls } from '@/components/game/GameControls';
@@ -10,6 +10,7 @@ export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
   const roomKey = params.key as string;
+  const initRef = useRef(false);
 
   const {
     connected,
@@ -17,6 +18,7 @@ export default function RoomPage() {
     players,
     connect,
     disconnect,
+    createRoom,
     joinRoom,
   } = useGameStore();
 
@@ -24,13 +26,22 @@ export default function RoomPage() {
   const [joining, setJoining] = useState(true);
 
   useEffect(() => {
+    // Prevent double initialization in React StrictMode
+    if (initRef.current) return;
+    initRef.current = true;
+
     const init = async () => {
       try {
         // Connect to socket
         await connect();
 
-        // Get deck ID from session storage or URL params
+        // Get deck ID and creator flag from session storage
         const deckId = sessionStorage.getItem('selectedDeckId');
+        const isCreator = sessionStorage.getItem('isRoomCreator') === 'true';
+        const displayName = sessionStorage.getItem('displayName') || 'Player';
+
+        // Clear the creator flag
+        sessionStorage.removeItem('isRoomCreator');
 
         if (!deckId) {
           setError('No deck selected. Please go back and select a deck.');
@@ -38,8 +49,31 @@ export default function RoomPage() {
           return;
         }
 
-        // Join the room
-        await joinRoom(roomKey, deckId);
+        // Fetch deck data from API
+        const deckRes = await fetch(`/api/decks/${deckId}`);
+        if (!deckRes.ok) {
+          throw new Error('Failed to load deck');
+        }
+        const { deck } = await deckRes.json();
+
+        // Transform deck data for socket server
+        const deckData = {
+          commander: {
+            name: deck.commander,
+            scryfallId: deck.cardList?.commander?.scryfallId || '',
+            imageUrl: deck.cardList?.commander?.imageUrl || '',
+          },
+          cards: deck.cardList?.cards || [],
+        };
+
+        if (isCreator) {
+          // Create the room on the socket server
+          await createRoom(deckId, deckData, displayName);
+        } else {
+          // Join existing room
+          await joinRoom(roomKey, deckId, deckData, displayName);
+        }
+
         setJoining(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to join room');
@@ -52,7 +86,7 @@ export default function RoomPage() {
     return () => {
       disconnect();
     };
-  }, [roomKey, connect, disconnect, joinRoom]);
+  }, [roomKey, connect, disconnect, createRoom, joinRoom]);
 
   if (error) {
     return (
