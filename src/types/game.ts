@@ -15,6 +15,11 @@ export interface BoardCard extends GameCard {
   tapped: boolean;
   faceDown: boolean;
   counters: number;
+  // Power/toughness modifications (for creatures)
+  modifiedPower?: number;
+  modifiedToughness?: number;
+  // Whether this card is a copy (created via "Make a token copy")
+  isCopy?: boolean;
 }
 
 // All zones a player can have cards in

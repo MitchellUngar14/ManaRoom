@@ -22,6 +22,8 @@ export interface ScryfallCard {
     mana_cost?: string;
     type_line: string;
     oracle_text?: string;
+    power?: string;
+    toughness?: string;
     image_uris?: {
       small: string;
       normal: string;
@@ -42,6 +44,9 @@ export interface ScryfallCard {
   scryfall_uri: string;
   edhrec_rank?: number;
   layout: string;
+  // Power and toughness for creatures
+  power?: string;
+  toughness?: string;
 }
 
 export interface CardFace {
@@ -87,6 +92,9 @@ export interface Card {
   scryfallUri: string;
   edhrecRank?: number;
   layout: string;
+  // Power and toughness for creatures
+  power?: string;
+  toughness?: string;
 }
 
 export interface DeckCard {
@@ -156,5 +164,7 @@ export function mapScryfallCard(scryfall: ScryfallCard): Card {
     scryfallUri: scryfall.scryfall_uri,
     edhrecRank: scryfall.edhrec_rank,
     layout: scryfall.layout,
+    power: scryfall.power || scryfall.card_faces?.[0]?.power,
+    toughness: scryfall.toughness || scryfall.card_faces?.[0]?.toughness,
   };
 }

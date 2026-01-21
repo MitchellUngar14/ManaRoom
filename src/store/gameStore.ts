@@ -61,6 +61,8 @@ interface GameStore {
   removeCard: (cardId: string, zone: ZoneType) => void;
   drawCard: () => void;
   takeControl: (cardId: string, fromPlayerId: string) => void;
+  updateCardStats: (cardId: string, stats: { counters?: number; modifiedPower?: number; modifiedToughness?: number }) => void;
+  createCardCopy: (card: BoardCard) => void;
 
   // UI actions
   setPreviewCard: (card: GameCard | null) => void;
@@ -271,6 +273,58 @@ export const useGameStore = create<GameStore>((set, get) => ({
               },
             },
           } as { players: Record<string, PlayerState> };
+        });
+      });
+
+      socket.on('game:cardStatsUpdated', (data: { playerId: string; cardId: string; stats: { counters?: number; modifiedPower?: number; modifiedToughness?: number } }) => {
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const battlefield = player.zones.battlefield.map((card) => {
+            if (card.instanceId === data.cardId) {
+              return {
+                ...card,
+                counters: data.stats.counters ?? card.counters,
+                modifiedPower: data.stats.modifiedPower ?? card.modifiedPower,
+                modifiedToughness: data.stats.modifiedToughness ?? card.modifiedToughness,
+              };
+            }
+            return card;
+          });
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield,
+                },
+              },
+            },
+          };
+        });
+      });
+
+      socket.on('game:copyCreated', (data: { playerId: string; copyCard: BoardCard }) => {
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield: [...player.zones.battlefield, data.copyCard],
+                },
+              },
+            },
+          };
         });
       });
 
@@ -584,6 +638,60 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!socket || !effectivePlayerId) return;
 
     socket.emit('game:takeControl', { cardId, fromPlayerId, toPlayerId: effectivePlayerId });
+  },
+
+  updateCardStats: (cardId, stats) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const battlefield = player.zones.battlefield.map((card) => {
+        if (card.instanceId === cardId) {
+          return {
+            ...card,
+            counters: stats.counters ?? card.counters,
+            modifiedPower: stats.modifiedPower ?? card.modifiedPower,
+            modifiedToughness: stats.modifiedToughness ?? card.modifiedToughness,
+          };
+        }
+        return card;
+      });
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              battlefield,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:updateCardStats', { cardId, stats });
+  },
+
+  createCardCopy: (card) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Generate a slightly offset position for the copy
+    const copyPosition = {
+      x: Math.min(0.95, (card.position?.x ?? 0.5) + 0.05),
+      y: card.position?.y ?? 0.5,
+    };
+
+    socket.emit('game:createCopy', {
+      cardId: card.instanceId,
+      position: copyPosition,
+    });
   },
 
   setPreviewCard: (card) => set({ previewCard: card }),

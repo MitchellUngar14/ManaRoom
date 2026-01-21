@@ -19,7 +19,8 @@ import { Graveyard } from './zones/Graveyard';
 import { Exile } from './zones/Exile';
 import { CommandZone } from './zones/CommandZone';
 import { CardPreviewPane } from './CardPreviewPane';
-import type { GameCard, ZoneType, PlayerState } from '@/types';
+import { CardEditModal } from './CardEditModal';
+import type { GameCard, BoardCard, ZoneType, PlayerState } from '@/types';
 
 // Global state for hovered card (used by keyboard shortcut)
 let hoveredCard: GameCard | null = null;
@@ -155,6 +156,7 @@ export function GameBoard() {
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
   const [bottomBarCollapsed, setBottomBarCollapsed] = useState(false);
+  const [editingCard, setEditingCard] = useState<BoardCard | null>(null);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -209,6 +211,37 @@ export function GameBoard() {
         // Only tap/untap if the card is on the battlefield
         if (targetCard && targetZone === 'battlefield') {
           useGameStore.getState().tapCard(targetCard.instanceId);
+        }
+      }
+
+      // E key opens edit modal for hovered card on battlefield (own cards only)
+      if (e.key === 'e' || e.key === 'E') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+
+        const hovered = getHoveredCard();
+        const hoveredZone = getHoveredCardZone();
+        const lastHovered = getLastHoveredCard();
+        const lastZone = getLastHoveredCardZone();
+
+        // Use currently hovered card, or fall back to last hovered
+        const targetCard = hovered || lastHovered;
+        const targetZone = hovered ? hoveredZone : lastZone;
+
+        // Only edit if the card is on the battlefield and it's our card
+        if (targetCard && targetZone === 'battlefield') {
+          // Check if it's our card by seeing if it exists in our battlefield
+          const { myId, players } = useGameStore.getState();
+          if (myId && players[myId]) {
+            const isOurCard = players[myId].zones.battlefield.some(
+              c => c.instanceId === targetCard.instanceId
+            );
+            if (isOurCard) {
+              setEditingCard(targetCard as BoardCard);
+            }
+          }
         }
       }
     };
@@ -388,6 +421,7 @@ export function GameBoard() {
               cards={myPlayer.zones.battlefield}
               isOpponent={false}
               largeCards={isPopoutOpen}
+              onEditCard={setEditingCard}
             />
           </DropZone>
         </div>
@@ -466,6 +500,13 @@ export function GameBoard() {
       <CardPreviewPane
         card={previewCard}
         onClose={() => setPreviewCard(null)}
+      />
+
+      {/* Card edit modal */}
+      <CardEditModal
+        isOpen={editingCard !== null}
+        card={editingCard}
+        onClose={() => setEditingCard(null)}
       />
     </DndContext>
   );

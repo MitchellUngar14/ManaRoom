@@ -12,9 +12,10 @@ interface BattlefieldProps {
   readOnly?: boolean;
   fullScreen?: boolean;
   largeCards?: boolean;
+  onEditCard?: (card: BoardCard) => void;
 }
 
-export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false, onEditCard }: BattlefieldProps) {
   // Card width class based on size
   const cardWidthClass = largeCards ? 'w-40' : 'w-28';
 
@@ -38,7 +39,7 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
                 transform: 'translate(-50%, -50%)',
               }}
             >
-              <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} />
+              <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />
             </div>
           );
         })}

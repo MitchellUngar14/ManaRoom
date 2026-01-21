@@ -596,6 +596,74 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Update card stats (counters, power/toughness modifiers)
+  socket.on('game:updateCardStats', ({ cardId, stats }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    const card = player.zones.battlefield.find((c) => c.instanceId === cardId);
+    if (!card) return;
+
+    // Update the card stats
+    if (stats.counters !== undefined) card.counters = stats.counters;
+    if (stats.modifiedPower !== undefined) card.modifiedPower = stats.modifiedPower;
+    if (stats.modifiedToughness !== undefined) card.modifiedToughness = stats.modifiedToughness;
+
+    room.lastActivity = new Date();
+
+    // Broadcast to all players
+    io.to(currentRoom).emit('game:cardStatsUpdated', {
+      playerId,
+      cardId,
+      stats,
+    });
+  });
+
+  // Create a copy of a card on the battlefield
+  socket.on('game:createCopy', ({ cardId, position }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    const originalCard = player.zones.battlefield.find((c) => c.instanceId === cardId);
+    if (!originalCard) return;
+
+    // Create a copy of the card
+    const copyCard = {
+      instanceId: uuidv4(),
+      cardName: originalCard.cardName,
+      scryfallId: originalCard.scryfallId,
+      imageUrl: originalCard.imageUrl,
+      card: originalCard.card,
+      position: position || { x: 0.5, y: 0.5 },
+      tapped: false,
+      faceDown: false,
+      counters: 0,
+      modifiedPower: 0,
+      modifiedToughness: 0,
+      isCopy: true,
+      isToken: true, // Copies are treated as tokens (removed from game when they leave battlefield)
+    };
+
+    player.zones.battlefield.push(copyCard);
+    room.lastActivity = new Date();
+
+    // Broadcast to all players
+    io.to(currentRoom).emit('game:copyCreated', {
+      playerId,
+      copyCard,
+    });
+  });
+
   // Add token
   socket.on('game:addToken', ({ tokenData, position }) => {
     if (!currentRoom || !playerId) return;

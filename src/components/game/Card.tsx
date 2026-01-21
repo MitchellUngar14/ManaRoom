@@ -19,6 +19,7 @@ interface CardProps {
   readOnly?: boolean;
   isDragOverlay?: boolean;
   onClick?: () => void;
+  onEditCard?: (card: BoardCard) => void;
 }
 
 // Helper to check if a card is a token
@@ -48,6 +49,7 @@ export function Card({
   readOnly = false,
   isDragOverlay = false,
   onClick,
+  onEditCard,
 }: CardProps) {
   const { tapCard, setPreviewCard, moveCard, removeCard, takeControl } = useGameStore();
   const boardCard = card as BoardCard;
@@ -143,6 +145,13 @@ export function Card({
     closeContextMenu();
   }, [card.instanceId, ownerId, takeControl, closeContextMenu]);
 
+  const handleEdit = useCallback(() => {
+    if (onEditCard) {
+      onEditCard(boardCard);
+    }
+    closeContextMenu();
+  }, [boardCard, onEditCard, closeContextMenu]);
+
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -158,7 +167,7 @@ export function Card({
     { label: 'Preview', icon: 'preview', onClick: handlePreview },
   ];
 
-  // Add tap/untap and graveyard options for battlefield cards (own cards only, not in readOnly mode)
+  // Add tap/untap, edit, and graveyard options for battlefield cards (own cards only, not in readOnly mode)
   // Don't show these options if allowTakeControl is true (means we're viewing opponent's cards in popout)
   if (isBattlefield && !isOpponent && !readOnly && !allowTakeControl) {
     contextMenuOptions.push({
@@ -166,6 +175,13 @@ export function Card({
       icon: isTapped ? 'untap' : 'tap',
       onClick: handleTap,
     });
+    if (onEditCard) {
+      contextMenuOptions.push({
+        label: 'Edit Card',
+        icon: 'edit',
+        onClick: handleEdit,
+      });
+    }
     contextMenuOptions.push({
       label: 'Graveyard',
       icon: 'destroy',
@@ -234,6 +250,43 @@ export function Card({
             <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
               <span className="text-xs text-center text-gray-400 break-words">
                 {card.cardName}
+              </span>
+            </div>
+          )}
+
+          {/* Counters display (top-right) */}
+          {isBattlefield && boardCard.counters > 0 && (
+            <div className="absolute top-1 right-1 bg-amber-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
+              {boardCard.counters}
+            </div>
+          )}
+
+          {/* Power/Toughness display (bottom-right) - only if modified */}
+          {isBattlefield && (boardCard.modifiedPower !== undefined && boardCard.modifiedPower !== 0 || boardCard.modifiedToughness !== undefined && boardCard.modifiedToughness !== 0) && (() => {
+            const basePower = parseInt(card.card?.power || '0') || 0;
+            const baseToughness = parseInt(card.card?.toughness || '0') || 0;
+            const currentPower = basePower + (boardCard.modifiedPower || 0);
+            const currentToughness = baseToughness + (boardCard.modifiedToughness || 0);
+            const powerChanged = boardCard.modifiedPower !== 0;
+            const toughnessChanged = boardCard.modifiedToughness !== 0;
+            return (
+              <div className="absolute bottom-1 right-1 bg-gray-900/90 text-white text-xs font-bold px-1.5 py-0.5 rounded shadow-md">
+                <span className={powerChanged ? (boardCard.modifiedPower! > 0 ? 'text-green-400' : 'text-red-400') : ''}>
+                  {currentPower}
+                </span>
+                <span className="text-gray-400">/</span>
+                <span className={toughnessChanged ? (boardCard.modifiedToughness! > 0 ? 'text-green-400' : 'text-red-400') : ''}>
+                  {currentToughness}
+                </span>
+              </div>
+            );
+          })()}
+
+          {/* Copy indicator (center) */}
+          {isBattlefield && boardCard.isCopy && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="bg-purple-600/80 text-white text-xs font-bold px-2 py-1 rounded shadow-lg uppercase tracking-wider">
+                Copy
               </span>
             </div>
           )}
