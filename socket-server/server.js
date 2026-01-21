@@ -484,17 +484,20 @@ io.on('connection', (socket) => {
 
     // Re-initialize all players
     for (const [, player] of room.players) {
-      // Collect all cards
+      // Collect all cards (excluding tokens and copies)
       const allCards = [
         ...player.zones.commandZone,
         ...player.zones.library,
         ...player.zones.hand,
-        ...player.zones.battlefield.map((c) => ({
-          instanceId: c.instanceId,
-          cardName: c.cardName,
-          scryfallId: c.scryfallId,
-          imageUrl: c.imageUrl,
-        })),
+        ...player.zones.battlefield
+          .filter((c) => !c.isToken && !c.isCopy) // Exclude tokens and copies
+          .map((c) => ({
+            instanceId: c.instanceId,
+            cardName: c.cardName,
+            scryfallId: c.scryfallId,
+            imageUrl: c.imageUrl,
+            card: c.card || null,
+          })),
         ...player.zones.graveyard,
         ...player.zones.exile,
       ];
@@ -521,6 +524,9 @@ io.on('connection', (socket) => {
       for (let i = 0; i < 7 && player.zones.library.length > 0; i++) {
         player.zones.hand.push(player.zones.library.pop());
       }
+
+      // Reset life total to 40
+      player.life = 40;
     }
 
     room.gameState = 'active';
