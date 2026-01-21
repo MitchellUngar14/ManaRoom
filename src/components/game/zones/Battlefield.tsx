@@ -9,9 +9,13 @@ interface BattlefieldProps {
   mirrorCards?: boolean;
   readOnly?: boolean;
   fullScreen?: boolean;
+  largeCards?: boolean;
 }
 
-export function Battlefield({ cards, isOpponent, mirrorCards = false, readOnly = false, fullScreen = false }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false }: BattlefieldProps) {
+  // Card width class based on size
+  const cardWidthClass = largeCards ? 'w-40' : 'w-28';
+
   return (
     <div className={`h-full bg-gray-900/40 relative overflow-hidden ${fullScreen ? 'min-h-screen' : ''}`}>
       {/* Cards on battlefield */}
@@ -24,7 +28,7 @@ export function Battlefield({ cards, isOpponent, mirrorCards = false, readOnly =
           return (
             <div
               key={card.instanceId}
-              className={`w-28 absolute ${mirrorCards ? 'rotate-180' : ''}`}
+              className={`${cardWidthClass} absolute ${mirrorCards ? 'rotate-180' : ''}`}
               style={{
                 left: `${displayX * 100}%`,
                 top: `${displayY * 100}%`,

@@ -13,9 +13,9 @@ interface CardProps {
   card: GameCard;
   zone: ZoneType;
   isOpponent?: boolean;
-  isDragging?: boolean;
   showBack?: boolean;
   readOnly?: boolean;
+  isDragOverlay?: boolean;
   onClick?: () => void;
 }
 
@@ -23,9 +23,9 @@ export function Card({
   card,
   zone,
   isOpponent = false,
-  isDragging = false,
   showBack = false,
   readOnly = false,
+  isDragOverlay = false,
   onClick,
 }: CardProps) {
   const { tapCard, setPreviewCard } = useGameStore();
@@ -41,10 +41,10 @@ export function Card({
     position: { x: number; y: number };
   }>({ isOpen: false, position: { x: 0, y: 0 } });
 
-  const { attributes, listeners: dndListeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners: dndListeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.instanceId,
     data: { card, zone },
-    disabled: isOpponent || readOnly,
+    disabled: isOpponent || readOnly || isDragOverlay,
   });
 
   // Merge our pointer handlers with dnd-kit's listeners
@@ -146,9 +146,7 @@ export function Card({
           style={style}
           {...attributes}
           {...listeners}
-          className={`card-container card-sparkle-border relative cursor-pointer select-none ${
-            isDragging ? 'opacity-50' : ''
-          } ${isHovered && showHoverEffects ? 'sparkle-active' : ''}`}
+          className={`card-container card-sparkle-border relative cursor-pointer select-none ${isHovered && showHoverEffects ? 'sparkle-active' : ''} ${isDragging ? 'opacity-0' : ''}`}
           animate={{
             rotate: isTapped ? 90 : 0,
             scale: isHovered && showHoverEffects ? 1.08 : 1,

@@ -385,6 +385,7 @@ export function GameBoard() {
             <Battlefield
               cards={myPlayer.zones.battlefield}
               isOpponent={false}
+              largeCards={isPopoutOpen}
             />
           </DropZone>
         </div>
@@ -449,11 +450,11 @@ export function GameBoard() {
       {/* Drag overlay - shows the card being dragged */}
       <DragOverlay>
         {activeCard && (
-          <div className="w-28 opacity-90 pointer-events-none">
+          <div className={`${isPopoutOpen && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}>
             <Card
               card={activeCard}
               zone={activeZone || 'hand'}
-              isDragging
+              isDragOverlay
             />
           </div>
         )}

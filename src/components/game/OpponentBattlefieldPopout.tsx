@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { PlayerState, GameCard } from '@/types';
 import { Battlefield } from './zones/Battlefield';
 import { CardPreviewPane } from './CardPreviewPane';
@@ -14,6 +14,7 @@ interface OpponentBattlefieldPopoutProps {
 
 export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlefieldPopoutProps) {
   const { previewCard, setPreviewCard } = useGameStore();
+  const [zoom, setZoom] = useState(1);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -76,14 +77,51 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
         </div>
       </header>
 
-      {/* Full-screen battlefield */}
-      <div className="flex-1 overflow-hidden">
-        <Battlefield
-          cards={opponent.zones.battlefield}
-          isOpponent={false}
-          readOnly={true}
-          fullScreen={true}
-        />
+      {/* Zoom controls */}
+      <div className="absolute top-16 right-4 z-20 flex flex-col gap-1">
+        <button
+          onClick={() => setZoom(z => Math.min(z + 0.25, 3))}
+          className="bg-gray-800/90 hover:bg-gray-700 w-8 h-8 rounded flex items-center justify-center text-gray-300 text-lg"
+          title="Zoom in"
+        >
+          +
+        </button>
+        <div className="bg-gray-800/90 px-2 py-1 rounded text-center text-xs text-gray-400">
+          {Math.round(zoom * 100)}%
+        </div>
+        <button
+          onClick={() => setZoom(z => Math.max(z - 0.25, 0.5))}
+          className="bg-gray-800/90 hover:bg-gray-700 w-8 h-8 rounded flex items-center justify-center text-gray-300 text-lg"
+          title="Zoom out"
+        >
+          −
+        </button>
+        <button
+          onClick={() => setZoom(1)}
+          className="bg-gray-800/90 hover:bg-gray-700 w-8 h-8 rounded flex items-center justify-center text-gray-300 text-xs mt-1"
+          title="Reset zoom"
+        >
+          1:1
+        </button>
+      </div>
+
+      {/* Battlefield container - fills available space with zoom */}
+      <div className="flex-1 overflow-auto">
+        <div
+          style={{
+            width: `${zoom * 100}%`,
+            height: `${zoom * 100}%`,
+            minWidth: '100%',
+            minHeight: '100%',
+          }}
+        >
+          <Battlefield
+            cards={opponent.zones.battlefield}
+            isOpponent={false}
+            readOnly={true}
+            largeCards={true}
+          />
+        </div>
       </div>
 
       {/* Card preview pane */}
