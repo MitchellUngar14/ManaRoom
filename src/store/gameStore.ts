@@ -42,6 +42,7 @@ interface GameStore {
     toZone: ZoneType,
     position?: { x: number; y: number }
   ) => void;
+  repositionCard: (cardId: string, position: { x: number; y: number }) => void;
   tapCard: (cardId: string) => void;
   shuffle: () => void;
   restart: () => void;
@@ -116,6 +117,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       socket.on('game:cardTapped', (data: CardTappedEvent) => {
         get()._onCardTapped(data);
+      });
+
+      socket.on('game:cardRepositioned', (data: { playerId: string; cardId: string; position: { x: number; y: number } }) => {
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const battlefield = player.zones.battlefield.map((card) => {
+            if (card.instanceId === data.cardId) {
+              return { ...card, position: data.position };
+            }
+            return card;
+          });
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield,
+                },
+              },
+            },
+          };
+        });
       });
 
       socket.on('game:shuffled', (data) => {
@@ -232,6 +260,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     socket.emit('game:moveCard', { cardId, fromZone, toZone, position });
+  },
+
+  repositionCard: (cardId, position) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const battlefield = player.zones.battlefield.map((card) => {
+        if (card.instanceId === cardId) {
+          return { ...card, position };
+        }
+        return card;
+      });
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              battlefield,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:repositionCard', { cardId, position });
   },
 
   tapCard: (cardId) => {

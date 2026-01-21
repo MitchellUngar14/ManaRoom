@@ -288,6 +288,30 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Reposition card on battlefield
+  socket.on('game:repositionCard', ({ cardId, position }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    const card = player.zones.battlefield.find((c) => c.instanceId === cardId);
+    if (!card) return;
+
+    card.position = position;
+    room.lastActivity = new Date();
+
+    // Broadcast to other players (not sender, they already updated optimistically)
+    socket.to(currentRoom).emit('game:cardRepositioned', {
+      playerId,
+      cardId,
+      position,
+    });
+  });
+
   // Tap/untap card
   socket.on('game:tapCard', ({ cardId }) => {
     if (!currentRoom || !playerId) return;
