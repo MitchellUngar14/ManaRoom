@@ -16,6 +16,7 @@ export default function RoomPage() {
     connected,
     gameState,
     players,
+    roomKey: actualRoomKey,
     connect,
     disconnect,
     createRoom,
@@ -24,6 +25,9 @@ export default function RoomPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(true);
+
+  // Use actual room key from store, falling back to URL param
+  const displayRoomKey = actualRoomKey || roomKey;
 
   useEffect(() => {
     // Prevent double initialization in React StrictMode
@@ -67,10 +71,12 @@ export default function RoomPage() {
         };
 
         if (isCreator) {
-          // Create the room on the socket server
-          await createRoom(deckId, deckData, displayName);
+          // Create the room on the socket server - returns actual room key
+          const serverRoomKey = await createRoom(deckId, deckData, displayName);
+          // Update URL to match actual room key (for sharing)
+          router.replace(`/room/${serverRoomKey}`);
         } else {
-          // Join existing room
+          // Join existing room using URL's room key
           await joinRoom(roomKey, deckId, deckData, displayName);
         }
 
@@ -86,7 +92,7 @@ export default function RoomPage() {
     return () => {
       disconnect();
     };
-  }, [roomKey, connect, disconnect, createRoom, joinRoom]);
+  }, [roomKey, router, connect, disconnect, createRoom, joinRoom]);
 
   if (error) {
     return (
@@ -110,7 +116,7 @@ export default function RoomPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Connecting to room {roomKey}...</p>
+          <p className="text-gray-400">Connecting to room {displayRoomKey}...</p>
         </div>
       </div>
     );
@@ -127,7 +133,7 @@ export default function RoomPage() {
             Share this room code with your opponent:
           </p>
           <div className="bg-gray-800 rounded-lg p-4 mb-6">
-            <span className="text-3xl font-mono tracking-wider">{roomKey}</span>
+            <span className="text-3xl font-mono tracking-wider">{displayRoomKey}</span>
           </div>
           <p className="text-gray-500">
             {playerCount} player{playerCount !== 1 ? 's' : ''} in room
@@ -156,7 +162,7 @@ export default function RoomPage() {
       <header className="bg-gray-900 px-4 py-2 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-4">
           <h1 className="font-semibold">ManaRoom</h1>
-          <span className="text-gray-500">Room: {roomKey}</span>
+          <span className="text-gray-500">Room: {displayRoomKey}</span>
         </div>
         <GameControls />
       </header>
