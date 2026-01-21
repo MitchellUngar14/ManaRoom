@@ -477,13 +477,22 @@ io.on('connection', (socket) => {
 
   // Restart game
   socket.on('game:restart', () => {
-    if (!currentRoom || !playerId) return;
+    console.log(`game:restart received from ${playerId} in room ${currentRoom}`);
+    if (!currentRoom || !playerId) {
+      console.log('game:restart failed: no currentRoom or playerId');
+      return;
+    }
 
     const room = rooms.get(currentRoom);
-    if (!room) return;
+    if (!room) {
+      console.log('game:restart failed: room not found');
+      return;
+    }
 
     // Re-initialize all players
-    for (const [, player] of room.players) {
+    for (const [pid, player] of room.players) {
+      console.log(`Restarting player ${pid}: ${player.displayName}`);
+
       // Collect all cards (excluding tokens and copies)
       const allCards = [
         ...player.zones.commandZone,
@@ -502,13 +511,18 @@ io.on('connection', (socket) => {
         ...player.zones.exile,
       ];
 
-      // Separate commander
-      const commander = allCards.find((c) =>
-        player.odeck.commander.toLowerCase() === c.cardName.toLowerCase()
-      );
-      const otherCards = allCards.filter((c) =>
-        player.odeck.commander.toLowerCase() !== c.cardName.toLowerCase()
-      );
+      console.log(`Total cards collected: ${allCards.length}`);
+
+      // Separate commander (handle case where commander name might not match)
+      const commanderName = player.odeck?.commander?.toLowerCase() || '';
+      const commander = commanderName
+        ? allCards.find((c) => c.cardName?.toLowerCase() === commanderName)
+        : null;
+      const otherCards = commanderName
+        ? allCards.filter((c) => c.cardName?.toLowerCase() !== commanderName)
+        : allCards;
+
+      console.log(`Commander: ${commander?.cardName || 'none'}, Other cards: ${otherCards.length}`);
 
       // Reset zones
       player.zones = {
