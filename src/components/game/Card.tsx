@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import type { GameCard, BoardCard, ZoneType } from '@/types';
 import { useGameStore } from '@/store/gameStore';
-import { CardContextMenu } from './CardContextMenu';
+import { CardContextMenu, MenuOption } from './CardContextMenu';
 import { setHoveredCard, clearHoveredCard } from './GameBoard';
 
 interface CardProps {
@@ -30,17 +30,32 @@ export function Card({
   const boardCard = card as BoardCard;
   const isTapped = boardCard.tapped;
   const isBattlefield = zone === 'battlefield';
+  const isHand = zone === 'hand';
+  const showHoverEffects = isHand || isBattlefield;
 
+  const [isHovered, setIsHovered] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
     position: { x: number; y: number };
   }>({ isOpen: false, position: { x: 0, y: 0 } });
 
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners: dndListeners, setNodeRef, transform } = useDraggable({
     id: card.instanceId,
     data: { card, zone },
     disabled: isOpponent,
   });
+
+  // Merge our pointer handlers with dnd-kit's listeners
+  const listeners = {
+    ...dndListeners,
+    onPointerMove: (e: React.PointerEvent) => {
+      setHoveredCard(card, zone);
+      if (showHoverEffects) {
+        setIsHovered(true);
+      }
+      dndListeners?.onPointerMove?.(e);
+    },
+  };
 
   const handleClick = () => {
     if (onClick) {
@@ -75,6 +90,10 @@ export function Card({
     setPreviewCard(card);
   }, [card, setPreviewCard]);
 
+  const handleTap = useCallback(() => {
+    tapCard(card.instanceId);
+  }, [card.instanceId, tapCard]);
+
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -85,9 +104,31 @@ export function Card({
     ? '/card-back.png'
     : card.imageUrl || card.card?.imageUris?.normal || '';
 
-  const contextMenuOptions = [
-    { label: 'Preview', icon: 'preview' as const, onClick: handlePreview },
+  // Build context menu options
+  const contextMenuOptions: MenuOption[] = [
+    { label: 'Preview', icon: 'preview', onClick: handlePreview },
   ];
+
+  // Add tap/untap option for battlefield cards (own cards only)
+  if (isBattlefield && !isOpponent) {
+    contextMenuOptions.push({
+      label: isTapped ? 'Untap' : 'Tap',
+      icon: isTapped ? 'untap' : 'tap',
+      onClick: handleTap,
+    });
+  }
+
+  const handlePointerEnter = useCallback(() => {
+    setHoveredCard(card, zone);
+    if (showHoverEffects) {
+      setIsHovered(true);
+    }
+  }, [card, zone, showHoverEffects]);
+
+  const handlePointerLeave = useCallback(() => {
+    clearHoveredCard(card);
+    setIsHovered(false);
+  }, [card]);
 
   return (
     <>
@@ -95,23 +136,26 @@ export function Card({
         className="h-full"
         onContextMenu={handleContextMenu}
         onPointerDown={handlePointerDown}
-        onPointerEnter={() => setHoveredCard(card)}
-        onPointerLeave={() => clearHoveredCard(card)}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
       >
         <motion.div
           ref={setNodeRef}
           style={style}
-          {...listeners}
           {...attributes}
-          className={`card-container relative cursor-pointer select-none ${
+          {...listeners}
+          className={`card-container card-sparkle-border relative cursor-pointer select-none ${
             isDragging ? 'opacity-50' : ''
-          }`}
-          animate={{ rotate: isTapped ? 90 : 0 }}
+          } ${isHovered && showHoverEffects ? 'sparkle-active' : ''}`}
+          animate={{
+            rotate: isTapped ? 90 : 0,
+            scale: isHovered && showHoverEffects ? 1.08 : 1,
+          }}
           transition={{ duration: 0.2 }}
           onClick={handleClick}
           onContextMenu={handleContextMenu}
-          onPointerEnter={() => setHoveredCard(card)}
-          onPointerMove={() => setHoveredCard(card)}
+          onPointerEnter={handlePointerEnter}
+          onPointerLeave={handlePointerLeave}
         >
           {imageUrl ? (
             <Image

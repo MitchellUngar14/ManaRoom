@@ -22,13 +22,20 @@ import type { GameCard, ZoneType, PlayerState } from '@/types';
 
 // Global state for hovered card (used by keyboard shortcut)
 let hoveredCard: GameCard | null = null;
+let hoveredCardZone: ZoneType | null = null;
 let lastHoveredCard: GameCard | null = null; // Persists even when mouse leaves for preview
-export function setHoveredCard(card: GameCard | null) {
+let lastHoveredCardZone: ZoneType | null = null;
+export function setHoveredCard(card: GameCard | null, zone?: ZoneType) {
   if (card) {
     hoveredCard = card;
     lastHoveredCard = card;
+    if (zone) {
+      hoveredCardZone = zone;
+      lastHoveredCardZone = zone;
+    }
   } else {
     hoveredCard = null;
+    hoveredCardZone = null;
   }
 }
 // Clear hovered card only if it matches the card being left
@@ -36,16 +43,24 @@ export function setHoveredCard(card: GameCard | null) {
 export function clearHoveredCard(card: GameCard) {
   if (hoveredCard?.instanceId === card.instanceId) {
     hoveredCard = null;
+    hoveredCardZone = null;
   }
 }
 export function getHoveredCard() {
   return hoveredCard;
 }
+export function getHoveredCardZone() {
+  return hoveredCardZone;
+}
 export function getLastHoveredCard() {
   return lastHoveredCard;
 }
+export function getLastHoveredCardZone() {
+  return lastHoveredCardZone;
+}
 export function clearLastHoveredCard() {
   lastHoveredCard = null;
+  lastHoveredCardZone = null;
 }
 
 function DropZone({
@@ -170,6 +185,28 @@ export function GameBoard() {
           if (targetCard) {
             setPreviewCard(targetCard);
           }
+        }
+      }
+
+      // T key taps/untaps hovered card on battlefield
+      if (e.key === 't' || e.key === 'T') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+
+        const hovered = getHoveredCard();
+        const hoveredZone = getHoveredCardZone();
+        const lastHovered = getLastHoveredCard();
+        const lastZone = getLastHoveredCardZone();
+
+        // Use currently hovered card, or fall back to last hovered
+        const targetCard = hovered || lastHovered;
+        const targetZone = hovered ? hoveredZone : lastZone;
+
+        // Only tap/untap if the card is on the battlefield
+        if (targetCard && targetZone === 'battlefield') {
+          useGameStore.getState().tapCard(targetCard.instanceId);
         }
       }
     };
@@ -333,10 +370,10 @@ export function GameBoard() {
 
           <div
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              bottomBarCollapsed ? 'h-0' : 'h-44'
+              bottomBarCollapsed ? 'h-0' : 'h-52'
             }`}
           >
-            <div className="h-44 border-t border-gray-800 bg-gray-900/80 flex">
+            <div className="h-52 border-t border-gray-800 bg-gray-900/80 flex">
               {/* My zones (left side) */}
               <div className="shrink-0 border-r border-gray-800 px-2 py-1 flex items-center gap-1">
                 <DropZone id="commandZone" className="w-24 shrink-0">

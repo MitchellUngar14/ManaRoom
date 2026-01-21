@@ -22,6 +22,7 @@ export default function RoomPage() {
     disconnect,
     createRoom,
     joinRoom,
+    rejoinRoom,
   } = useGameStore();
 
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,22 @@ export default function RoomPage() {
       try {
         // Connect to socket
         await connect();
+
+        // Check if we have an existing player ID for this room (reconnection case)
+        const existingPlayerId = sessionStorage.getItem(`playerId_${roomKey.toUpperCase()}`);
+
+        if (existingPlayerId) {
+          // Try to rejoin with existing player ID
+          const rejoined = await rejoinRoom(roomKey, existingPlayerId);
+          if (rejoined) {
+            console.log('Successfully rejoined room');
+            setJoining(false);
+            return;
+          }
+          // Rejoin failed, clear the stored player ID and continue with fresh join
+          console.log('Rejoin failed, joining as new player');
+          sessionStorage.removeItem(`playerId_${roomKey.toUpperCase()}`);
+        }
 
         // Get deck ID and creator flag from session storage
         const deckId = sessionStorage.getItem('selectedDeckId');

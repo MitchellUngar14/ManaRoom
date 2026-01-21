@@ -11,6 +11,10 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
 // In-memory room storage
 const rooms = new Map();
 
+// Track disconnected players for reconnection (playerId -> { roomKey, disconnectTime })
+const disconnectedPlayers = new Map();
+const RECONNECT_WINDOW_MS = 60 * 1000; // 60 seconds to reconnect
+
 // Room key generation (excludes confusing characters)
 function generateRoomKey() {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -224,6 +228,64 @@ io.on('connection', (socket) => {
       }
     } catch (error) {
       console.error('Error joining room:', error);
+      callback({ success: false, error: error.message });
+    }
+  });
+
+  // Rejoin room after disconnect (e.g., page refresh)
+  socket.on('room:rejoin', async ({ roomKey, odPlayerId }, callback) => {
+    try {
+      const normalizedKey = roomKey.toUpperCase();
+      const room = rooms.get(normalizedKey);
+
+      if (!room) {
+        callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      // Check if this player exists in the room
+      const existingPlayer = room.players.get(odPlayerId);
+      if (!existingPlayer) {
+        // Check if player was recently disconnected
+        const disconnectInfo = disconnectedPlayers.get(odPlayerId);
+        if (!disconnectInfo || disconnectInfo.roomKey !== normalizedKey) {
+          callback({ success: false, error: 'Player not found in room' });
+          return;
+        }
+      }
+
+      // Restore the player's socket connection
+      playerId = odPlayerId;
+      currentRoom = normalizedKey;
+
+      // Update the player's socket ID
+      const player = room.players.get(playerId);
+      if (player) {
+        player.socketId = socket.id;
+      }
+
+      // Remove from disconnected players if present
+      disconnectedPlayers.delete(playerId);
+
+      socket.join(currentRoom);
+      room.lastActivity = new Date();
+
+      console.log(`Player ${playerId} rejoined room ${currentRoom}`);
+
+      callback({ success: true, playerId });
+
+      // Send full game state to the rejoining player
+      socket.emit('room:joined', {
+        roomKey: currentRoom,
+        gameState: room.gameState,
+        playerId,
+        players: Object.fromEntries(room.players),
+      });
+
+      // Notify others that player reconnected
+      socket.to(currentRoom).emit('room:playerReconnected', { playerId });
+    } catch (error) {
+      console.error('Error rejoining room:', error);
       callback({ success: false, error: error.message });
     }
   });
@@ -477,14 +539,37 @@ io.on('connection', (socket) => {
 
     if (currentRoom && playerId) {
       const room = rooms.get(currentRoom);
-      if (room) {
-        room.players.delete(playerId);
-        socket.to(currentRoom).emit('room:playerLeft', { playerId });
+      if (room && room.players.has(playerId)) {
+        // Don't delete immediately - give them a chance to reconnect
+        disconnectedPlayers.set(playerId, {
+          roomKey: currentRoom,
+          disconnectTime: Date.now(),
+        });
 
-        if (room.players.size === 0) {
-          rooms.delete(currentRoom);
-          console.log(`Room ${currentRoom} deleted (empty)`);
-        }
+        // Notify others that player disconnected (but may reconnect)
+        socket.to(currentRoom).emit('room:playerDisconnected', { playerId });
+
+        console.log(`Player ${playerId} disconnected from ${currentRoom}, waiting for reconnect...`);
+
+        // Schedule cleanup after reconnect window
+        setTimeout(() => {
+          const disconnectInfo = disconnectedPlayers.get(playerId);
+          if (disconnectInfo && disconnectInfo.roomKey === currentRoom) {
+            // Player didn't reconnect in time, remove them
+            disconnectedPlayers.delete(playerId);
+            const roomToClean = rooms.get(currentRoom);
+            if (roomToClean) {
+              roomToClean.players.delete(playerId);
+              io.to(currentRoom).emit('room:playerLeft', { playerId });
+              console.log(`Player ${playerId} removed from ${currentRoom} (reconnect timeout)`);
+
+              if (roomToClean.players.size === 0) {
+                rooms.delete(currentRoom);
+                console.log(`Room ${currentRoom} deleted (empty)`);
+              }
+            }
+          }
+        }, RECONNECT_WINDOW_MS);
       }
     }
   });

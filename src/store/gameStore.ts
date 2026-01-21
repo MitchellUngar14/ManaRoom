@@ -36,6 +36,7 @@ interface GameStore {
   disconnect: () => void;
   createRoom: (deckId: string, deckData: DeckData, displayName: string) => Promise<string>;
   joinRoom: (roomKey: string, deckId: string, deckData: DeckData, displayName: string) => Promise<void>;
+  rejoinRoom: (roomKey: string, playerId: string) => Promise<boolean>;
   leaveRoom: () => void;
 
   // Game actions
@@ -101,6 +102,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         get()._setRoom(data.roomKey, data.gameState);
         get()._setMyId(data.playerId);
         get()._setPlayers(data.players);
+        // Store playerId in sessionStorage for reconnection after refresh
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(`playerId_${data.roomKey}`, data.playerId);
+        }
       });
 
       socket.on('room:playerJoined', (data) => {
@@ -245,6 +250,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
             resolve();
           } else {
             reject(new Error(response.error || 'Failed to join room'));
+          }
+        }
+      );
+    });
+  },
+
+  rejoinRoom: async (roomKey: string, odPlayerId: string) => {
+    const { socket } = get();
+    if (!socket) throw new Error('Not connected');
+
+    return new Promise((resolve) => {
+      socket.emit(
+        'room:rejoin',
+        { roomKey, odPlayerId },
+        (response: { success: boolean; playerId?: string; error?: string }) => {
+          if (response.success) {
+            resolve(true);
+          } else {
+            // Rejoin failed - player will need to join fresh
+            resolve(false);
           }
         }
       );
