@@ -24,8 +24,9 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
       <div className="absolute inset-0 p-2">
         {cards.map((card) => {
           const boardCard = card as BoardCard;
-          // For opponent cards: mirror the x position (1 - x) so cards appear in correct relative position
-          const displayX = isOpponent ? (1 - (boardCard.position?.x ?? 0.5)) : (boardCard.position?.x ?? 0.5);
+          // For opponent cards: only mirror Y so cards near opponent appear near the divider
+          // Keep X the same so left stays left and right stays right
+          const displayX = boardCard.position?.x ?? 0.5;
           const displayY = isOpponent ? (1 - (boardCard.position?.y ?? 0.5)) : (boardCard.position?.y ?? 0.5);
           return (
             <div
