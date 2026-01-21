@@ -106,9 +106,11 @@ export default function RoomPage() {
 
         if (isCreator) {
           // Create the room on the socket server - returns actual room key
-          await createRoom(deckId, deckData, displayName);
-          // Note: The actual room key is stored in the gameStore and displayed via displayRoomKey
-          // We don't redirect because that would cause a re-mount and re-initialization
+          const actualRoomKey = await createRoom(deckId, deckData, displayName);
+          // Update the URL to match the actual room key without causing a re-mount
+          if (actualRoomKey && actualRoomKey !== roomKey) {
+            window.history.replaceState(null, '', `/room/${actualRoomKey}`);
+          }
         } else {
           // Join existing room using URL's room key
           await joinRoom(roomKey, deckId, deckData, displayName);
