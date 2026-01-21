@@ -16,19 +16,18 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
   return (
     <>
       <div
-        className="h-full bg-gray-800/50 rounded-lg p-1 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-700/50 transition-colors"
+        className="h-full bg-gray-800/50 rounded p-1 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-700/50 transition-colors min-h-[80px]"
         onClick={() => setExpanded(true)}
         title="View graveyard"
       >
-        <span className="text-xs text-gray-500 mb-1">Graveyard</span>
+        <span className="text-[10px] text-gray-500 mb-1">Grave ({cards.length})</span>
         {topCard ? (
-          <div className="w-14">
+          <div className="w-10">
             <Card card={topCard} zone="graveyard" isOpponent={isOpponent} />
           </div>
         ) : (
-          <div className="w-14 aspect-[488/680] bg-gray-700/50 rounded border border-dashed border-gray-600" />
+          <div className="w-10 aspect-[488/680] bg-gray-700/50 rounded border border-dashed border-gray-600" />
         )}
-        <span className="text-xs text-gray-500 mt-1">{cards.length}</span>
       </div>
 
       {/* Expanded view modal */}
@@ -47,7 +46,7 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
               </h3>
               <button
                 onClick={() => setExpanded(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white text-2xl leading-none"
               >
                 &times;
               </button>

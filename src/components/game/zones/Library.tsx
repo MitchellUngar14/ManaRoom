@@ -20,11 +20,12 @@ export function Library({ cards, isOpponent }: LibraryProps) {
 
   return (
     <div
-      className="h-full bg-gray-800/50 rounded-lg p-1 flex items-center justify-center cursor-pointer hover:bg-gray-700/50 transition-colors"
+      className="h-full bg-gray-800/50 rounded p-1 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-700/50 transition-colors min-h-[80px]"
       onClick={handleClick}
-      title={isOpponent ? 'Opponent\'s library' : 'Click to draw a card'}
+      title={isOpponent ? "Opponent's library" : 'Click to draw a card'}
     >
-      <div className="w-14">
+      <span className="text-[10px] text-gray-500 mb-1">Library</span>
+      <div className="w-10">
         <CardBack count={cards.length} />
       </div>
     </div>
