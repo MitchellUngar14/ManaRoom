@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useGameStore } from '@/store/gameStore';
 import { TokenSearch } from './TokenSearch';
 
@@ -8,11 +9,14 @@ export function GameControls() {
   const { shuffle, restart, roomKey } = useGameStore();
   const [showTokenSearch, setShowTokenSearch] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleCopyRoomKey = () => {
     if (roomKey) {
       navigator.clipboard.writeText(roomKey);
     }
+    setShowMenu(false);
   };
 
   const handleRestart = () => {
@@ -21,6 +25,31 @@ export function GameControls() {
     }
     setShowMenu(false);
   };
+
+  const handleMenuToggle = () => {
+    if (!showMenu && menuButtonRef.current) {
+      const rect = menuButtonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setShowMenu(!showMenu);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!showMenu) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuButtonRef.current && !menuButtonRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   return (
     <>
@@ -41,31 +70,37 @@ export function GameControls() {
           Tokens
         </button>
 
-        <div className="relative">
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded"
-          >
-            Menu
-          </button>
+        <button
+          ref={menuButtonRef}
+          onClick={handleMenuToggle}
+          className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded"
+        >
+          Menu
+        </button>
 
-          {showMenu && (
-            <div className="absolute right-0 top-full mt-1 bg-gray-800 rounded-lg shadow-lg py-1 min-w-[160px] z-50">
-              <button
-                onClick={handleCopyRoomKey}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700"
-              >
-                Copy Room Code
-              </button>
-              <button
-                onClick={handleRestart}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 text-red-400"
-              >
-                Restart Game
-              </button>
-            </div>
-          )}
-        </div>
+        {showMenu && createPortal(
+          <div
+            className="fixed bg-gray-800 rounded-lg shadow-lg py-1 min-w-[160px] z-[9999]"
+            style={{
+              top: menuPosition.top,
+              right: menuPosition.right,
+            }}
+          >
+            <button
+              onClick={handleCopyRoomKey}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 text-white"
+            >
+              Copy Room Code
+            </button>
+            <button
+              onClick={handleRestart}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 text-red-400"
+            >
+              Restart Game
+            </button>
+          </div>,
+          document.body
+        )}
       </div>
 
       {showTokenSearch && (
