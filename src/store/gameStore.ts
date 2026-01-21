@@ -247,7 +247,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           );
 
           // Add card to new owner's battlefield
-          const toBattlefield = [...toPlayer.zones.battlefield, data.cardData as GameCard];
+          const toBattlefield = [...toPlayer.zones.battlefield, data.cardData];
 
           return {
             players: {
@@ -267,7 +267,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 },
               },
             },
-          };
+          } as { players: Record<string, PlayerState> };
         });
       });
 
