@@ -56,6 +56,7 @@ interface GameStore {
   shuffle: () => void;
   restart: () => void;
   addToken: (tokenData: TokenData, position: { x: number; y: number }) => void;
+  removeCard: (cardId: string, zone: ZoneType) => void;
   drawCard: () => void;
 
   // UI actions
@@ -157,6 +158,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 zones: {
                   ...player.zones,
                   battlefield,
+                },
+              },
+            },
+          };
+        });
+      });
+
+      socket.on('game:cardRemoved', (data: { playerId: string; cardId: string; zone: ZoneType }) => {
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const zoneCards = player.zones[data.zone].filter(
+            (c) => c.instanceId !== data.cardId
+          );
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  [data.zone]: zoneCards,
                 },
               },
             },
@@ -471,6 +496,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (socket) {
       socket.emit('game:addToken', { tokenData, position });
     }
+  },
+
+  removeCard: (cardId, zone) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update - remove card from zone
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const zoneCards = player.zones[zone].filter((c) => c.instanceId !== cardId);
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              [zone]: zoneCards,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:removeCard', { cardId, zone });
   },
 
   drawCard: () => {

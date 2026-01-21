@@ -19,6 +19,23 @@ interface CardProps {
   onClick?: () => void;
 }
 
+// Helper to check if a card is a token
+function isToken(card: GameCard): boolean {
+  // Check for isToken flag (set by server when creating tokens)
+  if ('isToken' in card && (card as { isToken?: boolean }).isToken) {
+    return true;
+  }
+  // Check layout field from Scryfall data
+  if (card.card?.layout === 'token') {
+    return true;
+  }
+  // Check type line for "Token" keyword
+  if (card.card?.typeLine?.includes('Token')) {
+    return true;
+  }
+  return false;
+}
+
 export function Card({
   card,
   zone,
@@ -28,7 +45,7 @@ export function Card({
   isDragOverlay = false,
   onClick,
 }: CardProps) {
-  const { tapCard, setPreviewCard } = useGameStore();
+  const { tapCard, setPreviewCard, moveCard, removeCard } = useGameStore();
   const boardCard = card as BoardCard;
   const isTapped = boardCard.tapped;
   const isBattlefield = zone === 'battlefield';
@@ -96,6 +113,16 @@ export function Card({
     tapCard(card.instanceId);
   }, [card.instanceId, tapCard]);
 
+  const handleGoToGraveyard = useCallback(() => {
+    if (isToken(card)) {
+      // Tokens are removed from the game when they would go to graveyard
+      removeCard(card.instanceId, 'battlefield');
+    } else {
+      // Regular cards go to graveyard
+      moveCard(card.instanceId, 'battlefield', 'graveyard');
+    }
+  }, [card, moveCard, removeCard]);
+
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -117,6 +144,11 @@ export function Card({
       label: isTapped ? 'Untap' : 'Tap',
       icon: isTapped ? 'untap' : 'tap',
       onClick: handleTap,
+    });
+    contextMenuOptions.push({
+      label: 'Graveyard',
+      icon: 'destroy',
+      onClick: handleGoToGraveyard,
     });
   }
 
@@ -164,7 +196,8 @@ export function Card({
               fill
               className="object-cover rounded"
               draggable={false}
-              sizes="(max-width: 768px) 80px, 120px"
+              sizes="200px"
+              quality={90}
             />
           ) : (
             <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">

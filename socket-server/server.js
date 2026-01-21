@@ -134,6 +134,12 @@ io.on('connection', (socket) => {
 
       socket.join(roomKey);
 
+      // Draw initial hand (7 cards) immediately so player can experiment while waiting
+      for (let i = 0; i < 7 && playerState.zones.library.length > 0; i++) {
+        const card = playerState.zones.library.pop();
+        playerState.zones.hand.push(card);
+      }
+
       console.log(`Room created: ${roomKey} by player ${playerId}`);
 
       callback({
@@ -190,6 +196,12 @@ io.on('connection', (socket) => {
 
       socket.join(currentRoom);
 
+      // Draw initial hand (7 cards) immediately so player can experiment
+      for (let i = 0; i < 7 && playerState.zones.library.length > 0; i++) {
+        const card = playerState.zones.library.pop();
+        playerState.zones.hand.push(card);
+      }
+
       console.log(`Player ${playerId} joined room ${currentRoom}`);
 
       callback({ success: true, playerId });
@@ -210,14 +222,6 @@ io.on('connection', (socket) => {
       // Auto-start game when 2+ players join
       if (room.players.size >= 2 && room.gameState === 'waiting') {
         room.gameState = 'active';
-
-        // Draw initial hands (7 cards each)
-        for (const [, player] of room.players) {
-          for (let i = 0; i < 7 && player.zones.library.length > 0; i++) {
-            const card = player.zones.library.pop();
-            player.zones.hand.push(card);
-          }
-        }
 
         io.to(currentRoom).emit('game:started', {
           gameState: 'active',
@@ -528,6 +532,32 @@ io.on('connection', (socket) => {
     });
 
     console.log(`Game restarted in room ${currentRoom}`);
+  });
+
+  // Remove card (used for deleting tokens)
+  socket.on('game:removeCard', ({ cardId, zone }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    // Find and remove card from zone
+    const zoneCards = player.zones[zone];
+    const cardIndex = zoneCards.findIndex((c) => c.instanceId === cardId);
+    if (cardIndex === -1) return;
+
+    zoneCards.splice(cardIndex, 1);
+    room.lastActivity = new Date();
+
+    // Broadcast to all players
+    io.to(currentRoom).emit('game:cardRemoved', {
+      playerId,
+      cardId,
+      zone,
+    });
   });
 
   // Add token

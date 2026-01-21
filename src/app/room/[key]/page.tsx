@@ -158,39 +158,8 @@ export default function RoomPage() {
     );
   }
 
-  if (gameState === 'waiting') {
-    const playerCount = Object.keys(players).length;
-
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-gray-900 rounded-lg p-8 max-w-md text-center">
-          <h2 className="text-2xl font-semibold mb-4">Waiting for Players</h2>
-          <p className="text-gray-400 mb-6">
-            Share this room code with your opponent:
-          </p>
-          <div className="bg-gray-800 rounded-lg p-4 mb-6">
-            <span className="text-3xl font-mono tracking-wider">{displayRoomKey}</span>
-          </div>
-          <p className="text-gray-500">
-            {playerCount} player{playerCount !== 1 ? 's' : ''} in room
-          </p>
-          <div className="mt-6">
-            {Object.values(players).map((player) => (
-              <div
-                key={player.odId}
-                className="flex items-center justify-between py-2 border-b border-gray-800"
-              >
-                <span>{player.displayName}</span>
-                <span className="text-gray-500 text-sm">
-                  {player.odeck.commander}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isWaiting = gameState === 'waiting';
+  const playerCount = Object.keys(players).length;
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -213,6 +182,25 @@ export default function RoomPage() {
       {/* Game board */}
       <div className="flex-1 overflow-hidden relative">
         <GameBoard />
+
+        {/* Waiting for opponent overlay */}
+        {isWaiting && (
+          <div className="absolute inset-0 z-30 pointer-events-none">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-auto">
+              <div className="bg-gray-900/95 backdrop-blur rounded-lg px-6 py-4 text-center shadow-xl border border-gray-700">
+                <p className="text-gray-400 text-sm mb-2">
+                  Share this room code with your opponent:
+                </p>
+                <div className="bg-gray-800 rounded-lg px-4 py-2 mb-2">
+                  <span className="text-2xl font-mono tracking-wider">{displayRoomKey}</span>
+                </div>
+                <p className="text-gray-500 text-xs">
+                  {playerCount} player{playerCount !== 1 ? 's' : ''} in room — feel free to experiment with your cards!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Collapse toggle button - positioned at top of game board area */}
         <button
