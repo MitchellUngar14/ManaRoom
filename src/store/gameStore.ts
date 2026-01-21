@@ -28,6 +28,9 @@ interface GameStore {
   myId: string | null;
   players: Record<string, PlayerState>;
 
+  // Spectator mode (for popout windows)
+  spectatorMode: boolean;
+
   // UI state
   previewCard: GameCard | null;
 
@@ -37,6 +40,7 @@ interface GameStore {
   createRoom: (deckId: string, deckData: DeckData, displayName: string) => Promise<string>;
   joinRoom: (roomKey: string, deckId: string, deckData: DeckData, displayName: string) => Promise<void>;
   rejoinRoom: (roomKey: string, playerId: string) => Promise<boolean>;
+  connectAsSpectator: (roomKey: string) => Promise<void>;
   leaveRoom: () => void;
 
   // Game actions
@@ -74,6 +78,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   gameState: null,
   myId: null,
   players: {},
+  spectatorMode: false,
   previewCard: null,
 
   connect: async () => {
@@ -270,6 +275,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
           } else {
             // Rejoin failed - player will need to join fresh
             resolve(false);
+          }
+        }
+      );
+    });
+  },
+
+  connectAsSpectator: async (roomKey: string) => {
+    const { socket } = get();
+    if (!socket) throw new Error('Not connected');
+
+    return new Promise((resolve, reject) => {
+      socket.emit(
+        'room:spectate',
+        { roomKey },
+        (response: { success: boolean; roomKey?: string; gameState?: 'waiting' | 'active' | 'ended'; players?: Record<string, PlayerState>; error?: string }) => {
+          if (response.success && response.roomKey) {
+            set({
+              spectatorMode: true,
+              roomKey: response.roomKey,
+              gameState: response.gameState || null,
+              players: response.players || {},
+            });
+            resolve();
+          } else {
+            reject(new Error(response.error || 'Failed to spectate room'));
           }
         }
       );

@@ -232,6 +232,36 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Spectate a room (read-only viewer for popout window)
+  socket.on('room:spectate', ({ roomKey }, callback) => {
+    try {
+      const normalizedKey = roomKey.toUpperCase();
+      const room = rooms.get(normalizedKey);
+
+      if (!room) {
+        callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      // Join socket room to receive broadcasts, but don't add as player
+      socket.join(normalizedKey);
+      currentRoom = normalizedKey;
+      // Don't set playerId - this is spectator only
+
+      console.log(`Spectator joined room ${normalizedKey}`);
+
+      callback({
+        success: true,
+        roomKey: normalizedKey,
+        gameState: room.gameState,
+        players: Object.fromEntries(room.players),
+      });
+    } catch (error) {
+      console.error('Error spectating room:', error);
+      callback({ success: false, error: error.message });
+    }
+  });
+
   // Rejoin room after disconnect (e.g., page refresh)
   socket.on('room:rejoin', async ({ roomKey, odPlayerId }, callback) => {
     try {

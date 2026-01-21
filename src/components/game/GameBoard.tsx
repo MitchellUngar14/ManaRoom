@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import { useGameStore } from '@/store/gameStore';
+import { usePopoutWindow } from '@/hooks/usePopoutWindow';
 import { Card } from './Card';
 import { Hand } from './zones/Hand';
 import { Battlefield } from './zones/Battlefield';
@@ -148,7 +149,8 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
 }
 
 export function GameBoard() {
-  const { myId, players, moveCard, repositionCard, previewCard, setPreviewCard } = useGameStore();
+  const { myId, players, roomKey, moveCard, repositionCard, previewCard, setPreviewCard } = useGameStore();
+  const { isPopoutOpen, openPopout, closePopout } = usePopoutWindow();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
@@ -284,56 +286,101 @@ export function GameBoard() {
       <div className="h-full flex flex-col bg-gray-950">
         {/* Battlefield area - full width */}
         <div className="flex-1 flex flex-col min-h-0">
-          {/* Opponent's battlefield (top half) */}
-          <div className="flex-1 border-b border-gray-700 relative">
-            {opponent ? (
-              <>
-                {/* Opponent zones popout button */}
-                <OpponentZonesPopout opponent={opponent} />
+          {/* Opponent's battlefield (top half) - hidden when popped out */}
+          {!isPopoutOpen && (
+            <div className="flex-1 border-b border-gray-700 relative">
+              {opponent ? (
+                <>
+                  {/* Opponent zones popout button */}
+                  <OpponentZonesPopout opponent={opponent} />
 
-                {/* Mirror toggle button */}
-                <button
-                  onClick={() => setMirrorOpponent(!mirrorOpponent)}
-                  className="absolute top-2 right-2 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-1.5 transition-colors"
-                  title={mirrorOpponent ? 'Show mirrored view' : 'Show cards right-side up'}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={mirrorOpponent ? 'text-blue-400' : ''}
+                  {/* Pop out button */}
+                  <button
+                    onClick={() => roomKey && openPopout(roomKey, opponent.odId)}
+                    className="absolute top-2 right-24 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-1.5 transition-colors"
+                    title="Pop out opponent's battlefield to separate window"
                   >
-                    <polyline points="17 1 21 5 17 9" />
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                    <polyline points="7 23 3 19 7 15" />
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-                  </svg>
-                  <span>{mirrorOpponent ? 'Mirrored' : 'Mirror'}</span>
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    <span>Pop Out</span>
+                  </button>
 
-                {/* Opponent battlefield */}
-                <div className="absolute inset-0">
-                  <Battlefield
-                    cards={opponent.zones.battlefield}
-                    isOpponent={true}
-                    mirrorCards={!mirrorOpponent}
-                  />
+                  {/* Mirror toggle button */}
+                  <button
+                    onClick={() => setMirrorOpponent(!mirrorOpponent)}
+                    className="absolute top-2 right-2 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-1.5 transition-colors"
+                    title={mirrorOpponent ? 'Show mirrored view' : 'Show cards right-side up'}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={mirrorOpponent ? 'text-blue-400' : ''}
+                    >
+                      <polyline points="17 1 21 5 17 9" />
+                      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                      <polyline points="7 23 3 19 7 15" />
+                      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                    </svg>
+                    <span>{mirrorOpponent ? 'Mirrored' : 'Mirror'}</span>
+                  </button>
+
+                  {/* Opponent battlefield */}
+                  <div className="absolute inset-0">
+                    <Battlefield
+                      cards={opponent.zones.battlefield}
+                      isOpponent={true}
+                      mirrorCards={!mirrorOpponent}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-900/30">
+                  <span className="text-gray-600">Waiting for opponent...</span>
                 </div>
-              </>
-            ) : (
-              <div className="h-full flex items-center justify-center bg-gray-900/30">
-                <span className="text-gray-600">Waiting for opponent...</span>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
-          {/* My battlefield (bottom half) */}
+          {/* Popout indicator bar - shown when battlefield is popped out */}
+          {isPopoutOpen && opponent && (
+            <div className="shrink-0 bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-gray-400 text-sm">
+                  {opponent.displayName}&apos;s battlefield is in a separate window
+                </span>
+                <span className="text-gray-600">|</span>
+                <span className="text-gray-500 text-sm">Life: {opponent.life}</span>
+              </div>
+              <button
+                onClick={closePopout}
+                className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
+              >
+                Close Popout
+              </button>
+            </div>
+          )}
+
+          {/* My battlefield (bottom half - expands when opponent is popped out) */}
           <DropZone id="battlefield" className="flex-1">
             <Battlefield
               cards={myPlayer.zones.battlefield}

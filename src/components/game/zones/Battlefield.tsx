@@ -7,11 +7,13 @@ interface BattlefieldProps {
   cards: GameCard[];
   isOpponent: boolean;
   mirrorCards?: boolean;
+  readOnly?: boolean;
+  fullScreen?: boolean;
 }
 
-export function Battlefield({ cards, isOpponent, mirrorCards = false }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, mirrorCards = false, readOnly = false, fullScreen = false }: BattlefieldProps) {
   return (
-    <div className="h-full bg-gray-900/40 relative overflow-hidden">
+    <div className={`h-full bg-gray-900/40 relative overflow-hidden ${fullScreen ? 'min-h-screen' : ''}`}>
       {/* Cards on battlefield */}
       <div className="absolute inset-0 p-2">
         {cards.map((card) => {
@@ -29,7 +31,7 @@ export function Battlefield({ cards, isOpponent, mirrorCards = false }: Battlefi
                 transform: 'translate(-50%, -50%)',
               }}
             >
-              <Card card={card} zone="battlefield" isOpponent={isOpponent} />
+              <Card card={card} zone="battlefield" isOpponent={isOpponent} readOnly={readOnly} />
             </div>
           );
         })}

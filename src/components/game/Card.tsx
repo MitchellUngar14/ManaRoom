@@ -15,6 +15,7 @@ interface CardProps {
   isOpponent?: boolean;
   isDragging?: boolean;
   showBack?: boolean;
+  readOnly?: boolean;
   onClick?: () => void;
 }
 
@@ -24,6 +25,7 @@ export function Card({
   isOpponent = false,
   isDragging = false,
   showBack = false,
+  readOnly = false,
   onClick,
 }: CardProps) {
   const { tapCard, setPreviewCard } = useGameStore();
@@ -42,7 +44,7 @@ export function Card({
   const { attributes, listeners: dndListeners, setNodeRef, transform } = useDraggable({
     id: card.instanceId,
     data: { card, zone },
-    disabled: isOpponent,
+    disabled: isOpponent || readOnly,
   });
 
   // Merge our pointer handlers with dnd-kit's listeners
@@ -60,7 +62,7 @@ export function Card({
   const handleClick = () => {
     if (onClick) {
       onClick();
-    } else if (isBattlefield && !isOpponent) {
+    } else if (isBattlefield && !isOpponent && !readOnly) {
       tapCard(card.instanceId);
     }
   };
@@ -109,8 +111,8 @@ export function Card({
     { label: 'Preview', icon: 'preview', onClick: handlePreview },
   ];
 
-  // Add tap/untap option for battlefield cards (own cards only)
-  if (isBattlefield && !isOpponent) {
+  // Add tap/untap option for battlefield cards (own cards only, not in readOnly mode)
+  if (isBattlefield && !isOpponent && !readOnly) {
     contextMenuOptions.push({
       label: isTapped ? 'Untap' : 'Tap',
       icon: isTapped ? 'untap' : 'tap',
