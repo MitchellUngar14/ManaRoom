@@ -119,19 +119,21 @@ export default function LobbyPage() {
         </header>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Left column: Decks */}
-          <div className="space-y-6">
-            <div className="grimoire-card rounded-xl p-6">
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="text-xl font-semibold text-amber-100">Your Grimoires</h2>
-                <button
-                  onClick={() => setShowImporter(true)}
-                  className="btn-magical px-4 py-2 text-sm bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-lg font-medium shadow-lg shadow-amber-900/20 transition-all"
-                >
-                  Import Deck
-                </button>
-              </div>
+          {/* Left column: Bookshelf with Grimoires */}
+          <div className="space-y-4">
+            {/* Bookshelf header */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-serif font-semibold etched-text">Your Grimoires</h2>
+              <button
+                onClick={() => setShowImporter(true)}
+                className="btn-magical px-4 py-2 text-sm bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-lg font-medium shadow-lg shadow-amber-900/20 transition-all"
+              >
+                + Add Grimoire
+              </button>
+            </div>
 
+            {/* Bookshelf */}
+            <div className="bookshelf rounded-lg p-4 pt-5 pb-6 min-h-[200px]">
               {decks.length > 0 ? (
                 <DeckList
                   decks={decks}
@@ -143,9 +145,9 @@ export default function LobbyPage() {
                   }}
                 />
               ) : (
-                <div className="text-center py-10 border border-dashed border-gray-700 rounded-lg">
-                  <p className="text-gray-500">No grimoires yet.</p>
-                  <p className="text-gray-600 text-sm mt-1">Import a deck from Moxfield to begin.</p>
+                <div className="h-full flex flex-col items-center justify-center py-8">
+                  <p className="etched-text-secondary text-sm">The shelf is empty.</p>
+                  <p className="etched-text-secondary text-xs mt-1 opacity-60">Import a grimoire from Moxfield to begin.</p>
                 </div>
               )}
             </div>

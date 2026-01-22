@@ -264,3 +264,188 @@ body {
 .btn-magical:hover::before {
   transform: translateX(100%);
 }
+
+/* Bookshelf styling */
+.bookshelf {
+  background: linear-gradient(180deg, #1a1410 0%, #251c15 100%);
+  border: 2px solid #3d2f24;
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.6),
+    0 4px 20px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+/* Shelf plank that books rest on */
+.shelf-plank {
+  position: relative;
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+}
+
+.shelf-plank::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -16px;
+  right: -16px;
+  height: 10px;
+  background: linear-gradient(180deg, #4a3a2a 0%, #3d2f24 40%, #2a1f18 100%);
+  border-top: 1px solid #5a4a38;
+  border-bottom: 2px solid #1a1410;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Last shelf doesn't need extra margin */
+.shelf-plank:last-child {
+  margin-bottom: 0;
+}
+
+/* Book styling - realistic leather-bound tome */
+.grimoire-book {
+  background: linear-gradient(180deg, #5a4535 0%, #3d2a1a 15%, #2d1f16 85%, #1a120d 100%);
+  border: 2px solid #6a5545;
+  border-radius: 3px 6px 6px 3px;
+  box-shadow:
+    /* Outer shadow */
+    3px 3px 8px rgba(0, 0, 0, 0.5),
+    /* Inner leather highlight */
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 70px;
+}
+
+/* Book spine - left edge with ridges */
+.grimoire-book::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background:
+    /* Spine ridges */
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 8px,
+      rgba(0, 0, 0, 0.3) 8px,
+      rgba(0, 0, 0, 0.3) 10px,
+      transparent 10px,
+      transparent 18px
+    ),
+    /* Base spine color */
+    linear-gradient(90deg, #7a6555 0%, #5a4535 30%, #4a3528 70%, #3a2518 100%);
+  border-right: 2px solid #2d1f16;
+  border-radius: 3px 0 0 3px;
+}
+
+/* Page edges on the right side */
+.grimoire-book::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 6px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      #f5f0e6 0px,
+      #e8e0d0 1px,
+      #f0ebe0 2px
+    );
+  border-left: 1px solid #d0c8b8;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Gold embossed frame on cover */
+.grimoire-book-inner {
+  position: relative;
+  margin-left: 20px;
+  margin-right: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 2px;
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.05) 0%, transparent 50%);
+}
+
+/* Corner decorations */
+.grimoire-book-inner::before,
+.grimoire-book-inner::after {
+  content: '✦';
+  position: absolute;
+  font-size: 8px;
+  color: rgba(201, 162, 39, 0.4);
+}
+
+.grimoire-book-inner::before {
+  top: 2px;
+  left: 4px;
+}
+
+.grimoire-book-inner::after {
+  bottom: 2px;
+  right: 4px;
+}
+
+.grimoire-book:hover {
+  transform: translateX(10px) rotate(-1deg);
+  box-shadow:
+    6px 6px 16px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.grimoire-book.selected {
+  transform: translateX(14px) rotate(-1.5deg);
+  background: linear-gradient(180deg, #6a5540 0%, #4d3525 15%, #3d2a1a 85%, #2a1a10 100%);
+  border-color: #c9a227;
+  box-shadow:
+    0 0 25px rgba(201, 162, 39, 0.4),
+    6px 6px 20px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.grimoire-book.selected .grimoire-book-inner {
+  border-color: rgba(201, 162, 39, 0.5);
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.1) 0%, transparent 50%);
+}
+
+.grimoire-book.selected .grimoire-book-inner::before,
+.grimoire-book.selected .grimoire-book-inner::after {
+  color: rgba(201, 162, 39, 0.7);
+}
+
+/* Etched text effect */
+.etched-text {
+  color: #c9a227;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.8),
+    0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.etched-text-secondary {
+  color: #8b7355;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Delete button etched into book */
+.book-delete-btn {
+  background: linear-gradient(135deg, #3d2a1a 0%, #2a1a10 100%);
+  border: 1px solid #5a4535;
+  color: #8b7355;
+  transition: all 0.2s ease;
+}
+
+.book-delete-btn:hover {
+  background: linear-gradient(135deg, #4a2020 0%, #3a1515 100%);
+  border-color: #8b4545;
+  color: #cc6666;
+}
