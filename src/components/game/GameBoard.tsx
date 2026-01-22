@@ -20,6 +20,9 @@ import { Exile } from './zones/Exile';
 import { CommandZone } from './zones/CommandZone';
 import { CardPreviewPane } from './CardPreviewPane';
 import { CardEditModal } from './CardEditModal';
+import { ThemeSelector } from './ThemeSelector';
+import { AmbientEffects } from './AmbientEffects';
+import { useTheme } from '@/hooks/useTheme';
 import type { GameCard, BoardCard, ZoneType, PlayerState } from '@/types';
 
 // Global state for hovered card (used by keyboard shortcut)
@@ -152,6 +155,7 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
 export function GameBoard() {
   const { myId, players, roomKey, moveCard, repositionCard, previewCard, setPreviewCard } = useGameStore();
   const { isPopoutOpen, openPopout, closePopout } = usePopoutWindow();
+  const { theme, setTheme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
@@ -316,7 +320,10 @@ export function GameBoard() {
       onDragEnd={handleDragEnd}
       collisionDetection={pointerWithin}
     >
-      <div className="h-full flex flex-col bg-gray-950">
+      {/* Ambient Effects Layer */}
+      <AmbientEffects theme={theme} />
+
+      <div className="h-full flex flex-col theme-battlefield relative z-10">
         {/* Battlefield area - full width */}
         <div className="flex-1 flex flex-col min-h-0">
           {/* Opponent's battlefield (top half) - hidden when popped out */}
@@ -350,6 +357,11 @@ export function GameBoard() {
                     </svg>
                     <span>Pop Out</span>
                   </button>
+
+                  {/* Theme selector */}
+                  <div className="absolute top-2 left-2 z-20">
+                    <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
+                  </div>
 
                   {/* Mirror toggle button */}
                   <button
