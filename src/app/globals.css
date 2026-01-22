@@ -280,6 +280,12 @@ body {
   position: relative;
   padding-bottom: 14px;
   margin-bottom: 4px;
+  z-index: 1;
+}
+
+/* Selected shelf gets higher z-index so book floats above other shelves */
+.shelf-plank:has(.grimoire-book.selected) {
+  z-index: 10;
 }
 
 .shelf-plank::after {
@@ -295,6 +301,7 @@ body {
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: -1;
 }
 
 /* Last shelf doesn't need extra margin */
@@ -401,7 +408,6 @@ body {
 }
 
 .grimoire-book.selected {
-  transform: translateX(14px) rotate(-1.5deg);
   background: linear-gradient(180deg, #6a5540 0%, #4d3525 15%, #3d2a1a 85%, #2a1a10 100%);
   border-color: #c9a227;
   box-shadow:
@@ -409,6 +415,16 @@ body {
     6px 6px 20px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  animation: book-float 2.5s ease-in-out infinite;
+}
+
+@keyframes book-float {
+  0%, 100% {
+    transform: translateX(20px) translateY(0px) rotate(-2deg);
+  }
+  50% {
+    transform: translateX(24px) translateY(-8px) rotate(-3deg);
+  }
 }
 
 .grimoire-book.selected .grimoire-book-inner {
