@@ -51,15 +51,28 @@ export function CreateRoom({ selectedDeckId, onRoomCreated, disabled }: CreateRo
   };
 
   return (
-    <div className="grimoire-card rounded-xl p-6">
-      <h2 className="text-xl font-semibold mb-2 text-amber-100">Summon Arena</h2>
+    <div className="summoning-portal rounded-xl p-6">
+      {/* Rune decorations */}
+      <div className="portal-runes top-3 left-4">✦ ◆ ✦</div>
+      <div className="portal-runes top-3 right-4">✦ ◆ ✦</div>
 
-      <p className="text-gray-400 mb-5 text-sm">
-        Open a portal to a new battlefield and summon an ally to join you.
+      <h2 className="text-xl font-semibold mb-2 text-center text-purple-200">
+        Summon Arena
+      </h2>
+
+      <p className="text-gray-400 mb-6 text-sm text-center">
+        Step through the portal to create a new battlefield
       </p>
 
+      {/* Portal visualization */}
+      <div className="flex justify-center mb-6">
+        <div className={`portal-ring ${disabled ? 'opacity-40' : ''}`}>
+          <div className="portal-vortex" />
+        </div>
+      </div>
+
       {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm mb-4 backdrop-blur-sm">
+        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm mb-4 backdrop-blur-sm text-center">
           {error}
         </div>
       )}
@@ -67,10 +80,13 @@ export function CreateRoom({ selectedDeckId, onRoomCreated, disabled }: CreateRo
       <button
         onClick={handleCreate}
         disabled={disabled || loading}
-        className="btn-magical w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed rounded-lg font-medium shadow-lg shadow-green-900/30 disabled:shadow-none transition-all"
+        className="portal-enter-btn w-full py-3.5 rounded-lg text-sm"
       >
-        {loading ? 'Opening portal...' : disabled ? 'Choose a grimoire first' : 'Open Portal'}
+        {loading ? '✦ Opening Portal... ✦' : disabled ? 'Select a Grimoire' : '✦ Enter the Portal ✦'}
       </button>
+
+      {/* Bottom runes */}
+      <div className="portal-runes bottom-3 left-1/2 -translate-x-1/2">◈ ◇ ◈</div>
     </div>
   );
 }

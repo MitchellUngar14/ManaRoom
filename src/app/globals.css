@@ -449,3 +449,185 @@ body {
   border-color: #8b4545;
   color: #cc6666;
 }
+
+/* Summoning Portal */
+.summoning-portal {
+  position: relative;
+  background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0d12 70%);
+  border: 2px solid #2a1a3e;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Portal stone frame */
+.summoning-portal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    /* Corner runes */
+    radial-gradient(circle at 10% 10%, rgba(201, 162, 39, 0.15) 0%, transparent 15%),
+    radial-gradient(circle at 90% 10%, rgba(201, 162, 39, 0.15) 0%, transparent 15%),
+    radial-gradient(circle at 10% 90%, rgba(201, 162, 39, 0.15) 0%, transparent 15%),
+    radial-gradient(circle at 90% 90%, rgba(201, 162, 39, 0.15) 0%, transparent 15%);
+  pointer-events: none;
+}
+
+/* Inner portal ring */
+.portal-ring {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #2a1a4e 0%, #15102a 60%, #0a0a12 100%);
+  box-shadow:
+    0 0 40px rgba(107, 33, 168, 0.4),
+    0 0 80px rgba(107, 33, 168, 0.2),
+    inset 0 0 30px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animated portal border */
+.portal-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from var(--portal-angle, 0deg),
+    #6b21a8,
+    #c9a227,
+    #6b21a8,
+    #3b82f6,
+    #6b21a8
+  );
+  animation: portal-spin 4s linear infinite;
+  z-index: -1;
+}
+
+/* Inner glow */
+.portal-ring::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    rgba(107, 33, 168, 0.3) 0%,
+    rgba(59, 130, 246, 0.2) 30%,
+    transparent 70%
+  );
+  animation: portal-pulse 2s ease-in-out infinite;
+}
+
+@property --portal-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes portal-spin {
+  from { --portal-angle: 0deg; }
+  to { --portal-angle: 360deg; }
+}
+
+@keyframes portal-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Swirling energy inside portal */
+.portal-vortex {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(201, 162, 39, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(107, 33, 168, 0.5) 0%, transparent 40%),
+    radial-gradient(ellipse at center, #1a0a2e 0%, #0a0512 100%);
+  animation: vortex-swirl 3s ease-in-out infinite;
+  box-shadow: inset 0 0 20px rgba(107, 33, 168, 0.5);
+}
+
+@keyframes vortex-swirl {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(0.95);
+  }
+}
+
+/* Enter portal button */
+.portal-enter-btn {
+  position: relative;
+  background: linear-gradient(180deg, #6b21a8 0%, #4c1d95 50%, #3b1578 100%);
+  border: 2px solid #8b5cf6;
+  color: #e9d5ff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  box-shadow:
+    0 0 20px rgba(139, 92, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.portal-enter-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.portal-enter-btn:hover {
+  background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+  border-color: #a78bfa;
+  box-shadow:
+    0 0 30px rgba(139, 92, 246, 0.6),
+    0 0 60px rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.portal-enter-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.portal-enter-btn:disabled {
+  background: linear-gradient(180deg, #374151 0%, #1f2937 100%);
+  border-color: #4b5563;
+  color: #6b7280;
+  box-shadow: none;
+  transform: none;
+}
+
+.portal-enter-btn:disabled::before {
+  display: none;
+}
+
+/* Rune decorations */
+.portal-runes {
+  position: absolute;
+  font-family: serif;
+  font-size: 12px;
+  color: rgba(201, 162, 39, 0.4);
+  letter-spacing: 0.3em;
+  animation: rune-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes rune-glow {
+  from { opacity: 0.3; }
+  to { opacity: 0.7; }
+}
