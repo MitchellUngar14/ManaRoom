@@ -12,16 +12,23 @@ interface ThemeSelectorProps {
 
 export function ThemeSelector({ currentTheme, onThemeChange }: ThemeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = () => {
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      // Position dropdown below button, aligned to left edge
+      // But ensure it doesn't go off the right side of the screen
+      const menuWidth = 240; // min-w-[240px]
+      let left = rect.left;
+      if (left + menuWidth > window.innerWidth - 16) {
+        left = window.innerWidth - menuWidth - 16;
+      }
       setMenuPosition({
         top: rect.bottom + 4,
-        right: window.innerWidth - rect.right,
+        left: Math.max(8, left), // Ensure at least 8px from left edge
       });
     }
     setIsOpen(!isOpen);
@@ -88,7 +95,7 @@ export function ThemeSelector({ currentTheme, onThemeChange }: ThemeSelectorProp
             className="fixed bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700 py-2 min-w-[240px] z-[9999] max-h-[400px] overflow-y-auto"
             style={{
               top: menuPosition.top,
-              right: menuPosition.right,
+              left: menuPosition.left,
             }}
           >
             <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-800 mb-1">

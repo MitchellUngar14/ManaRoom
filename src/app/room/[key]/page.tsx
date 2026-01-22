@@ -5,7 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { GameBoard } from '@/components/game/GameBoard';
 import { GameControls } from '@/components/game/GameControls';
 import { LifeCounter } from '@/components/game/LifeCounter';
+import { ThemeSelector } from '@/components/game/ThemeSelector';
 import { useGameStore } from '@/store/gameStore';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function RoomPage() {
   const params = useParams();
@@ -28,6 +30,7 @@ export default function RoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(true);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   // Use actual room key from store, falling back to URL param
   const displayRoomKey = actualRoomKey || roomKey;
@@ -173,6 +176,7 @@ export default function RoomPage() {
           <div className="flex items-center gap-4">
             <h1 className="font-semibold">ManaRoom</h1>
             <span className="text-gray-500 text-sm">Room: {displayRoomKey}</span>
+            <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
           </div>
           <LifeCounter />
           <GameControls />
