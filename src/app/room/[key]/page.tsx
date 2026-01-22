@@ -6,6 +6,7 @@ import { GameBoard } from '@/components/game/GameBoard';
 import { GameControls } from '@/components/game/GameControls';
 import { LifeCounter } from '@/components/game/LifeCounter';
 import { ThemeSelector } from '@/components/game/ThemeSelector';
+import { LogoLoader } from '@/components/ui/LogoLoader';
 import { useGameStore } from '@/store/gameStore';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -174,10 +175,10 @@ export default function RoomPage() {
 
   if (joining || !connected) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Connecting to room {displayRoomKey}...</p>
+          <LogoLoader size="medium" showText={false} />
+          <p className="text-gray-400 mt-4">Connecting to room {displayRoomKey}...</p>
         </div>
       </div>
     );

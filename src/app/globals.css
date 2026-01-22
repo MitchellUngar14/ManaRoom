@@ -807,6 +807,69 @@ body {
 }
 
 /* ========================================
+   Logo Loader with Sparkle Effect
+   ======================================== */
+
+.logo-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-loader-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-loader-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.logo-loader-image {
+  position: relative;
+  z-index: 1;
+  animation: logo-pulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(100, 180, 255, 0.4)) drop-shadow(0 0 40px rgba(100, 180, 255, 0.2));
+}
+
+.logo-loader-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-loader-text {
+  margin-top: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--sanctum-text-muted, #8a8070);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  animation: text-fade 2s ease-in-out infinite;
+}
+
+@keyframes logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px rgba(100, 180, 255, 0.4)) drop-shadow(0 0 40px rgba(100, 180, 255, 0.2));
+  }
+  50% {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 30px rgba(100, 180, 255, 0.6)) drop-shadow(0 0 60px rgba(100, 180, 255, 0.3));
+  }
+}
+
+@keyframes text-fade {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ========================================
    Modal Styling
    ======================================== */
 

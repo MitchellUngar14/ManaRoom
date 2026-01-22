@@ -7,6 +7,7 @@ import { DeckList } from '@/components/deck/DeckList';
 import { DeckViewer } from '@/components/deck/DeckViewer';
 import { CreateRoom } from '@/components/lobby/CreateRoom';
 import { JoinRoom } from '@/components/lobby/JoinRoom';
+import { LogoLoader } from '@/components/ui/LogoLoader';
 
 interface User {
   userId: string;
@@ -104,7 +105,7 @@ export default function LobbyPage() {
       <div className="study-room">
         <div className="study-room-interior">
           <div className="flex items-center justify-center h-full">
-            <div className="study-orb-loader" />
+            <LogoLoader size="large" />
           </div>
         </div>
       </div>
