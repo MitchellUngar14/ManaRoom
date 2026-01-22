@@ -23,7 +23,7 @@ export function Hand({ cards }: HandProps) {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-3 pt-1 shrink-0">
-        <span className="text-xs text-gray-500">Hand ({cards.length})</span>
+        <span className="text-xs transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Hand ({cards.length})</span>
       </div>
 
       {/* Cards */}

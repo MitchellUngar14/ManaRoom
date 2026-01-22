@@ -20,7 +20,10 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
   const cardWidthClass = largeCards ? 'w-40' : 'w-28';
 
   return (
-    <div className={`h-full bg-gray-900/40 relative overflow-hidden ${fullScreen ? 'min-h-screen' : ''}`}>
+    <div
+      className={`h-full relative overflow-hidden transition-colors duration-500 ${fullScreen ? 'min-h-screen' : ''}`}
+      style={{ backgroundColor: 'var(--theme-bg-secondary)', opacity: 0.9 }}
+    >
       {/* Cards on battlefield */}
       <div className="absolute inset-0 p-2">
         {cards.map((card) => {
@@ -48,7 +51,7 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
       {/* Empty state */}
       {cards.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-gray-700 text-sm">Battlefield</span>
+          <span className="text-sm transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Battlefield</span>
         </div>
       )}
     </div>

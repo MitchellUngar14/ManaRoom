@@ -324,11 +324,16 @@ export function GameBoard() {
       <AmbientEffects theme={theme} />
 
       <div className="h-full flex flex-col theme-battlefield relative z-10">
+        {/* Theme selector - always visible */}
+        <div className="absolute top-2 left-2 z-30">
+          <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
+        </div>
+
         {/* Battlefield area - full width */}
         <div className="flex-1 flex flex-col min-h-0">
           {/* Opponent's battlefield (top half) - hidden when popped out */}
           {!isPopoutOpen && (
-            <div className="flex-1 border-b border-gray-700 relative">
+            <div className="flex-1 border-b relative transition-colors duration-500" style={{ borderColor: 'var(--theme-border)' }}>
               {opponent ? (
                 <>
                   {/* Opponent zones popout button */}
@@ -357,11 +362,6 @@ export function GameBoard() {
                     </svg>
                     <span>Pop Out</span>
                   </button>
-
-                  {/* Theme selector */}
-                  <div className="absolute top-2 left-2 z-20">
-                    <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
-                  </div>
 
                   {/* Mirror toggle button */}
                   <button
@@ -401,8 +401,8 @@ export function GameBoard() {
                   </div>
                 </>
               ) : (
-                <div className="h-full flex items-center justify-center bg-gray-900/30">
-                  <span className="text-gray-600">Waiting for opponent...</span>
+                <div className="h-full flex items-center justify-center transition-colors duration-500" style={{ backgroundColor: 'var(--theme-bg-secondary)', opacity: 0.5 }}>
+                  <span className="transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Waiting for opponent...</span>
                 </div>
               )}
             </div>
@@ -469,9 +469,9 @@ export function GameBoard() {
               bottomBarCollapsed ? 'h-0' : 'h-52'
             }`}
           >
-            <div className="h-52 border-t border-gray-800 bg-gray-900/80 flex">
+            <div className="h-52 border-t flex transition-colors duration-500" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-tertiary)' }}>
               {/* My zones (left side) */}
-              <div className="shrink-0 border-r border-gray-800 px-2 py-1 flex items-center gap-1">
+              <div className="shrink-0 border-r px-2 py-1 flex items-center gap-1 transition-colors duration-500" style={{ borderColor: 'var(--theme-border)' }}>
                 <DropZone id="commandZone" className="w-24 shrink-0">
                   <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                 </DropZone>
