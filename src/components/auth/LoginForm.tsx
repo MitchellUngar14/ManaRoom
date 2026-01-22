@@ -38,19 +38,15 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <h2 className="text-2xl font-semibold text-center bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">
-        Enter the Battlefield
-      </h2>
-
+    <form onSubmit={handleSubmit} className="auth-form">
       {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm backdrop-blur-sm">
+        <div className="auth-error">
           {error}
         </div>
       )}
 
-      <div>
-        <label htmlFor="email" className="block text-sm text-gray-400 mb-1.5">
+      <div className="auth-field">
+        <label htmlFor="email" className="auth-label">
           Email
         </label>
         <input
@@ -58,13 +54,14 @@ export function LoginForm() {
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all"
+          className="auth-input"
+          placeholder="summoner@manaroom.gg"
           required
         />
       </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm text-gray-400 mb-1.5">
+      <div className="auth-field">
+        <label htmlFor="password" className="auth-label">
           Password
         </label>
         <input
@@ -72,7 +69,8 @@ export function LoginForm() {
           id="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all"
+          className="auth-input"
+          placeholder="••••••••"
           required
         />
       </div>
@@ -80,9 +78,16 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="btn-magical w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-purple-800 disabled:to-purple-900 disabled:cursor-not-allowed rounded-lg font-medium text-white shadow-lg shadow-purple-900/30 transition-all"
+        className="auth-submit"
       >
-        {loading ? 'Planeswalking...' : 'Enter'}
+        {loading ? (
+          <span className="auth-submit-loading">
+            <span className="auth-spinner" />
+            Entering...
+          </span>
+        ) : (
+          'Enter the Study'
+        )}
       </button>
     </form>
   );

@@ -292,39 +292,419 @@ body {
   color: var(--theme-text-secondary);
 }
 
-/* Sign In Page - Planeswalker's Gate */
-.planeswalker-gate {
-  background: linear-gradient(180deg, #1a0a2e 0%, #0a0a0a 100%);
+/* ========================================
+   Login Page - Refined Sanctum Style
+   ======================================== */
+
+.login-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sanctum-bg-deep);
+  font-family: 'Crimson Text', Georgia, serif;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-.planeswalker-gate::before {
-  content: '';
+/* Ambient background gradient */
+.login-ambient {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(107, 33, 168, 0.15) 0%, transparent 70%);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201, 162, 39, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 30% 70%, rgba(74, 126, 184, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 50% at 70% 60%, rgba(124, 92, 191, 0.03) 0%, transparent 50%);
   pointer-events: none;
 }
 
-.portal-frame {
-  background: linear-gradient(145deg, #12121a 0%, #1a1a2e 100%);
-  border: 1px solid #2a2a3e;
+/* Subtle floating particles */
+.login-particles {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(201, 162, 39, 0.4), transparent),
+    radial-gradient(1px 1px at 40% 70%, rgba(201, 162, 39, 0.3), transparent),
+    radial-gradient(1px 1px at 60% 20%, rgba(201, 162, 39, 0.3), transparent),
+    radial-gradient(1px 1px at 80% 60%, rgba(201, 162, 39, 0.2), transparent),
+    radial-gradient(1px 1px at 10% 80%, rgba(74, 126, 184, 0.3), transparent),
+    radial-gradient(1px 1px at 90% 40%, rgba(74, 126, 184, 0.2), transparent);
+  background-size: 200px 200px;
+  animation: login-particles-drift 30s linear infinite;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@keyframes login-particles-drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100px, -50px); }
+}
+
+/* Main container */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  z-index: 10;
+  padding: 24px;
+  margin: auto;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.login-container.mounted {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero section with logo */
+.login-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-logo-wrapper {
+  position: relative;
+  width: 180px;
+  height: 180px;
+}
+
+.login-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 40px rgba(201, 162, 39, 0.3));
+  animation: login-logo-pulse 4s ease-in-out infinite;
+}
+
+@keyframes login-logo-pulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(201, 162, 39, 0.25)); }
+  50% { filter: drop-shadow(0 0 50px rgba(201, 162, 39, 0.4)); }
+}
+
+.login-logo-glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  animation: login-glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes login-glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.login-hero-text {
+  text-align: center;
+}
+
+.login-tagline {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--sanctum-gold);
+  letter-spacing: 0.12em;
+  margin: 0 0 4px 0;
+  text-shadow: 0 2px 10px rgba(201, 162, 39, 0.3);
+}
+
+.login-description {
+  font-size: 14px;
+  color: var(--sanctum-text-secondary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* Auth panel */
+.login-panel {
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(180deg, var(--sanctum-bg-panel) 0%, var(--sanctum-bg-deep) 100%);
+  border: 1px solid var(--sanctum-border);
+  border-radius: 16px;
+  overflow: hidden;
   box-shadow:
-    0 0 60px rgba(107, 33, 168, 0.2),
-    inset 0 0 30px rgba(0, 0, 0, 0.5);
+    0 25px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--sanctum-border-subtle),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.login-panel-header {
+  display: flex;
+  border-bottom: 1px solid var(--sanctum-border);
+}
+
+.login-tab {
+  flex: 1;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sanctum-text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
   position: relative;
 }
 
-.portal-frame::before {
+.login-tab::after {
   content: '';
   position: absolute;
-  inset: -2px;
-  background: linear-gradient(145deg, #c9a227 0%, #6b21a8 50%, #c9a227 100%);
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0.3;
-  filter: blur(1px);
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--sanctum-gold);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.login-tab:hover {
+  color: var(--sanctum-text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.login-tab.active {
+  color: var(--sanctum-gold);
+  background: linear-gradient(180deg, rgba(201, 162, 39, 0.08) 0%, transparent 100%);
+}
+
+.login-tab.active::after {
+  transform: scaleX(1);
+}
+
+.login-panel-content {
+  padding: 20px;
+}
+
+.login-panel-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--sanctum-border-subtle);
+  text-align: center;
+}
+
+.login-guest-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--sanctum-text-muted);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.login-guest-link:hover {
+  color: var(--sanctum-blue-arcane);
+}
+
+.login-guest-icon {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.login-guest-link:hover .login-guest-icon {
+  transform: translateX(4px);
+}
+
+/* Corner flourishes */
+.login-flourish {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+.login-flourish-tl {
+  top: 0;
+  left: 0;
+  background:
+    linear-gradient(135deg, var(--sanctum-gold) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 40%, var(--sanctum-gold) 40%, var(--sanctum-gold) 42%, transparent 42%);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.login-flourish-br {
+  bottom: 0;
+  right: 0;
+  background:
+    linear-gradient(-45deg, var(--sanctum-gold) 0%, transparent 50%),
+    linear-gradient(-135deg, transparent 40%, var(--sanctum-gold) 40%, var(--sanctum-gold) 42%, transparent 42%);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .login-logo-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+
+  .login-tagline {
+    font-size: 14px;
+  }
+
+  .login-panel {
+    border-radius: 12px;
+  }
+
+  .login-panel-content {
+    padding: 16px;
+  }
+
+  .login-flourish {
+    display: none;
+  }
+}
+
+/* Auth form styles */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sanctum-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--sanctum-bg-deep);
+  border: 1px solid var(--sanctum-border);
+  border-radius: 8px;
+  color: var(--sanctum-text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: var(--sanctum-text-muted);
+  opacity: 0.5;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--sanctum-gold-muted);
+  box-shadow: 0 0 0 3px var(--sanctum-gold-glow);
+}
+
+.auth-error {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #fca5a5;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: 8px;
+  background: linear-gradient(180deg, var(--sanctum-blue-arcane) 0%, #3a6a9e 100%);
+  border: 1px solid rgba(74, 126, 184, 0.5);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 4px 12px rgba(74, 126, 184, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: linear-gradient(180deg, #5a8ec8 0%, #4a7eb8 100%);
+  box-shadow:
+    0 6px 20px rgba(74, 126, 184, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-submit-register {
+  background: linear-gradient(180deg, var(--sanctum-gold) 0%, #a88920 100%);
+  border-color: rgba(201, 162, 39, 0.5);
+  box-shadow:
+    0 4px 12px rgba(201, 162, 39, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.auth-submit-register:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--sanctum-gold-bright) 0%, var(--sanctum-gold) 100%);
+  box-shadow:
+    0 6px 20px rgba(201, 162, 39, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.auth-submit-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: auth-spin 0.8s linear infinite;
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .login-sconce {
+    display: none;
+  }
+
+  .login-content {
+    padding: 16px;
+  }
+
+  .tome-content {
+    padding: 20px 16px;
+  }
 }
 
 /* ========================================

@@ -1,97 +1,93 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 
-// Floating mana symbols for background ambiance
-function FloatingManaSymbols() {
-  const symbols = ['W', 'U', 'B', 'R', 'G'];
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {symbols.map((symbol, i) => (
-        <div
-          key={i}
-          className="absolute text-4xl opacity-5 mana-float"
-          style={{
-            left: `${15 + i * 18}%`,
-            top: `${20 + (i % 3) * 25}%`,
-            animationDelay: `${i * 1.5}s`,
-            color: symbol === 'W' ? '#f9fafb' :
-                   symbol === 'U' ? '#3b82f6' :
-                   symbol === 'B' ? '#6b7280' :
-                   symbol === 'R' ? '#ef4444' : '#22c55e',
-          }}
-        >
-          {symbol === 'W' ? '☀' :
-           symbol === 'U' ? '💧' :
-           symbol === 'B' ? '💀' :
-           symbol === 'R' ? '🔥' : '🌲'}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function Home() {
+  const router = useRouter();
   const [showRegister, setShowRegister] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Check if already logged in
+  useEffect(() => {
+    setMounted(true);
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          router.push('/lobby');
+        }
+      } catch {
+        // Not logged in, stay on login page
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   return (
-    <main className="planeswalker-gate min-h-screen flex flex-col items-center justify-center p-8">
-      <FloatingManaSymbols />
+    <main className="login-page">
+      {/* Ambient background effects */}
+      <div className="login-ambient" />
 
-      <div className="max-w-md w-full space-y-8 relative z-10">
-        {/* Title with magical glow */}
-        <div className="text-center">
-          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent drop-shadow-lg">
-            ManaRoom
-          </h1>
-          <p className="text-gray-400 text-lg">Enter the Multiverse</p>
-          <p className="text-gray-500 text-sm mt-1">Play Commander with friends online</p>
+      {/* Floating particles */}
+      <div className="login-particles" />
+
+      {/* Main content */}
+      <div className={`login-container ${mounted ? 'mounted' : ''}`}>
+        {/* Logo section */}
+        <div className="login-hero">
+          <div className="login-logo-wrapper">
+            <Image
+              src="/manaroom-logo.png"
+              alt="ManaRoom"
+              width={180}
+              height={180}
+              priority
+              className="login-logo-img"
+            />
+            <div className="login-logo-glow" />
+          </div>
+
+          <div className="login-hero-text">
+            <p className="login-tagline">The Summoner&apos;s Sanctum</p>
+            <p className="login-description">Play Commander with friends online</p>
+          </div>
         </div>
 
-        {/* Portal frame container */}
-        <div className="portal-frame rounded-xl p-8 space-y-6">
-          {showRegister ? (
-            <>
+        {/* Auth panel */}
+        <div className="login-panel">
+          <div className="login-panel-header">
+            <button
+              onClick={() => setShowRegister(false)}
+              className={`login-tab ${!showRegister ? 'active' : ''}`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setShowRegister(true)}
+              className={`login-tab ${showRegister ? 'active' : ''}`}
+            >
+              Register
+            </button>
+          </div>
+
+          <div className="login-panel-content">
+            {showRegister ? (
               <RegisterForm onSuccess={() => setShowRegister(false)} />
-              <p className="text-center text-sm text-gray-400">
-                Already have an account?{' '}
-                <button
-                  onClick={() => setShowRegister(false)}
-                  className="text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  Sign in
-                </button>
-              </p>
-            </>
-          ) : (
-            <>
+            ) : (
               <LoginForm />
-              <p className="text-center text-sm text-gray-400">
-                Don&apos;t have an account?{' '}
-                <button
-                  onClick={() => setShowRegister(true)}
-                  className="text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  Register
-                </button>
-              </p>
-            </>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Guest link */}
-        <div className="text-center">
-          <Link
-            href="/lobby"
-            className="text-sm text-gray-500 hover:text-purple-400 transition-colors"
-          >
-            Continue as guest (limited features)
-          </Link>
         </div>
       </div>
+
+      {/* Decorative corner flourishes */}
+      <div className="login-flourish login-flourish-tl" />
+      <div className="login-flourish login-flourish-br" />
     </main>
   );
 }
