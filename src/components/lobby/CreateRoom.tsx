@@ -51,15 +51,15 @@ export function CreateRoom({ selectedDeckId, onRoomCreated, disabled }: CreateRo
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Create Room</h2>
+    <div className="grimoire-card rounded-xl p-6">
+      <h2 className="text-xl font-semibold mb-2 text-amber-100">Summon Arena</h2>
 
-      <p className="text-gray-400 mb-4">
-        Create a new game room and invite a friend to play.
+      <p className="text-gray-400 mb-5 text-sm">
+        Open a portal to a new battlefield and summon an ally to join you.
       </p>
 
       {error && (
-        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-2 rounded text-sm mb-4">
+        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm mb-4 backdrop-blur-sm">
           {error}
         </div>
       )}
@@ -67,9 +67,9 @@ export function CreateRoom({ selectedDeckId, onRoomCreated, disabled }: CreateRo
       <button
         onClick={handleCreate}
         disabled={disabled || loading}
-        className="w-full py-3 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded font-medium"
+        className="btn-magical w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed rounded-lg font-medium shadow-lg shadow-green-900/30 disabled:shadow-none transition-all"
       >
-        {loading ? 'Creating...' : disabled ? 'Select a deck first' : 'Create Room'}
+        {loading ? 'Opening portal...' : disabled ? 'Choose a grimoire first' : 'Open Portal'}
       </button>
     </div>
   );

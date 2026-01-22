@@ -79,26 +79,31 @@ export default function LobbyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="summoners-hall min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-amber-500"></div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="summoners-hall min-h-screen p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <header className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">ManaRoom</h1>
+        <header className="flex justify-between items-center border-b border-gray-800 pb-6">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent">
+              Summoner&apos;s Hall
+            </h1>
+            <p className="text-gray-500 text-sm mt-1">Prepare your deck and enter battle</p>
+          </div>
           {user ? (
             <div className="flex items-center gap-4">
-              <span className="text-gray-400">
-                Welcome, {user.displayName}
+              <span className="text-amber-200/80">
+                Welcome, <span className="font-medium text-amber-100">{user.displayName}</span>
               </span>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm bg-gray-800 hover:bg-gray-700 rounded"
+                className="px-4 py-2 text-sm bg-gray-800/80 hover:bg-gray-700/80 rounded-lg border border-gray-700 transition-colors"
               >
                 Logout
               </button>
@@ -106,7 +111,7 @@ export default function LobbyPage() {
           ) : (
             <button
               onClick={() => router.push('/')}
-              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 rounded"
+              className="btn-magical px-5 py-2.5 text-sm bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-lg font-medium shadow-lg shadow-purple-900/30 transition-all"
             >
               Sign In
             </button>
@@ -116,12 +121,12 @@ export default function LobbyPage() {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Left column: Decks */}
           <div className="space-y-6">
-            <div className="bg-gray-900 rounded-lg p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Your Decks</h2>
+            <div className="grimoire-card rounded-xl p-6">
+              <div className="flex justify-between items-center mb-5">
+                <h2 className="text-xl font-semibold text-amber-100">Your Grimoires</h2>
                 <button
                   onClick={() => setShowImporter(true)}
-                  className="px-4 py-2 text-sm bg-green-600 hover:bg-green-500 rounded"
+                  className="btn-magical px-4 py-2 text-sm bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-lg font-medium shadow-lg shadow-amber-900/20 transition-all"
                 >
                   Import Deck
                 </button>
@@ -138,9 +143,10 @@ export default function LobbyPage() {
                   }}
                 />
               ) : (
-                <p className="text-gray-500 text-center py-8">
-                  No decks yet. Import a deck from Moxfield to get started.
-                </p>
+                <div className="text-center py-10 border border-dashed border-gray-700 rounded-lg">
+                  <p className="text-gray-500">No grimoires yet.</p>
+                  <p className="text-gray-600 text-sm mt-1">Import a deck from Moxfield to begin.</p>
+                </div>
               )}
             </div>
           </div>
@@ -162,13 +168,13 @@ export default function LobbyPage() {
 
         {/* Deck importer modal */}
         {showImporter && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Import Deck</h2>
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="grimoire-card rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-amber-900/30">
+              <div className="flex justify-between items-center mb-5">
+                <h2 className="text-xl font-semibold text-amber-100">Inscribe New Grimoire</h2>
                 <button
                   onClick={() => setShowImporter(false)}
-                  className="text-gray-400 hover:text-white"
+                  className="text-gray-400 hover:text-white text-2xl leading-none"
                 >
                   &times;
                 </button>

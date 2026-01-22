@@ -32,25 +32,27 @@ export function DeckList({ decks, selectedId, onSelect, onDelete }: DeckListProp
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {decks.map((deck) => (
         <div
           key={deck.id}
           onClick={() => onSelect(deck.id)}
-          className={`p-4 rounded-lg cursor-pointer transition-colors ${
+          className={`p-4 rounded-lg cursor-pointer transition-all duration-200 ${
             selectedId === deck.id
-              ? 'bg-blue-900/50 border border-blue-500'
-              : 'bg-gray-800 hover:bg-gray-750 border border-transparent'
+              ? 'bg-amber-900/30 border border-amber-500/50 shadow-lg shadow-amber-900/20'
+              : 'bg-gray-800/50 hover:bg-gray-800/80 border border-gray-700/50 hover:border-gray-600'
           }`}
         >
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="font-medium">{deck.name}</h3>
-              <p className="text-sm text-gray-400">{deck.commander}</p>
+              <h3 className={`font-medium ${selectedId === deck.id ? 'text-amber-100' : 'text-gray-200'}`}>
+                {deck.name}
+              </h3>
+              <p className="text-sm text-gray-400 mt-0.5">{deck.commander}</p>
             </div>
             <button
               onClick={(e) => handleDelete(e, deck.id)}
-              className="text-gray-500 hover:text-red-400 p-1"
+              className="text-gray-500 hover:text-red-400 p-1.5 hover:bg-red-900/20 rounded transition-colors"
               title="Delete deck"
             >
               <svg

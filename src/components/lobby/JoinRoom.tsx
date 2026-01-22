@@ -47,20 +47,20 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Join Room</h2>
+    <div className="grimoire-card rounded-xl p-6">
+      <h2 className="text-xl font-semibold mb-2 text-amber-100">Enter Portal</h2>
 
-      <p className="text-gray-400 mb-4">
-        Enter a room code to join an existing game.
+      <p className="text-gray-400 mb-5 text-sm">
+        Speak the arcane code to enter an existing battlefield.
       </p>
 
       {error && (
-        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-2 rounded text-sm mb-4">
+        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm mb-4 backdrop-blur-sm">
           {error}
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <input
           type="text"
           value={roomKey}
@@ -69,16 +69,16 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
             setError(null);
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Enter room code"
+          placeholder="PORTAL CODE"
           maxLength={6}
-          className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 font-mono text-lg tracking-wider uppercase"
+          className="flex-1 px-4 py-3.5 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 font-mono text-lg tracking-widest uppercase text-center transition-all"
         />
         <button
           onClick={handleJoin}
           disabled={!selectedDeckId}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded font-medium"
+          className="btn-magical px-7 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed rounded-lg font-medium shadow-lg shadow-purple-900/30 disabled:shadow-none transition-all"
         >
-          Join
+          Enter
         </button>
       </div>
     </div>
