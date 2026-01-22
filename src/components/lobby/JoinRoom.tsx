@@ -14,12 +14,12 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
 
   const handleJoin = async () => {
     if (!roomKey.trim()) {
-      setError('Please enter a room code');
+      setError('Enter a room code');
       return;
     }
 
     if (!selectedDeckId) {
-      setError('Please select a deck first');
+      setError('Select a grimoire first');
       return;
     }
 
@@ -44,7 +44,7 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
     // Wait for door animation then navigate
     setTimeout(() => {
       onJoin(roomKey.toUpperCase().trim());
-    }, 1200);
+    }, 1500);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -53,62 +53,88 @@ export function JoinRoom({ selectedDeckId, onJoin }: JoinRoomProps) {
     }
   };
 
+  const hasSelectedDeck = !!selectedDeckId;
+
   return (
-    <div className="arcane-door-container rounded-xl p-6">
-      <h2 className="text-xl font-semibold mb-2 text-center text-amber-100 relative z-10">
-        The Sealed Gate
-      </h2>
+    <div className={`study-gate ${isUnlocking ? 'gate-opening' : ''} ${hasSelectedDeck ? 'gate-ready' : ''}`}>
+      {/* Stone archway frame */}
+      <div className="gate-arch">
+        {/* Rune carvings on arch */}
+        <div className="arch-runes arch-runes-left">
+          <span>✦</span>
+          <span>◈</span>
+          <span>✧</span>
+        </div>
+        <div className="arch-runes arch-runes-right">
+          <span>✧</span>
+          <span>◈</span>
+          <span>✦</span>
+        </div>
 
-      <p className="text-gray-400 mb-4 text-sm text-center relative z-10">
-        Speak the arcane code to unseal the passage
-      </p>
+        {/* Portal inside arch */}
+        <div className="gate-portal">
+          <div className="portal-mist" />
+          <div className="portal-swirl" />
+          <div className="portal-glow" />
 
-      {/* Door visualization */}
-      <div className="flex justify-center mb-5 relative z-10">
-        <div className={`arcane-door-frame ${isUnlocking ? 'unlocking' : ''}`}>
-          {/* Portal behind door */}
-          <div className="door-portal" />
-
-          {/* Door leaves */}
-          <div className="door-leaf door-leaf-left" />
-          <div className="door-leaf door-leaf-right" />
-
-          {/* Lock */}
-          <div className={`door-lock ${isUnlocking ? 'unlocked' : ''}`}>
-            <div className="lock-shackle" />
-            <div className="lock-body" />
+          {/* Sparkles emanating from portal */}
+          <div className="portal-sparkles">
+            <div className="sparkle sparkle-1" />
+            <div className="sparkle sparkle-2" />
+            <div className="sparkle sparkle-3" />
+            <div className="sparkle sparkle-4" />
+            <div className="sparkle sparkle-5" />
+            <div className="sparkle sparkle-6" />
+            <div className="sparkle sparkle-7" />
+            <div className="sparkle sparkle-8" />
+            <div className="sparkle sparkle-9" />
+            <div className="sparkle sparkle-10" />
+            {/* Extra sparkles shown on hover */}
+            <div className="sparkle sparkle-11" />
+            <div className="sparkle sparkle-12" />
+            <div className="sparkle sparkle-13" />
+            <div className="sparkle sparkle-14" />
+            <div className="sparkle sparkle-15" />
           </div>
+        </div>
+
+        {/* Gate doors */}
+        <div className="gate-doors">
+          <div className="gate-door gate-door-left" />
+          <div className="gate-door gate-door-right" />
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm mb-4 backdrop-blur-sm text-center relative z-10">
-          {error}
-        </div>
-      )}
+      {/* Input area below archway */}
+      <div className="gate-controls">
+        <p className="gate-label">Enter Room Code</p>
 
-      {/* Code input and unlock button */}
-      <div className="flex gap-3 relative z-10">
-        <input
-          type="text"
-          value={roomKey}
-          onChange={(e) => {
-            setRoomKey(e.target.value.toUpperCase());
-            setError(null);
-          }}
-          onKeyDown={handleKeyDown}
-          placeholder="RUNE CODE"
-          maxLength={6}
-          disabled={isUnlocking}
-          className="rune-code-input flex-1 px-4 py-3.5 rounded-lg focus:outline-none font-mono text-lg tracking-widest uppercase text-center transition-all disabled:opacity-50"
-        />
-        <button
-          onClick={handleJoin}
-          disabled={!selectedDeckId || isUnlocking}
-          className="unlock-btn px-6 py-3.5 rounded-lg text-sm"
-        >
-          {isUnlocking ? '✦' : 'Unlock'}
-        </button>
+        {error && (
+          <p className="gate-error">{error}</p>
+        )}
+
+        <div className="gate-input-group">
+          <input
+            type="text"
+            value={roomKey}
+            onChange={(e) => {
+              setRoomKey(e.target.value.toUpperCase());
+              setError(null);
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="ROOM CODE"
+            maxLength={6}
+            disabled={isUnlocking}
+            className="gate-input"
+          />
+          <button
+            onClick={handleJoin}
+            disabled={!selectedDeckId || isUnlocking}
+            className="gate-enter-btn"
+          >
+            {isUnlocking ? '...' : 'Enter'}
+          </button>
+        </div>
       </div>
     </div>
   );

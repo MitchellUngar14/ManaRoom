@@ -30,7 +30,29 @@ export default function RoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(true);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  // Fullscreen toggle
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error('Fullscreen toggle failed:', error);
+    }
+  };
 
   // Use actual room key from store, falling back to URL param
   const displayRoomKey = actualRoomKey || roomKey;
@@ -179,7 +201,24 @@ export default function RoomPage() {
             <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
           </div>
           <LifeCounter />
-          <GameControls />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-gray-400 hover:text-gray-200 transition-colors"
+              title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v2a1 1 0 01-2 0V5a3 3 0 013-3h2a1 1 0 010 2H5zm10 0a1 1 0 011-1h2a3 3 0 013 3v2a1 1 0 01-2 0V5a1 1 0 00-1-1h-2a1 1 0 010-2zM5 16a1 1 0 001 1h2a1 1 0 010 2H5a3 3 0 01-3-3v-2a1 1 0 012 0v2zm12 0a1 1 0 01-1 1h-2a1 1 0 010 2h2a3 3 0 003-3v-2a1 1 0 00-2 0v2z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H5v3a1 1 0 01-2 0V4zm12 0a1 1 0 011 1v3a1 1 0 01-2 0V5h-3a1 1 0 010-2h4zM3 16a1 1 0 011-1h3a1 1 0 010 2H5v-3a1 1 0 00-2 0v4zm12 0a1 1 0 01-1 1h-3a1 1 0 010-2h3v-3a1 1 0 012 0v4z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+            <GameControls />
+          </div>
         </header>
       </div>
 

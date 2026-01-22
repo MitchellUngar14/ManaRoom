@@ -51,42 +51,47 @@ export function CreateRoom({ selectedDeckId, onRoomCreated, disabled }: CreateRo
   };
 
   return (
-    <div className="summoning-portal rounded-xl p-6">
-      {/* Rune decorations */}
-      <div className="portal-runes top-3 left-4">✦ ◆ ✦</div>
-      <div className="portal-runes top-3 right-4">✦ ◆ ✦</div>
-
-      <h2 className="text-xl font-semibold mb-2 text-center text-purple-200">
-        Summon Arena
-      </h2>
-
-      <p className="text-gray-400 mb-6 text-sm text-center">
-        Step through the portal to create a new battlefield
-      </p>
-
-      {/* Portal visualization */}
-      <div className="flex justify-center mb-6">
-        <div className={`portal-ring ${disabled ? 'opacity-40' : ''}`}>
-          <div className="portal-vortex" />
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm mb-4 backdrop-blur-sm text-center">
-          {error}
-        </div>
-      )}
-
+    <div className="mystical-orb-container">
+      {/* The mystical blue orb */}
       <button
         onClick={handleCreate}
         disabled={disabled || loading}
-        className="portal-enter-btn w-full py-3.5 rounded-lg text-sm"
+        className={`mystical-orb ${disabled ? 'orb-dormant' : 'orb-active'} ${loading ? 'orb-activating' : ''}`}
       >
-        {loading ? '✦ Opening Portal... ✦' : disabled ? 'Select a Grimoire' : '✦ Enter the Portal ✦'}
+        {/* Orb inner glow layers */}
+        <div className="orb-core" />
+        <div className="orb-swirl" />
+        <div className="orb-highlight" />
+
+        {/* Floating runes around orb */}
+        <div className="orb-runes">
+          <span className="rune rune-1">✦</span>
+          <span className="rune rune-2">◇</span>
+          <span className="rune rune-3">✧</span>
+          <span className="rune rune-4">◆</span>
+        </div>
       </button>
 
-      {/* Bottom runes */}
-      <div className="portal-runes bottom-3 left-1/2 -translate-x-1/2">◈ ◇ ◈</div>
+      {/* Orb stand/base */}
+      <div className="orb-stand">
+        <div className="stand-prongs" />
+      </div>
+
+      {/* Label and status */}
+      <div className="orb-label">
+        <p className="text-sm font-medium text-blue-200/90">
+          {loading ? 'Opening Portal...' : disabled ? 'Select a Grimoire' : 'Summon Arena'}
+        </p>
+        <p className="text-xs text-blue-300/50 mt-1">
+          {disabled ? 'Choose your deck to activate' : 'Touch the orb to create a room'}
+        </p>
+      </div>
+
+      {error && (
+        <div className="orb-error">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

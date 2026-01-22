@@ -26,11 +26,31 @@ export default function LobbyPage() {
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [showImporter, setShowImporter] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     checkAuth();
     loadDecks();
+
+    // Listen for fullscreen changes (e.g., user presses Escape)
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error('Fullscreen toggle failed:', error);
+    }
+  };
 
   const checkAuth = async () => {
     try {
@@ -79,113 +99,196 @@ export default function LobbyPage() {
 
   if (loading) {
     return (
-      <div className="summoners-hall min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-amber-500"></div>
+      <div className="study-room">
+        <div className="study-room-interior">
+          <div className="flex items-center justify-center h-full">
+            <div className="study-orb-loader" />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <main className="summoners-hall min-h-screen p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <header className="flex justify-between items-center border-b border-gray-800 pb-6">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent">
-              Summoner&apos;s Hall
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">Prepare your deck and enter battle</p>
-          </div>
-          {user ? (
-            <div className="flex items-center gap-4">
-              <span className="text-amber-200/80">
-                Welcome, <span className="font-medium text-amber-100">{user.displayName}</span>
-              </span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm bg-gray-800/80 hover:bg-gray-700/80 rounded-lg border border-gray-700 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
+    <main className="study-room">
+      {/* Room interior with walls and floor */}
+      <div className="study-room-interior">
+        {/* Back wall */}
+        <div className="study-back-wall" />
+
+        {/* Archway/Door - centered on screen, coming from floor */}
+        <div className="study-exit-archway">
+          <JoinRoom
+            selectedDeckId={selectedDeckId}
+            onJoin={handleJoinRoom}
+          />
+        </div>
+
+        {/* Bookshelf on the left side */}
+        <div className="study-bookshelf-tall">
+          {/* Header bar */}
+          <div className="bookshelf-title-bar">
+            <h2 className="bookshelf-title">{user ? `${user.displayName}'s` : ''} Grimoires</h2>
             <button
-              onClick={() => router.push('/')}
-              className="btn-magical px-5 py-2.5 text-sm bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-lg font-medium shadow-lg shadow-purple-900/30 transition-all"
+              onClick={() => setShowImporter(true)}
+              className="bookshelf-add-btn"
+              title="Add Grimoire"
             >
-              Sign In
+              +
             </button>
-          )}
-        </header>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Left column: Bookshelf with Grimoires */}
-          <div className="space-y-4">
-            {/* Bookshelf header */}
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-serif font-semibold etched-text">Your Grimoires</h2>
-              <button
-                onClick={() => setShowImporter(true)}
-                className="btn-magical px-4 py-2 text-sm bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-lg font-medium shadow-lg shadow-amber-900/20 transition-all"
-              >
-                + Add Grimoire
-              </button>
-            </div>
-
-            {/* Bookshelf */}
-            <div className="bookshelf rounded-lg p-4 pt-5 pb-6 min-h-[200px]">
-              {decks.length > 0 ? (
-                <DeckList
-                  decks={decks}
-                  selectedId={selectedDeckId}
-                  onSelect={setSelectedDeckId}
-                  onDelete={(id) => {
-                    setDecks(decks.filter((d) => d.id !== id));
-                    if (selectedDeckId === id) setSelectedDeckId(null);
-                  }}
-                />
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center py-8">
-                  <p className="etched-text-secondary text-sm">The shelf is empty.</p>
-                  <p className="etched-text-secondary text-xs mt-1 opacity-60">Import a grimoire from Moxfield to begin.</p>
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Right column: Room actions */}
-          <div className="space-y-6">
-            <CreateRoom
-              selectedDeckId={selectedDeckId}
-              onRoomCreated={handleRoomCreated}
-              disabled={!selectedDeckId}
-            />
+          {/* Scrollable book area */}
+          <div className="bookshelf-scroll-area">
+            {decks.length > 0 ? (
+              <DeckList
+                decks={decks}
+                selectedId={selectedDeckId}
+                onSelect={setSelectedDeckId}
+                onDelete={(id) => {
+                  setDecks(decks.filter((d) => d.id !== id));
+                  if (selectedDeckId === id) setSelectedDeckId(null);
+                }}
+              />
+            ) : (
+              <div className="bookshelf-empty">
+                <p className="text-amber-200/40 text-sm">No grimoires</p>
+                <button
+                  onClick={() => setShowImporter(true)}
+                  className="text-amber-400/60 hover:text-amber-300 text-xs mt-2 underline"
+                >
+                  Import from Moxfield
+                </button>
+              </div>
+            )}
+          </div>
 
-            <JoinRoom
-              selectedDeckId={selectedDeckId}
-              onJoin={handleJoinRoom}
-            />
+          {/* Decorative shelf bottom */}
+          <div className="bookshelf-base" />
+        </div>
+
+        {/* Right wall with candles */}
+        <div className="study-right-wall">
+          <div className="wall-sconce">
+            <div className="sconce-candle" />
+            <div className="sconce-bracket" />
+          </div>
+          <div className="wall-sconce wall-sconce-2">
+            <div className="sconce-candle" />
+            <div className="sconce-bracket" />
           </div>
         </div>
 
-        {/* Deck importer modal */}
-        {showImporter && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="grimoire-card rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-amber-900/30">
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="text-xl font-semibold text-amber-100">Inscribe New Grimoire</h2>
-                <button
-                  onClick={() => setShowImporter(false)}
-                  className="text-gray-400 hover:text-white text-2xl leading-none"
-                >
-                  &times;
-                </button>
+        {/* Floor */}
+        <div className="study-floor">
+          {/* Desk/table in center of room */}
+          <div className="study-desk-area">
+            <div className="study-table">
+              {/* The mystical orb on the table */}
+              <div className="table-orb">
+                <CreateRoom
+                  selectedDeckId={selectedDeckId}
+                  onRoomCreated={handleRoomCreated}
+                  disabled={!selectedDeckId}
+                />
               </div>
-              <DeckImporter onSuccess={handleDeckImported} />
+
+              {/* Open grimoire showing selected deck */}
+              {selectedDeckId && (() => {
+                const selectedDeck = decks.find(d => d.id === selectedDeckId);
+                const commanderImageUrl = selectedDeck?.commander
+                  ? `https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=${encodeURIComponent(selectedDeck.commander)}`
+                  : null;
+                return (
+                  <div className="table-open-book">
+                    {/* Left page - Commander card art */}
+                    <div className="book-page-left">
+                      <div className="book-commander-art">
+                        {commanderImageUrl && (
+                          <img
+                            src={commanderImageUrl}
+                            alt={selectedDeck?.commander || 'Commander'}
+                            loading="eager"
+                          />
+                        )}
+                        <div className="book-commander-placeholder">⚔</div>
+                      </div>
+                    </div>
+                    {/* Right page - Deck name */}
+                    <div className="book-page-right">
+                      <p className="book-deck-name">{selectedDeck?.name}</p>
+                      <p className="book-commander-name">{selectedDeck?.commander}</p>
+                      <p className="book-deck-footer">✦ GRIMOIRE ✦</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Scattered papers */}
+              <div className="table-papers" />
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Header overlay */}
+        <header className="study-header">
+          <div>
+            <h1 className="text-xl font-bold text-amber-100/90">
+              Summoner&apos;s Study
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleFullscreen}
+              className="study-header-btn-icon"
+              title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v2a1 1 0 01-2 0V5a3 3 0 013-3h2a1 1 0 010 2H5zm10 0a1 1 0 011-1h2a3 3 0 013 3v2a1 1 0 01-2 0V5a1 1 0 00-1-1h-2a1 1 0 010-2zM5 16a1 1 0 001 1h2a1 1 0 010 2H5a3 3 0 01-3-3v-2a1 1 0 012 0v2zm12 0a1 1 0 01-1 1h-2a1 1 0 010 2h2a3 3 0 003-3v-2a1 1 0 00-2 0v2z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H5v3a1 1 0 01-2 0V4zm12 0a1 1 0 011 1v3a1 1 0 01-2 0V5h-3a1 1 0 010-2h4zM3 16a1 1 0 011-1h3a1 1 0 010 2H5v-3a1 1 0 00-2 0v4zm12 0a1 1 0 01-1 1h-3a1 1 0 010-2h3v-3a1 1 0 012 0v4z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="study-header-btn"
+              >
+                Leave Study
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push('/')}
+                className="study-header-btn study-header-btn-alt"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
+        </header>
       </div>
+
+      {/* Deck importer modal */}
+      {showImporter && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="study-modal rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-xl font-serif text-amber-100">Inscribe New Grimoire</h2>
+              <button
+                onClick={() => setShowImporter(false)}
+                className="text-amber-200/50 hover:text-amber-100 text-2xl leading-none transition-colors"
+              >
+                &times;
+              </button>
+            </div>
+            <DeckImporter onSuccess={handleDeckImported} />
+          </div>
+        </div>
+      )}
     </main>
   );
 }
