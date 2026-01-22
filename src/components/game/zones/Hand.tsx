@@ -20,25 +20,25 @@ export function Hand({ cards }: HandProps) {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="px-3 pt-1 shrink-0">
+    <div className="h-full relative overflow-visible">
+      {/* Header - positioned absolutely so it doesn't clip cards */}
+      <div className="absolute top-1 left-3 z-0">
         <span className="text-xs transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Hand ({cards.length})</span>
       </div>
 
       {/* Cards */}
-      <div className="flex-1 min-h-0 px-2 pb-1 overflow-x-auto overflow-y-hidden">
+      <div className="h-full px-4 py-3 overflow-x-auto overflow-y-visible">
         <div
-          className="h-full flex items-center gap-1"
+          className="h-full flex items-center gap-2"
           onPointerMove={handleContainerMouseMove}
         >
           {cards.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-gray-600 text-sm">
+            <div className="flex-1 flex items-center justify-center text-sm" style={{ color: 'var(--theme-text-muted)' }}>
               Your hand is empty
             </div>
           ) : (
             cards.map((card) => (
-              <div key={card.instanceId} className="w-28 shrink-0">
+              <div key={card.instanceId} className="w-28 shrink-0 hand-card-wrapper">
                 <Card card={card} zone="hand" />
               </div>
             ))

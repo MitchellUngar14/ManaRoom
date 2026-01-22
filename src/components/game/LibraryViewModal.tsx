@@ -41,7 +41,7 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          className="game-modal-overlay"
           onClick={onClose}
         >
           <motion.div
@@ -49,35 +49,41 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[85vh] flex flex-col"
+            className="game-modal w-full max-w-4xl max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-lg font-semibold text-white">
+            <div className="game-modal-header">
+              <h2 className="game-modal-title">
                 Library ({cards.length} cards)
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white text-2xl leading-none p-1"
+                className="game-modal-close"
               >
                 &times;
               </button>
             </div>
 
             {/* Search */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-4" style={{ borderBottom: '1px solid var(--theme-border)' }}>
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search library..."
-                  className="w-full px-4 py-2 pl-10 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 pl-10 rounded-lg focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--theme-bg-elevated)',
+                    border: '1px solid var(--theme-border)',
+                    color: 'var(--theme-text-primary)',
+                  }}
                   autoFocus
                 />
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--theme-text-muted)' }}
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
                   height="18"
@@ -94,23 +100,24 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                    style={{ color: 'var(--theme-text-muted)' }}
                   >
                     &times;
                   </button>
                 )}
               </div>
               {searchQuery && (
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm" style={{ color: 'var(--theme-text-muted)' }}>
                   Showing {filteredCards.length} of {cards.length} cards
                 </p>
               )}
             </div>
 
             {/* Card list */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="game-modal-body">
               {filteredCards.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
+                <div className="text-center py-8" style={{ color: 'var(--theme-text-muted)' }}>
                   {searchQuery ? 'No cards match your search' : 'Library is empty'}
                 </div>
               ) : (
@@ -122,15 +129,18 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                     return (
                       <div
                         key={card.instanceId}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800 transition-colors group"
+                        className="flex items-center gap-3 p-2 rounded-lg transition-colors group"
+                        style={{ backgroundColor: 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-bg-elevated)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
                         {/* Position number */}
-                        <span className="w-8 text-right text-sm text-gray-500 font-mono">
+                        <span className="w-8 text-right text-sm font-mono" style={{ color: 'var(--theme-text-muted)' }}>
                           {originalIndex + 1}.
                         </span>
 
                         {/* Card thumbnail */}
-                        <div className="relative w-10 h-14 rounded overflow-hidden bg-gray-700 shrink-0">
+                        <div className="relative w-10 h-14 rounded overflow-hidden shrink-0" style={{ backgroundColor: 'var(--theme-bg-tertiary)' }}>
                           {imageUrl ? (
                             <Image
                               src={imageUrl}
@@ -141,7 +151,7 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-[8px] text-gray-500 text-center px-1">
+                              <span className="text-[8px] text-center px-1" style={{ color: 'var(--theme-text-muted)' }}>
                                 {card.cardName}
                               </span>
                             </div>
@@ -149,13 +159,13 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                         </div>
 
                         {/* Card name */}
-                        <span className="flex-1 text-gray-200 group-hover:text-white transition-colors">
+                        <span className="flex-1 transition-colors" style={{ color: 'var(--theme-text-primary)' }}>
                           {card.cardName}
                         </span>
 
                         {/* Card type (if available) */}
                         {card.card?.typeLine && (
-                          <span className="text-xs text-gray-500 hidden sm:block mr-2">
+                          <span className="text-xs hidden sm:block mr-2" style={{ color: 'var(--theme-text-muted)' }}>
                             {card.card.typeLine}
                           </span>
                         )}
@@ -163,7 +173,7 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                         {/* Tutor to hand button */}
                         <button
                           onClick={() => handleTutorToHand(card)}
-                          className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="game-btn game-btn-small game-btn-accent opacity-0 group-hover:opacity-100 transition-opacity"
                           title="Add to hand"
                         >
                           To Hand
@@ -176,7 +186,7 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
             </div>
 
             {/* Footer hint */}
-            <div className="p-3 border-t border-gray-700 text-center text-xs text-gray-500">
+            <div className="p-3 text-center text-xs" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
               Top of library is position 1 · Hover over a card and click &quot;To Hand&quot; to tutor
             </div>
           </motion.div>

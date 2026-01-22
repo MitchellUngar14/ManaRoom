@@ -64,36 +64,37 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
   }, [setPreviewCard]);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-950">
+    <div className="h-screen flex flex-col theme-battlefield">
       {/* Header with opponent info */}
-      <header className="bg-gray-900 px-4 py-2 flex justify-between items-center shrink-0">
+      <header className="px-4 py-2 flex justify-between items-center shrink-0 border-b" style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center gap-4">
-          <h1 className="font-semibold text-lg">{opponent.displayName}&apos;s Battlefield</h1>
-          <span className="text-gray-500 text-sm">Room: {roomKey}</span>
+          <h1 className="font-semibold text-lg" style={{ color: 'var(--theme-text-primary)' }}>{opponent.displayName}&apos;s Battlefield</h1>
+          <span className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Room: {roomKey}</span>
         </div>
         <div className="flex items-center gap-4">
           {/* Zone counts */}
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-gray-400">
-              Hand: <span className="text-white font-medium">{opponent.zones.hand.length}</span>
+            <span style={{ color: 'var(--theme-text-secondary)' }}>
+              Hand: <span className="font-medium" style={{ color: 'var(--theme-text-primary)' }}>{opponent.zones.hand.length}</span>
             </span>
-            <span className="text-gray-400">
-              Library: <span className="text-white font-medium">{opponent.zones.library.length}</span>
+            <span style={{ color: 'var(--theme-text-secondary)' }}>
+              Library: <span className="font-medium" style={{ color: 'var(--theme-text-primary)' }}>{opponent.zones.library.length}</span>
             </span>
             <button
               onClick={() => setZonesModalOpen(true)}
-              className="text-blue-400 hover:text-blue-300 underline"
+              className="underline hover:opacity-80"
+              style={{ color: 'var(--theme-accent)' }}
             >
               View Zones
             </button>
           </div>
-          <span className="text-gray-600">|</span>
+          <span style={{ color: 'var(--theme-border)' }}>|</span>
           {/* Life total */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Life:</span>
-            <span className="text-2xl font-bold text-red-400">{opponent.life}</span>
+            <span className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>Life:</span>
+            <span className="text-2xl font-bold" style={{ color: 'var(--theme-accent)' }}>{opponent.life}</span>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
             {opponent.odeck.commander}
           </div>
         </div>
@@ -103,24 +104,24 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
       <div className="absolute top-16 right-4 z-20 flex flex-col gap-1">
         <button
           onClick={() => setZoom(z => Math.min(z + 0.25, 3))}
-          className="bg-gray-800/90 hover:bg-gray-700 w-8 h-8 rounded flex items-center justify-center text-gray-300 text-lg"
+          className="game-btn w-8 h-8 rounded flex items-center justify-center text-lg"
           title="Zoom in"
         >
           +
         </button>
-        <div className="bg-gray-800/90 px-2 py-1 rounded text-center text-xs text-gray-400">
+        <div className="px-2 py-1 rounded text-center text-xs" style={{ backgroundColor: 'var(--theme-bg-elevated)', color: 'var(--theme-text-secondary)' }}>
           {Math.round(zoom * 100)}%
         </div>
         <button
           onClick={() => setZoom(z => Math.max(z - 0.25, 0.5))}
-          className="bg-gray-800/90 hover:bg-gray-700 w-8 h-8 rounded flex items-center justify-center text-gray-300 text-lg"
+          className="game-btn w-8 h-8 rounded flex items-center justify-center text-lg"
           title="Zoom out"
         >
           −
         </button>
         <button
           onClick={() => setZoom(1)}
-          className="bg-gray-800/90 hover:bg-gray-700 w-8 h-8 rounded flex items-center justify-center text-gray-300 text-xs mt-1"
+          className="game-btn w-8 h-8 rounded flex items-center justify-center text-xs mt-1"
           title="Reset zoom"
         >
           1:1
@@ -128,13 +129,18 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
       </div>
 
       {/* Battlefield container - fills available space with zoom */}
-      <div className="flex-1 overflow-auto">
+      <div className={`flex-1 ${zoom >= 1 ? 'overflow-auto' : 'overflow-hidden flex items-center justify-center'}`}>
         <div
-          style={{
+          style={zoom >= 1 ? {
             width: `${zoom * 100}%`,
             height: `${zoom * 100}%`,
             minWidth: '100%',
             minHeight: '100%',
+          } : {
+            width: '100%',
+            height: '100%',
+            transform: `scale(${zoom})`,
+            transformOrigin: 'center',
           }}
         >
           <Battlefield
@@ -144,6 +150,7 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
             allowTakeControl={true}
             readOnly={false}
             largeCards={true}
+            showEntryEffects={true}
           />
         </div>
       </div>
@@ -151,40 +158,42 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
       {/* Zones modal */}
       {zonesModalOpen && (
         <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          className="game-modal-overlay"
           onClick={() => setZonesModalOpen(false)}
         >
           <div
-            className="bg-gray-900 rounded-lg p-6 max-w-lg w-full"
+            className="game-modal max-w-lg w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">{opponent.displayName}&apos;s Zones</h3>
+            <div className="game-modal-header">
+              <h3 className="game-modal-title">{opponent.displayName}&apos;s Zones</h3>
               <button
                 onClick={() => setZonesModalOpen(false)}
-                className="text-gray-400 hover:text-white text-2xl leading-none"
+                className="game-modal-close"
               >
                 &times;
               </button>
             </div>
 
-            <div className="flex justify-center gap-2">
-              <div className="h-32">
-                <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
+            <div className="game-modal-body">
+              <div className="flex justify-center gap-2">
+                <div className="h-32">
+                  <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
+                </div>
+                <div className="h-32">
+                  <Library cards={opponent.zones.library} isOpponent={true} />
+                </div>
+                <div className="h-32">
+                  <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
+                </div>
+                <div className="h-32">
+                  <Exile cards={opponent.zones.exile} isOpponent={true} />
+                </div>
               </div>
-              <div className="h-32">
-                <Library cards={opponent.zones.library} isOpponent={true} />
-              </div>
-              <div className="h-32">
-                <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
-              </div>
-              <div className="h-32">
-                <Exile cards={opponent.zones.exile} isOpponent={true} />
-              </div>
-            </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-700 text-center text-sm text-gray-400">
-              Hand: {opponent.zones.hand.length} cards
+              <div className="mt-4 pt-4 text-center text-sm" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+                Hand: {opponent.zones.hand.length} cards
+              </div>
             </div>
           </div>
         </div>

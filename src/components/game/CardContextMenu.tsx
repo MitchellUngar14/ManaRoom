@@ -247,7 +247,7 @@ export function CardContextMenu({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
+          transition={{ duration: 0.08 }}
           className="fixed"
           style={{
             left: adjustedPosition.x,
@@ -260,8 +260,9 @@ export function CardContextMenu({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            transition={{ duration: 0.1 }}
-            className="absolute w-3 h-3 bg-gray-600 rounded-full -translate-x-1/2 -translate-y-1/2"
+            transition={{ duration: 0.05 }}
+            className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
+            style={{ backgroundColor: 'var(--theme-border)' }}
           />
 
           {/* Radial menu items */}
@@ -272,32 +273,55 @@ export function CardContextMenu({
             return (
               <motion.button
                 key={index}
-                initial={{ scale: 0, x: 0, y: 0, opacity: 0 }}
+                initial={{ scale: 0.5, x: pos.x * 0.3, y: pos.y * 0.3, opacity: 0 }}
                 animate={{
                   scale: 1,
                   x: pos.x,
                   y: pos.y,
                   opacity: 1
                 }}
-                exit={{ scale: 0, x: 0, y: 0, opacity: 0 }}
+                exit={{ scale: 0.5, opacity: 0 }}
                 transition={{
-                  duration: 0.2,
-                  delay: index * 0.03,
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 20
+                  duration: 0.12,
+                  ease: 'easeOut'
                 }}
                 onClick={() => {
                   option.onClick();
                   onClose();
                 }}
-                className="absolute w-11 h-11 -translate-x-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-gray-500 rounded-full flex items-center justify-center text-gray-200 hover:text-white transition-colors shadow-lg group"
+                className="absolute w-11 h-11 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center transition-all shadow-lg group"
+                style={{
+                  backgroundColor: 'var(--theme-bg-elevated)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: 'var(--theme-border)',
+                  color: 'var(--theme-text-secondary)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--theme-bg-tertiary)';
+                  e.currentTarget.style.borderColor = 'var(--theme-accent-muted)';
+                  e.currentTarget.style.color = 'var(--theme-accent)';
+                  e.currentTarget.style.boxShadow = '0 0 16px var(--theme-accent-glow)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--theme-bg-elevated)';
+                  e.currentTarget.style.borderColor = 'var(--theme-border)';
+                  e.currentTarget.style.color = 'var(--theme-text-secondary)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                }}
                 title={option.label}
               >
                 <IconComponent />
 
                 {/* Tooltip */}
-                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-xs text-gray-300 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <span
+                  className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                  style={{
+                    backgroundColor: 'var(--theme-bg-secondary)',
+                    color: 'var(--theme-text-secondary)',
+                    border: '1px solid var(--theme-border)',
+                  }}
+                >
                   {option.label}
                 </span>
               </motion.button>

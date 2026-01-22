@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DeckImporter } from '@/components/deck/DeckImporter';
 import { DeckList } from '@/components/deck/DeckList';
+import { DeckViewer } from '@/components/deck/DeckViewer';
 import { CreateRoom } from '@/components/lobby/CreateRoom';
 import { JoinRoom } from '@/components/lobby/JoinRoom';
 
@@ -25,6 +26,7 @@ export default function LobbyPage() {
   const [decks, setDecks] = useState<SavedDeck[]>([]);
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [showImporter, setShowImporter] = useState(false);
+  const [showDeckViewer, setShowDeckViewer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -111,20 +113,12 @@ export default function LobbyPage() {
 
   return (
     <main className="study-room">
-      {/* Room interior with walls and floor */}
+      {/* Room interior - now CSS grid layout */}
       <div className="study-room-interior">
-        {/* Back wall */}
+        {/* Ambient background */}
         <div className="study-back-wall" />
 
-        {/* Archway/Door - centered on screen, coming from floor */}
-        <div className="study-exit-archway">
-          <JoinRoom
-            selectedDeckId={selectedDeckId}
-            onJoin={handleJoinRoom}
-          />
-        </div>
-
-        {/* Bookshelf on the left side */}
+        {/* Grimoire Library Panel - Left Sidebar */}
         <div className="study-bookshelf-tall">
           {/* Header bar */}
           <div className="bookshelf-title-bar">
@@ -152,90 +146,23 @@ export default function LobbyPage() {
               />
             ) : (
               <div className="bookshelf-empty">
-                <p className="text-amber-200/40 text-sm">No grimoires</p>
+                <p className="text-sm" style={{ color: 'var(--sanctum-text-muted)' }}>No grimoires yet</p>
                 <button
                   onClick={() => setShowImporter(true)}
-                  className="text-amber-400/60 hover:text-amber-300 text-xs mt-2 underline"
+                  className="text-xs mt-3 underline transition-colors"
+                  style={{ color: 'var(--sanctum-gold-muted)' }}
                 >
                   Import from Moxfield
                 </button>
               </div>
             )}
           </div>
-
-          {/* Decorative shelf bottom */}
-          <div className="bookshelf-base" />
         </div>
 
-        {/* Right wall with candles */}
-        <div className="study-right-wall">
-          <div className="wall-sconce">
-            <div className="sconce-candle" />
-            <div className="sconce-bracket" />
-          </div>
-          <div className="wall-sconce wall-sconce-2">
-            <div className="sconce-candle" />
-            <div className="sconce-bracket" />
-          </div>
-        </div>
-
-        {/* Floor */}
-        <div className="study-floor">
-          {/* Desk/table in center of room */}
-          <div className="study-desk-area">
-            <div className="study-table">
-              {/* The mystical orb on the table */}
-              <div className="table-orb">
-                <CreateRoom
-                  selectedDeckId={selectedDeckId}
-                  onRoomCreated={handleRoomCreated}
-                  disabled={!selectedDeckId}
-                />
-              </div>
-
-              {/* Open grimoire showing selected deck */}
-              {selectedDeckId && (() => {
-                const selectedDeck = decks.find(d => d.id === selectedDeckId);
-                const commanderImageUrl = selectedDeck?.commander
-                  ? `https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=${encodeURIComponent(selectedDeck.commander)}`
-                  : null;
-                return (
-                  <div className="table-open-book">
-                    {/* Left page - Commander card art */}
-                    <div className="book-page-left">
-                      <div className="book-commander-art">
-                        {commanderImageUrl && (
-                          <img
-                            src={commanderImageUrl}
-                            alt={selectedDeck?.commander || 'Commander'}
-                            loading="eager"
-                          />
-                        )}
-                        <div className="book-commander-placeholder">⚔</div>
-                      </div>
-                    </div>
-                    {/* Right page - Deck name */}
-                    <div className="book-page-right">
-                      <p className="book-deck-name">{selectedDeck?.name}</p>
-                      <p className="book-commander-name">{selectedDeck?.commander}</p>
-                      <p className="book-deck-footer">✦ GRIMOIRE ✦</p>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Scattered papers */}
-              <div className="table-papers" />
-            </div>
-          </div>
-        </div>
-
-        {/* Header overlay */}
+        {/* Header */}
         <header className="study-header">
           <div>
-            <h1 className="text-xl font-bold text-amber-100/90">
-              Summoner&apos;s Study
-            </h1>
+            <h1>Arcanist&apos;s Sanctum</h1>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -258,7 +185,7 @@ export default function LobbyPage() {
                 onClick={handleLogout}
                 className="study-header-btn"
               >
-                Leave Study
+                Leave
               </button>
             ) : (
               <button
@@ -270,6 +197,64 @@ export default function LobbyPage() {
             )}
           </div>
         </header>
+
+        {/* Main content area */}
+        <div className="study-desk-area">
+          {/* Selected deck preview */}
+          {selectedDeckId && (() => {
+            const selectedDeck = decks.find(d => d.id === selectedDeckId);
+            const commanderImageUrl = selectedDeck?.commander
+              ? `https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=${encodeURIComponent(selectedDeck.commander)}`
+              : null;
+            return (
+              <div
+                className="table-open-book"
+                onClick={() => setShowDeckViewer(true)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && setShowDeckViewer(true)}
+              >
+                {/* Commander card art */}
+                <div className="book-page-left">
+                  <div className="book-commander-art">
+                    {commanderImageUrl && (
+                      <img
+                        src={commanderImageUrl}
+                        alt={selectedDeck?.commander || 'Commander'}
+                        loading="eager"
+                      />
+                    )}
+                    <div className="book-commander-placeholder">⚔</div>
+                  </div>
+                </div>
+                {/* Deck info */}
+                <div className="book-page-right">
+                  <p className="book-deck-name">{selectedDeck?.name}</p>
+                  <p className="book-commander-name">{selectedDeck?.commander}</p>
+                  <p className="book-deck-footer">Selected Grimoire</p>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Action buttons row */}
+          <div className="flex flex-col sm:flex-row items-center gap-8">
+            {/* Create Room */}
+            <div className="table-orb">
+              <CreateRoom
+                selectedDeckId={selectedDeckId}
+                onRoomCreated={handleRoomCreated}
+                disabled={!selectedDeckId}
+              />
+            </div>
+
+            {/* Join Room */}
+            <JoinRoom
+              selectedDeckId={selectedDeckId}
+              onJoin={handleJoinRoom}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Deck importer modal */}
@@ -277,10 +262,11 @@ export default function LobbyPage() {
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="study-modal rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl font-serif text-amber-100">Inscribe New Grimoire</h2>
+              <h2 className="text-xl font-serif" style={{ color: 'var(--sanctum-text-primary)' }}>Inscribe New Grimoire</h2>
               <button
                 onClick={() => setShowImporter(false)}
-                className="text-amber-200/50 hover:text-amber-100 text-2xl leading-none transition-colors"
+                className="text-2xl leading-none transition-colors"
+                style={{ color: 'var(--sanctum-text-muted)' }}
               >
                 &times;
               </button>
@@ -288,6 +274,14 @@ export default function LobbyPage() {
             <DeckImporter onSuccess={handleDeckImported} />
           </div>
         </div>
+      )}
+
+      {/* Deck viewer modal */}
+      {showDeckViewer && selectedDeckId && (
+        <DeckViewer
+          deckId={selectedDeckId}
+          onClose={() => setShowDeckViewer(false)}
+        />
       )}
     </main>
   );

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { GameCard, BoardCard, ZoneType } from '@/types';
 import { useGameStore } from '@/store/gameStore';
@@ -58,15 +59,23 @@ export function Card({
   const isHand = zone === 'hand';
   const isGraveyard = zone === 'graveyard';
   const isExile = zone === 'exile';
-  const showHoverEffects = isHand || isBattlefield;
+  // Don't show hover effects on drag overlay cards
+  const showHoverEffects = (isHand || isBattlefield) && !isDragOverlay;
   // Cards in graveyard/exile should not have their own context menu - the zone handles it
   const disableContextMenu = isGraveyard || isExile;
 
   const [isHovered, setIsHovered] = useState(false);
+  const [hoverRect, setHoverRect] = useState<DOMRect | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
     position: { x: number; y: number };
   }>({ isOpen: false, position: { x: 0, y: 0 } });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { attributes, listeners: dndListeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.instanceId,
@@ -75,13 +84,24 @@ export function Card({
     disabled: isOpponent || readOnly || isDragOverlay || isGraveyard || isExile,
   });
 
+  // Clear hover state when drag starts so portal doesn't show stale position
+  useEffect(() => {
+    if (isDragging) {
+      setIsHovered(false);
+      setHoverRect(null);
+    }
+  }, [isDragging]);
+
   // Merge our pointer handlers with dnd-kit's listeners
   const listeners = {
     ...dndListeners,
     onPointerMove: (e: React.PointerEvent) => {
-      setHoveredCard(card, zone);
-      if (showHoverEffects) {
-        setIsHovered(true);
+      // Don't update hover state during drag
+      if (!isDragging) {
+        setHoveredCard(card, zone);
+        if (showHoverEffects) {
+          setIsHovered(true);
+        }
       }
       dndListeners?.onPointerMove?.(e);
     },
@@ -200,21 +220,31 @@ export function Card({
   }
 
   const handlePointerEnter = useCallback(() => {
+    // Don't update hover state during drag
+    if (isDragging) return;
     setHoveredCard(card, zone);
     if (showHoverEffects) {
       setIsHovered(true);
+      // Capture the card's position for the portal
+      if (cardRef.current) {
+        setHoverRect(cardRef.current.getBoundingClientRect());
+      }
     }
-  }, [card, zone, showHoverEffects]);
+  }, [card, zone, showHoverEffects, isDragging]);
 
   const handlePointerLeave = useCallback(() => {
+    // Don't update hover state during drag
+    if (isDragging) return;
     clearHoveredCard(card);
     setIsHovered(false);
-  }, [card]);
+    setHoverRect(null);
+  }, [card, isDragging]);
 
   return (
     <>
       <div
-        className="h-full"
+        ref={cardRef}
+        className="h-full relative"
         onContextMenu={handleContextMenu}
         onPointerDown={handlePointerDown}
         onPointerEnter={handlePointerEnter}
@@ -225,12 +255,11 @@ export function Card({
           style={style}
           {...attributes}
           {...listeners}
-          className={`card-container card-sparkle-border relative cursor-pointer select-none ${isHovered && showHoverEffects ? 'sparkle-active' : ''} ${isDragging ? 'opacity-0' : ''}`}
+          className={`card-container relative cursor-pointer select-none ${isDragging ? 'opacity-0' : ''} ${isHovered && showHoverEffects && !isDragging && hoverRect ? 'opacity-0' : ''}`}
           animate={{
             rotate: isTapped ? 90 : 0,
-            scale: isHovered && showHoverEffects ? 1.08 : 1,
           }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
           onClick={handleClick}
           onContextMenu={handleContextMenu}
           onPointerEnter={handlePointerEnter}
@@ -247,8 +276,8 @@ export function Card({
               quality={90}
             />
           ) : (
-            <div className="w-full h-full bg-gray-700 rounded flex items-center justify-center p-1">
-              <span className="text-xs text-center text-gray-400 break-words">
+            <div className="w-full h-full rounded flex items-center justify-center p-1" style={{ backgroundColor: 'var(--theme-bg-tertiary)' }}>
+              <span className="text-xs text-center break-words" style={{ color: 'var(--theme-text-muted)' }}>
                 {card.cardName}
               </span>
             </div>
@@ -299,6 +328,88 @@ export function Card({
         options={contextMenuOptions}
         onClose={closeContextMenu}
       />
+
+      {/* Portal-based hover effect - escapes all container overflow */}
+      {mounted && showHoverEffects && isHovered && !isDragging && hoverRect && createPortal(
+        <AnimatePresence>
+          <motion.div
+            className="pointer-events-none"
+            style={{
+              position: 'fixed',
+              zIndex: 9998,
+            }}
+            initial={{
+              left: hoverRect.left,
+              top: hoverRect.top,
+              width: hoverRect.width,
+              height: hoverRect.height,
+              rotate: isTapped ? 90 : 0,
+            }}
+            animate={{
+              left: hoverRect.left + hoverRect.width / 2 - (hoverRect.width * 1.5) / 2,
+              top: hoverRect.top + hoverRect.height / 2 - (hoverRect.height * 1.5) / 2,
+              width: hoverRect.width * 1.5,
+              height: hoverRect.height * 1.5,
+              rotate: isTapped ? 90 : 0,
+            }}
+            exit={{
+              left: hoverRect.left,
+              top: hoverRect.top,
+              width: hoverRect.width,
+              height: hoverRect.height,
+              rotate: isTapped ? 90 : 0,
+            }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+          >
+            {/* Glow effect */}
+            <div className="card-glow-effect" />
+
+            {/* Particles */}
+            <div className="card-glow-particles">
+              <div className="card-glow-particle particle-left" />
+              <div className="card-glow-particle particle-left" />
+              <div className="card-glow-particle particle-left" />
+              <div className="card-glow-particle particle-left" />
+              <div className="card-glow-particle particle-left" />
+              <div className="card-glow-particle particle-right" />
+              <div className="card-glow-particle particle-right" />
+              <div className="card-glow-particle particle-right" />
+              <div className="card-glow-particle particle-right" />
+              <div className="card-glow-particle particle-right" />
+              <div className="card-glow-particle particle-top" />
+              <div className="card-glow-particle particle-top" />
+              <div className="card-glow-particle particle-top" />
+              <div className="card-glow-particle particle-top" />
+              <div className="card-glow-particle particle-bottom" />
+              <div className="card-glow-particle particle-bottom" />
+              <div className="card-glow-particle particle-bottom" />
+              <div className="card-glow-particle particle-bottom" />
+            </div>
+
+            {/* Card image - rendered at full size, not scaled */}
+            <div className="card-container relative">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={card.cardName}
+                  fill
+                  className="object-cover rounded"
+                  draggable={false}
+                  sizes="300px"
+                  quality={95}
+                />
+              ) : (
+                <div className="w-full h-full rounded flex items-center justify-center p-1" style={{ backgroundColor: 'var(--theme-bg-tertiary)' }}>
+                  <span className="text-xs text-center break-words" style={{ color: 'var(--theme-text-muted)' }}>
+                    {card.cardName}
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

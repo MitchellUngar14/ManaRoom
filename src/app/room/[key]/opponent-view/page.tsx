@@ -3,12 +3,16 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
+import { useTheme } from '@/hooks/useTheme';
 import { OpponentBattlefieldPopout } from '@/components/game/OpponentBattlefieldPopout';
 
 export default function OpponentViewPage() {
   const params = useParams();
   const roomKey = params.key as string;
   const initRef = useRef(false);
+
+  // Apply theme to this window
+  useTheme();
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,10 +76,10 @@ export default function OpponentViewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+      <div className="min-h-screen flex items-center justify-center theme-battlefield">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Connecting to room {roomKey}...</p>
+          <div className="game-spinner mx-auto mb-4" />
+          <p style={{ color: 'var(--theme-text-secondary)' }}>Connecting to room {roomKey}...</p>
         </div>
       </div>
     );
@@ -83,13 +87,13 @@ export default function OpponentViewPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="bg-gray-900 rounded-lg p-6 max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center theme-battlefield">
+        <div className="rounded-lg p-6 max-w-md text-center" style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
           <h2 className="text-xl font-semibold text-red-400 mb-4">Error</h2>
-          <p className="text-gray-300 mb-6">{error}</p>
+          <p className="mb-6" style={{ color: 'var(--theme-text-secondary)' }}>{error}</p>
           <button
             onClick={() => window.close()}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded"
+            className="game-btn px-6 py-2"
           >
             Close Window
           </button>
@@ -100,10 +104,10 @@ export default function OpponentViewPage() {
 
   if (!connected || !spectatorMode) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+      <div className="min-h-screen flex items-center justify-center theme-battlefield">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Connecting as spectator...</p>
+          <div className="game-spinner mx-auto mb-4" />
+          <p style={{ color: 'var(--theme-text-secondary)' }}>Connecting as spectator...</p>
         </div>
       </div>
     );
@@ -113,15 +117,15 @@ export default function OpponentViewPage() {
 
   if (!opponent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="bg-gray-900 rounded-lg p-6 max-w-md text-center">
-          <h2 className="text-xl font-semibold text-yellow-400 mb-4">Opponent Not Found</h2>
-          <p className="text-gray-300 mb-6">
+      <div className="min-h-screen flex items-center justify-center theme-battlefield">
+        <div className="rounded-lg p-6 max-w-md text-center" style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--theme-accent)' }}>Opponent Not Found</h2>
+          <p className="mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
             The opponent may have left the game or the connection was lost.
           </p>
           <button
             onClick={() => window.close()}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded"
+            className="game-btn px-6 py-2"
           >
             Close Window
           </button>

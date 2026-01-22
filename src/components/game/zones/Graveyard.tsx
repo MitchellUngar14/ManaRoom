@@ -56,7 +56,8 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
         onContextMenu={handleContextMenu}
       >
         <span
-          className="text-[9px] text-gray-500 mb-0.5 text-center"
+          className="text-[9px] mb-0.5 text-center"
+          style={{ color: 'var(--theme-text-muted)' }}
           onClick={() => setExpanded(true)}
         >
           Grave ({cards.length})
@@ -71,7 +72,11 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
             </div>
           ) : (
             <div
-              className="card-container bg-gray-700/30 rounded border-2 border-dashed border-gray-600 hover:border-gray-500 transition-colors"
+              className="card-container rounded border-2 border-dashed transition-colors"
+              style={{
+                backgroundColor: 'var(--theme-bg-elevated)',
+                borderColor: 'var(--theme-border)',
+              }}
               onClick={() => setExpanded(true)}
             />
           )}
@@ -88,30 +93,30 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
       {/* Expanded view modal */}
       {expanded && (
         <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          className="game-modal-overlay"
           onClick={() => setExpanded(false)}
         >
           <div
-            className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[85vh] flex flex-col"
+            className="game-modal w-full max-w-4xl max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold">
+            <div className="game-modal-header">
+              <h3 className="game-modal-title">
                 {isOpponent ? "Opponent's Graveyard" : 'Graveyard'} ({cards.length})
               </h3>
               <button
                 onClick={() => setExpanded(false)}
-                className="text-gray-400 hover:text-white text-2xl leading-none"
+                className="game-modal-close"
               >
                 &times;
               </button>
             </div>
 
             {/* Card list */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="game-modal-body">
               {cards.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">Graveyard is empty</p>
+                <p style={{ color: 'var(--theme-text-muted)' }} className="text-center py-8">Graveyard is empty</p>
               ) : (
                 <div className="space-y-1">
                   {cards.map((card) => {
@@ -120,10 +125,13 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
                     return (
                       <div
                         key={card.instanceId}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800 transition-colors group"
+                        className="flex items-center gap-3 p-2 rounded-lg transition-colors group"
+                        style={{ backgroundColor: 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-bg-elevated)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
                         {/* Card thumbnail */}
-                        <div className="relative w-10 h-14 rounded overflow-hidden bg-gray-700 shrink-0">
+                        <div className="relative w-10 h-14 rounded overflow-hidden shrink-0" style={{ backgroundColor: 'var(--theme-bg-tertiary)' }}>
                           {imageUrl ? (
                             <Image
                               src={imageUrl}
@@ -134,7 +142,7 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-[8px] text-gray-500 text-center px-1">
+                              <span className="text-[8px] text-center px-1" style={{ color: 'var(--theme-text-muted)' }}>
                                 {card.cardName}
                               </span>
                             </div>
@@ -142,13 +150,13 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
                         </div>
 
                         {/* Card name */}
-                        <span className="flex-1 text-gray-200 group-hover:text-white transition-colors">
+                        <span className="flex-1 transition-colors" style={{ color: 'var(--theme-text-primary)' }}>
                           {card.cardName}
                         </span>
 
                         {/* Card type (if available) */}
                         {card.card?.typeLine && (
-                          <span className="text-xs text-gray-500 hidden sm:block mr-2">
+                          <span className="text-xs hidden sm:block mr-2" style={{ color: 'var(--theme-text-muted)' }}>
                             {card.card.typeLine}
                           </span>
                         )}
@@ -157,7 +165,7 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
                         {!isOpponent && (
                           <button
                             onClick={() => handleReturnToHand(card)}
-                            className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="game-btn game-btn-small game-btn-accent opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Return to hand"
                           >
                             To Hand
@@ -172,7 +180,7 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
 
             {/* Footer hint */}
             {!isOpponent && cards.length > 0 && (
-              <div className="p-3 border-t border-gray-700 text-center text-xs text-gray-500">
+              <div className="p-3 text-center text-xs" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
                 Hover over a card and click &quot;To Hand&quot; to return it
               </div>
             )}

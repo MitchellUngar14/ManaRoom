@@ -9,6 +9,7 @@ import {
   pointerWithin,
 } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
+import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { usePopoutWindow } from '@/hooks/usePopoutWindow';
 import { Card } from './Card';
@@ -97,52 +98,55 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
       {/* Toggle button - positioned in top-left of opponent battlefield */}
       <button
         onClick={() => setIsOpen(true)}
-        className="absolute top-2 left-2 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-2 transition-colors"
+        className="absolute top-2 left-2 z-20 game-btn game-btn-small"
       >
         <span>{opponent.displayName}</span>
-        <span className="text-gray-500">|</span>
-        <span className="text-gray-400">Hand: {opponent.zones.hand.length}</span>
-        <span className="text-gray-500">|</span>
-        <span className="text-gray-400">Lib: {opponent.zones.library.length}</span>
+        <span className="game-info-divider" style={{ height: '12px', margin: '0 4px' }} />
+        <span style={{ color: 'var(--theme-text-muted)' }}>Hand: {opponent.zones.hand.length}</span>
+        <span className="game-info-divider" style={{ height: '12px', margin: '0 4px' }} />
+        <span style={{ color: 'var(--theme-text-muted)' }}>Lib: {opponent.zones.library.length}</span>
       </button>
 
       {/* Popout modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          className="game-modal-overlay"
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="bg-gray-900 rounded-lg p-6 max-w-lg w-full"
+            className="game-modal"
+            style={{ width: '100%', maxWidth: '500px' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">{opponent.displayName}&apos;s Zones</h3>
+            <div className="game-modal-header">
+              <h3 className="game-modal-title">{opponent.displayName}&apos;s Zones</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white text-2xl leading-none"
+                className="game-modal-close"
               >
                 &times;
               </button>
             </div>
 
-            <div className="flex justify-center gap-2">
-              <div className="h-32">
-                <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
+            <div className="game-modal-body">
+              <div className="flex justify-center gap-2">
+                <div className="h-32">
+                  <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
+                </div>
+                <div className="h-32">
+                  <Library cards={opponent.zones.library} isOpponent={true} />
+                </div>
+                <div className="h-32">
+                  <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
+                </div>
+                <div className="h-32">
+                  <Exile cards={opponent.zones.exile} isOpponent={true} />
+                </div>
               </div>
-              <div className="h-32">
-                <Library cards={opponent.zones.library} isOpponent={true} />
-              </div>
-              <div className="h-32">
-                <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
-              </div>
-              <div className="h-32">
-                <Exile cards={opponent.zones.exile} isOpponent={true} />
-              </div>
-            </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-700 text-center text-sm text-gray-400">
-              Hand: {opponent.zones.hand.length} cards
+              <div className="mt-4 pt-4 text-center" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)', fontSize: '14px' }}>
+                Hand: {opponent.zones.hand.length} cards
+              </div>
             </div>
           </div>
         </div>
@@ -160,6 +164,7 @@ export function GameBoard() {
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
   const [bottomBarCollapsed, setBottomBarCollapsed] = useState(false);
   const [editingCard, setEditingCard] = useState<BoardCard | null>(null);
+  const [showPlacementGuides, setShowPlacementGuides] = useState(true);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -284,9 +289,14 @@ export function GameBoard() {
       const translated = active.rect.current.translated;
 
       if (overRect && translated) {
+        // Calculate card height as percentage of battlefield for y constraint
+        const cardHeightPercent = translated.height / overRect.height;
+        // Minimum y keeps most of the card visible (only small portion can go above)
+        const minY = cardHeightPercent * 0.4; // Allow top ~10% of card to potentially go above
+
         position = {
           x: Math.max(0.05, Math.min(0.95, (translated.left - overRect.left + translated.width / 2) / overRect.width)),
-          y: Math.max(0.05, Math.min(0.95, (translated.top - overRect.top + translated.height / 2) / overRect.height)),
+          y: Math.max(minY, Math.min(0.95, (translated.top - overRect.top + translated.height / 2) / overRect.height)),
         };
       } else {
         position = { x: 0.5, y: 0.5 };
@@ -307,8 +317,9 @@ export function GameBoard() {
 
   if (!myPlayer) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-gray-500">Loading game state...</p>
+      <div className="h-full flex items-center justify-center game-loading">
+        <div className="game-spinner" />
+        <p className="game-loading-text">Loading game state...</p>
       </div>
     );
   }
@@ -336,7 +347,7 @@ export function GameBoard() {
                   {/* Pop out button */}
                   <button
                     onClick={() => roomKey && myId && openPopout(roomKey, opponent.odId, myId)}
-                    className="absolute top-2 right-24 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-1.5 transition-colors"
+                    className="absolute top-2 right-24 z-20 game-btn game-btn-small"
                     title="Pop out opponent's battlefield to separate window"
                   >
                     <svg
@@ -360,7 +371,7 @@ export function GameBoard() {
                   {/* Mirror toggle button */}
                   <button
                     onClick={() => setMirrorOpponent(!mirrorOpponent)}
-                    className="absolute top-2 right-2 z-20 bg-gray-800/90 hover:bg-gray-700 px-3 py-1.5 rounded text-xs text-gray-300 flex items-center gap-1.5 transition-colors"
+                    className={`absolute top-2 right-2 z-20 game-btn game-btn-small ${mirrorOpponent ? 'game-btn-active' : ''}`}
                     title={mirrorOpponent ? 'Show mirrored view' : 'Show cards right-side up'}
                   >
                     <svg
@@ -373,7 +384,6 @@ export function GameBoard() {
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className={mirrorOpponent ? 'text-blue-400' : ''}
                     >
                       <polyline points="17 1 21 5 17 9" />
                       <path d="M3 11V9a4 4 0 0 1 4-4h14" />
@@ -395,8 +405,8 @@ export function GameBoard() {
                   </div>
                 </>
               ) : (
-                <div className="h-full flex items-center justify-center transition-colors duration-500" style={{ backgroundColor: 'var(--theme-bg-secondary)', opacity: 0.5 }}>
-                  <span className="transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Waiting for opponent...</span>
+                <div className="h-full game-waiting">
+                  <span>Waiting for opponent...</span>
                 </div>
               )}
             </div>
@@ -404,17 +414,17 @@ export function GameBoard() {
 
           {/* Popout indicator bar - shown when battlefield is popped out */}
           {isPopoutOpen && opponent && (
-            <div className="shrink-0 bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-400 text-sm">
+            <div className="shrink-0 game-popout-bar">
+              <div className="game-popout-info">
+                <span>
                   {opponent.displayName}&apos;s battlefield is in a separate window
                 </span>
-                <span className="text-gray-600">|</span>
-                <span className="text-gray-500 text-sm">Life: {opponent.life}</span>
+                <span className="game-info-divider" />
+                <span>Life: {opponent.life}</span>
               </div>
               <button
                 onClick={closePopout}
-                className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
+                className="game-btn game-btn-small"
               >
                 Close Popout
               </button>
@@ -422,13 +432,38 @@ export function GameBoard() {
           )}
 
           {/* My battlefield (bottom half - expands when opponent is popped out) */}
-          <DropZone id="battlefield" className="flex-1">
+          <DropZone id="battlefield" className="flex-1 relative">
             <Battlefield
               cards={myPlayer.zones.battlefield}
               isOpponent={false}
               largeCards={isPopoutOpen}
               onEditCard={setEditingCard}
+              showPlacementGuides={showPlacementGuides}
             />
+            {/* Placement guides toggle */}
+            <button
+              onClick={() => setShowPlacementGuides(!showPlacementGuides)}
+              className={`absolute bottom-2 right-2 z-20 game-btn game-btn-small ${showPlacementGuides ? 'game-btn-active' : ''}`}
+              title={showPlacementGuides ? 'Hide placement guides' : 'Show placement guides'}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              <span>Guides</span>
+            </button>
           </DropZone>
         </div>
 
@@ -437,7 +472,7 @@ export function GameBoard() {
           {/* Collapse toggle button - positioned at bottom of battlefield */}
           <button
             onClick={() => setBottomBarCollapsed(!bottomBarCollapsed)}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 z-20 bg-gray-800 hover:bg-gray-700 px-3 py-0.5 rounded-t"
+            className={`game-collapse-btn ${bottomBarCollapsed ? 'collapsed' : ''}`}
             title={bottomBarCollapsed ? 'Show hand & zones' : 'Hide hand & zones'}
           >
             <svg
@@ -450,22 +485,19 @@ export function GameBoard() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`text-gray-400 transition-transform duration-300 ${
-                bottomBarCollapsed ? '' : 'rotate-180'
-              }`}
             >
               <polyline points="18 15 12 9 6 15" />
             </svg>
           </button>
 
           <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              bottomBarCollapsed ? 'h-0' : 'h-52'
+            className={`transition-all duration-300 ease-in-out ${
+              bottomBarCollapsed ? 'h-0 overflow-hidden' : 'h-52 overflow-visible'
             }`}
           >
-            <div className="h-52 border-t flex transition-colors duration-500" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-tertiary)' }}>
+            <div className="h-52 flex game-hand-zone overflow-visible">
               {/* My zones (left side) */}
-              <div className="shrink-0 border-r px-2 py-1 flex items-center gap-1 transition-colors duration-500" style={{ borderColor: 'var(--theme-border)' }}>
+              <div className="shrink-0 game-side-zones">
                 <DropZone id="commandZone" className="w-24 shrink-0">
                   <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                 </DropZone>
@@ -481,7 +513,7 @@ export function GameBoard() {
               </div>
 
               {/* Hand (right side, takes remaining space) */}
-              <DropZone id="hand" className="flex-1 min-w-0 overflow-hidden">
+              <DropZone id="hand" className="flex-1 min-w-0 overflow-visible">
                 <Hand cards={myPlayer.zones.hand} />
               </DropZone>
             </div>
@@ -492,13 +524,18 @@ export function GameBoard() {
       {/* Drag overlay - shows the card being dragged */}
       <DragOverlay>
         {activeCard && (
-          <div className={`${isPopoutOpen && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}>
+          <motion.div
+            className={`${isPopoutOpen && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}
+            initial={{ scale: 1.5 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+          >
             <Card
               card={activeCard}
               zone={activeZone || 'hand'}
               isDragOverlay
             />
-          </div>
+          </motion.div>
         )}
       </DragOverlay>
 
