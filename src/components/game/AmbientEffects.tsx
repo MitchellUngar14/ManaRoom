@@ -21,7 +21,7 @@ interface Particle {
 
 export function AmbientEffects({ theme, disabled = false }: AmbientEffectsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const particlesRef = useRef<Particle[]>([]);
 
   const { ambientEnabled, ambientType, ambientColor, ambientOpacity } = theme.effects;
