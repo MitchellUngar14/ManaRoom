@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { DeckImporter } from '@/components/deck/DeckImporter';
 import { DeckList } from '@/components/deck/DeckList';
 import { DeckViewer } from '@/components/deck/DeckViewer';
-import { CreateRoom } from '@/components/lobby/CreateRoom';
-import { JoinRoom } from '@/components/lobby/JoinRoom';
+import { CrystalPortal } from '@/components/lobby/CrystalPortal';
 import { LogoLoader } from '@/components/ui/LogoLoader';
 
 interface User {
@@ -92,6 +91,28 @@ export default function LobbyPage() {
 
   const handleJoinRoom = (roomKey: string) => {
     router.push(`/room/${roomKey}`);
+  };
+
+  const handleCreateRoom = async () => {
+    if (!selectedDeckId) return;
+
+    try {
+      const res = await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deckId: selectedDeckId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create room');
+      }
+
+      router.push(`/room/${data.roomKey}`);
+    } catch (error) {
+      console.error('Failed to create room:', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -273,25 +294,13 @@ export default function LobbyPage() {
             {/* Divider */}
             <div className="sanctum-divider" />
 
-            {/* Right: Portals (Create/Join Room) */}
+            {/* Right: Crystal Portal (Create/Join Room) */}
             <div className="sanctum-portals-section">
-              <h3 className="portals-heading">Planar Portals</h3>
-              <div className="portals-stack">
-                {/* Create Room */}
-                <div className="table-orb">
-                  <CreateRoom
-                    selectedDeckId={selectedDeckId}
-                    onRoomCreated={handleRoomCreated}
-                    disabled={!selectedDeckId}
-                  />
-                </div>
-
-                {/* Join Room */}
-                <JoinRoom
-                  selectedDeckId={selectedDeckId}
-                  onJoin={handleJoinRoom}
-                />
-              </div>
+              <CrystalPortal
+                selectedDeckId={selectedDeckId}
+                onJoin={handleJoinRoom}
+                onCreateRoom={handleCreateRoom}
+              />
             </div>
           </div>
         </div>
