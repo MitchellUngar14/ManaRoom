@@ -17,7 +17,8 @@ export interface ParseResult {
  * - "1x Card Name"
  * - "1 Card Name (SET) 123"
  * - "1 Card Name *CMDR*"
- * - Section headers: "// Commander", "// Mainboard", etc.
+ * - Section headers: "// Commander", "// Mainboard", "SIDEBOARD:", etc.
+ * - Commander after blank line at end of list (no quantity prefix)
  */
 export function parseMoxfieldText(text: string): ParseResult {
   const lines = text.trim().split('\n');
@@ -28,15 +29,27 @@ export function parseMoxfieldText(text: string): ParseResult {
   let currentSection: 'mainboard' | 'commander' | 'sideboard' | 'maybeboard' =
     'mainboard';
 
-  for (const line of lines) {
+  // Track if we've seen a blank line after sideboard (indicates commander section)
+  let afterSideboardBlankLine = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmed = line.trim();
 
-    // Skip empty lines
-    if (!trimmed) continue;
+    // Handle empty lines - after sideboard, they indicate commander section
+    if (!trimmed) {
+      if (currentSection === 'sideboard') {
+        afterSideboardBlankLine = true;
+      }
+      continue;
+    }
 
-    // Handle section headers
-    if (trimmed.startsWith('//')) {
-      const sectionName = trimmed.slice(2).trim().toLowerCase();
+    // Handle section headers (both "// Section" and "SECTION:" formats)
+    if (trimmed.startsWith('//') || /^[A-Z]+:$/i.test(trimmed)) {
+      const sectionName = trimmed.startsWith('//')
+        ? trimmed.slice(2).trim().toLowerCase()
+        : trimmed.slice(0, -1).toLowerCase();
+
       if (
         sectionName.includes('commander') ||
         sectionName.includes('cmdr')
@@ -49,6 +62,7 @@ export function parseMoxfieldText(text: string): ParseResult {
       } else {
         currentSection = 'mainboard';
       }
+      afterSideboardBlankLine = false;
       continue;
     }
 
@@ -68,14 +82,36 @@ export function parseMoxfieldText(text: string): ParseResult {
 
       const card: ParsedCard = { quantity, name };
 
-      if (isCommanderTag || currentSection === 'commander') {
+      if (isCommanderTag || currentSection === 'commander' || afterSideboardBlankLine) {
+        // Commander if tagged, in commander section, or after blank line following sideboard
         card.isCommander = true;
         commanders.push(card);
+      } else if (currentSection === 'sideboard' || currentSection === 'maybeboard') {
+        // Skip sideboard/maybeboard cards
+        continue;
       } else {
         cards.push(card);
       }
-    } else if (trimmed && !trimmed.startsWith('#')) {
-      errors.push(`Could not parse: ${line}`);
+    } else if (cleanedLine && !cleanedLine.startsWith('#')) {
+      // Handle card name without quantity (usually commander at end)
+      // This is a card name on its own line, assume quantity of 1
+      const name = cleanedLine.replace(/\s+\([^)]+\)\s*\d*$/, '').trim();
+
+      if (name) {
+        const card: ParsedCard = { quantity: 1, name };
+
+        if (isCommanderTag || currentSection === 'commander' || afterSideboardBlankLine) {
+          card.isCommander = true;
+          commanders.push(card);
+        } else if (currentSection === 'sideboard' || currentSection === 'maybeboard') {
+          // Skip sideboard/maybeboard cards
+          continue;
+        } else {
+          // Could be a card without quantity, add as error for review
+          errors.push(`No quantity specified: "${line}" (assuming 1)`);
+          cards.push(card);
+        }
+      }
     }
   }
 

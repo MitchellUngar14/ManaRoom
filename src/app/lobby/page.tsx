@@ -199,61 +199,100 @@ export default function LobbyPage() {
           </div>
         </header>
 
-        {/* Main content area */}
+        {/* Main content area - horizontal split layout */}
         <div className="study-desk-area">
-          {/* Selected deck preview */}
-          {selectedDeckId && (() => {
-            const selectedDeck = decks.find(d => d.id === selectedDeckId);
-            const commanderImageUrl = selectedDeck?.commander
-              ? `https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=${encodeURIComponent(selectedDeck.commander)}`
-              : null;
-            return (
-              <div
-                className="table-open-book"
-                onClick={() => setShowDeckViewer(true)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && setShowDeckViewer(true)}
-              >
-                {/* Commander card art */}
-                <div className="book-page-left">
-                  <div className="book-commander-art">
-                    {commanderImageUrl && (
-                      <img
-                        src={commanderImageUrl}
-                        alt={selectedDeck?.commander || 'Commander'}
-                        loading="eager"
-                      />
-                    )}
-                    <div className="book-commander-placeholder">⚔</div>
+          <div className="sanctum-split-layout">
+            {/* Left: Selected deck preview (Grimoire) */}
+            <div className="sanctum-grimoire-section">
+              {selectedDeckId ? (() => {
+                const selectedDeck = decks.find(d => d.id === selectedDeckId);
+                const commanderImageUrl = selectedDeck?.commander
+                  ? `https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=${encodeURIComponent(selectedDeck.commander)}`
+                  : null;
+                return (
+                  <div
+                    className="grimoire-book"
+                    onClick={() => setShowDeckViewer(true)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && setShowDeckViewer(true)}
+                  >
+                    {/* Grimoire background image */}
+                    <img
+                      src="/grimoire.png"
+                      alt=""
+                      className="grimoire-bg"
+                      draggable={false}
+                    />
+
+                    {/* Commander art in the window slot */}
+                    <div className="grimoire-window">
+                      {commanderImageUrl && (
+                        <img
+                          src={commanderImageUrl}
+                          alt={selectedDeck?.commander || 'Commander'}
+                          className="grimoire-commander-img"
+                          loading="eager"
+                        />
+                      )}
+                    </div>
+
+                    {/* Deck info in the open area */}
+                    <div className="grimoire-text-area">
+                      <p className="grimoire-deck-name">{selectedDeck?.name}</p>
+                      <p className="grimoire-commander-name">{selectedDeck?.commander}</p>
+                    </div>
+
+                    {/* Hover glow effect */}
+                    <div className="grimoire-glow" />
+                  </div>
+                );
+              })() : (
+                <div
+                  className="grimoire-book grimoire-empty"
+                  role="button"
+                  tabIndex={0}
+                >
+                  <img
+                    src="/grimoire.png"
+                    alt=""
+                    className="grimoire-bg"
+                    draggable={false}
+                  />
+                  <div className="grimoire-window grimoire-window-empty">
+                    <span className="grimoire-empty-icon">?</span>
+                  </div>
+                  <div className="grimoire-text-area">
+                    <p className="grimoire-deck-name grimoire-empty-text">Select a Grimoire</p>
+                    <p className="grimoire-commander-name grimoire-empty-subtext">Choose from your collection</p>
                   </div>
                 </div>
-                {/* Deck info */}
-                <div className="book-page-right">
-                  <p className="book-deck-name">{selectedDeck?.name}</p>
-                  <p className="book-commander-name">{selectedDeck?.commander}</p>
-                  <p className="book-deck-footer">Selected Grimoire</p>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Action buttons row */}
-          <div className="flex flex-col sm:flex-row items-center gap-8">
-            {/* Create Room */}
-            <div className="table-orb">
-              <CreateRoom
-                selectedDeckId={selectedDeckId}
-                onRoomCreated={handleRoomCreated}
-                disabled={!selectedDeckId}
-              />
+              )}
             </div>
 
-            {/* Join Room */}
-            <JoinRoom
-              selectedDeckId={selectedDeckId}
-              onJoin={handleJoinRoom}
-            />
+            {/* Divider */}
+            <div className="sanctum-divider" />
+
+            {/* Right: Portals (Create/Join Room) */}
+            <div className="sanctum-portals-section">
+              <h3 className="portals-heading">Planar Portals</h3>
+              <div className="portals-stack">
+                {/* Create Room */}
+                <div className="table-orb">
+                  <CreateRoom
+                    selectedDeckId={selectedDeckId}
+                    onRoomCreated={handleRoomCreated}
+                    disabled={!selectedDeckId}
+                  />
+                </div>
+
+                {/* Join Room */}
+                <JoinRoom
+                  selectedDeckId={selectedDeckId}
+                  onJoin={handleJoinRoom}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

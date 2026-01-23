@@ -58,10 +58,13 @@ body {
 
 /* Theme-based card hover glow effect */
 @keyframes card-glow-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.8;
     transform: scale(1.03);
@@ -78,12 +81,10 @@ body {
   position: absolute;
   inset: -8px;
   border-radius: 8% / 6%;
-  background: radial-gradient(
-    ellipse at center,
-    var(--theme-accent) 0%,
-    var(--theme-accent-muted) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse at center,
+      var(--theme-accent) 0%,
+      var(--theme-accent-muted) 30%,
+      transparent 70%);
   opacity: 0.6;
   filter: blur(12px);
   z-index: 0;
@@ -125,52 +126,126 @@ body {
   left: 0;
   animation: particle-emit-left 1.8s ease-out infinite;
 }
-.particle-left:nth-child(1) { top: 15%; animation-delay: 0s; }
-.particle-left:nth-child(2) { top: 35%; animation-delay: 0.3s; }
-.particle-left:nth-child(3) { top: 55%; animation-delay: 0.6s; }
-.particle-left:nth-child(4) { top: 75%; animation-delay: 0.9s; }
-.particle-left:nth-child(5) { top: 45%; animation-delay: 1.2s; }
+
+.particle-left:nth-child(1) {
+  top: 15%;
+  animation-delay: 0s;
+}
+
+.particle-left:nth-child(2) {
+  top: 35%;
+  animation-delay: 0.3s;
+}
+
+.particle-left:nth-child(3) {
+  top: 55%;
+  animation-delay: 0.6s;
+}
+
+.particle-left:nth-child(4) {
+  top: 75%;
+  animation-delay: 0.9s;
+}
+
+.particle-left:nth-child(5) {
+  top: 45%;
+  animation-delay: 1.2s;
+}
 
 /* Right edge particles - emanate rightward */
 .particle-right {
   right: 0;
   animation: particle-emit-right 1.8s ease-out infinite;
 }
-.particle-right:nth-child(6) { top: 20%; animation-delay: 0.15s; }
-.particle-right:nth-child(7) { top: 40%; animation-delay: 0.45s; }
-.particle-right:nth-child(8) { top: 60%; animation-delay: 0.75s; }
-.particle-right:nth-child(9) { top: 80%; animation-delay: 1.05s; }
-.particle-right:nth-child(10) { top: 50%; animation-delay: 1.35s; }
+
+.particle-right:nth-child(6) {
+  top: 20%;
+  animation-delay: 0.15s;
+}
+
+.particle-right:nth-child(7) {
+  top: 40%;
+  animation-delay: 0.45s;
+}
+
+.particle-right:nth-child(8) {
+  top: 60%;
+  animation-delay: 0.75s;
+}
+
+.particle-right:nth-child(9) {
+  top: 80%;
+  animation-delay: 1.05s;
+}
+
+.particle-right:nth-child(10) {
+  top: 50%;
+  animation-delay: 1.35s;
+}
 
 /* Top edge particles - emanate upward */
 .particle-top {
   top: 0;
   animation: particle-emit-top 1.8s ease-out infinite;
 }
-.particle-top:nth-child(11) { left: 20%; animation-delay: 0.1s; }
-.particle-top:nth-child(12) { left: 40%; animation-delay: 0.4s; }
-.particle-top:nth-child(13) { left: 60%; animation-delay: 0.7s; }
-.particle-top:nth-child(14) { left: 80%; animation-delay: 1.0s; }
+
+.particle-top:nth-child(11) {
+  left: 20%;
+  animation-delay: 0.1s;
+}
+
+.particle-top:nth-child(12) {
+  left: 40%;
+  animation-delay: 0.4s;
+}
+
+.particle-top:nth-child(13) {
+  left: 60%;
+  animation-delay: 0.7s;
+}
+
+.particle-top:nth-child(14) {
+  left: 80%;
+  animation-delay: 1.0s;
+}
 
 /* Bottom edge particles - emanate downward then curve up */
 .particle-bottom {
   bottom: 0;
   animation: particle-emit-bottom 1.8s ease-out infinite;
 }
-.particle-bottom:nth-child(15) { left: 25%; animation-delay: 0.2s; }
-.particle-bottom:nth-child(16) { left: 45%; animation-delay: 0.5s; }
-.particle-bottom:nth-child(17) { left: 65%; animation-delay: 0.8s; }
-.particle-bottom:nth-child(18) { left: 85%; animation-delay: 1.1s; }
+
+.particle-bottom:nth-child(15) {
+  left: 25%;
+  animation-delay: 0.2s;
+}
+
+.particle-bottom:nth-child(16) {
+  left: 45%;
+  animation-delay: 0.5s;
+}
+
+.particle-bottom:nth-child(17) {
+  left: 65%;
+  animation-delay: 0.8s;
+}
+
+.particle-bottom:nth-child(18) {
+  left: 85%;
+  animation-delay: 1.1s;
+}
 
 @keyframes particle-emit-left {
   0% {
     opacity: 0;
     transform: translate(0, 0) scale(0.5);
   }
+
   10% {
     opacity: 1;
     transform: translate(-4px, 0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translate(-20px, -10px) scale(0.2);
@@ -182,10 +257,12 @@ body {
     opacity: 0;
     transform: translate(0, 0) scale(0.5);
   }
+
   10% {
     opacity: 1;
     transform: translate(4px, 0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translate(20px, -10px) scale(0.2);
@@ -197,10 +274,12 @@ body {
     opacity: 0;
     transform: translate(0, 0) scale(0.5);
   }
+
   10% {
     opacity: 1;
     transform: translate(0, -4px) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translate(0, -25px) scale(0.2);
@@ -212,14 +291,17 @@ body {
     opacity: 0;
     transform: translate(0, 0) scale(0.5);
   }
+
   10% {
     opacity: 1;
     transform: translate(0, 4px) scale(1);
   }
+
   50% {
     opacity: 0.7;
     transform: translate(0, 8px) scale(0.8);
   }
+
   100% {
     opacity: 0;
     transform: translate(0, -15px) scale(0.2);
@@ -338,8 +420,13 @@ body {
 }
 
 @keyframes login-particles-drift {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(-100px, -50px); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(-100px, -50px);
+  }
 }
 
 /* Main container */
@@ -384,8 +471,15 @@ body {
 }
 
 @keyframes login-logo-pulse {
-  0%, 100% { filter: drop-shadow(0 0 30px rgba(201, 162, 39, 0.25)); }
-  50% { filter: drop-shadow(0 0 50px rgba(201, 162, 39, 0.4)); }
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 30px rgba(201, 162, 39, 0.25));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 50px rgba(201, 162, 39, 0.4));
+  }
 }
 
 .login-logo-glow {
@@ -397,8 +491,17 @@ body {
 }
 
 @keyframes login-glow-pulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
 .login-hero-text {
@@ -689,7 +792,9 @@ body {
 }
 
 @keyframes auth-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive adjustments */
@@ -798,10 +903,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 40px;
-  gap: 48px;
+  justify-content: flex-start;
+  padding: 24px 40px;
+  gap: 24px;
   position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Remove old table styling */
@@ -962,6 +1069,376 @@ body {
 }
 
 /* ========================================
+   Grimoire Book - Deck Preview
+   ======================================== */
+
+.grimoire-book {
+  position: relative;
+  width: 420px;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.grimoire-book:hover {
+  transform: scale(1.02) translateY(-4px);
+}
+
+.grimoire-book:active {
+  transform: scale(0.99);
+}
+
+/* Background image */
+.grimoire-bg {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Commander art window - positioned over the square slot */
+.grimoire-window {
+  position: absolute;
+  /* Position calibrated to the dark window slot in the grimoire image */
+  top: 16%;
+  left: 33%;
+  width: 37%;
+  height: 35%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.grimoire-commander-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Text area - positioned in the open book area below window */
+.grimoire-text-area {
+  position: absolute;
+  top: 58%;
+  left: 22%;
+  width: 56%;
+  height: 35%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 8px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.grimoire-deck-name {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--sanctum-gold-bright, #d4af37);
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.9);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.grimoire-commander-name {
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow:
+    0 0 8px rgba(0, 0, 0, 0.8),
+    0 1px 3px rgba(0, 0, 0, 0.9);
+  line-height: 1.25;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Hover glow effect */
+.grimoire-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(ellipse at 50% 30%,
+      rgba(100, 180, 255, 0.15) 0%,
+      transparent 50%);
+}
+
+.grimoire-book:hover .grimoire-glow {
+  opacity: 1;
+}
+
+/* Blue gems glow on hover */
+.grimoire-book:hover .grimoire-bg {
+  filter: brightness(1.05);
+}
+
+/* Empty state */
+.grimoire-empty {
+  cursor: default;
+  opacity: 0.6;
+  filter: grayscale(0.4) brightness(0.8);
+}
+
+.grimoire-empty:hover {
+  transform: none;
+  filter: grayscale(0.4) brightness(0.8);
+}
+
+.grimoire-empty:hover .grimoire-glow {
+  opacity: 0;
+}
+
+.grimoire-empty:hover .grimoire-bg {
+  filter: none;
+}
+
+.grimoire-window-empty {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.grimoire-empty-icon {
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.grimoire-empty-text {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 14px !important;
+}
+
+.grimoire-empty-subtext {
+  color: rgba(255, 255, 255, 0.35) !important;
+  font-size: 11px !important;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .grimoire-book {
+    width: 370px;
+  }
+
+  .grimoire-deck-name {
+    font-size: 18px;
+  }
+
+  .grimoire-commander-name {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .grimoire-book {
+    width: 345px;
+  }
+
+  .grimoire-deck-name {
+    font-size: 16px;
+  }
+
+  .grimoire-commander-name {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .grimoire-book {
+    width: 300px;
+  }
+
+  .grimoire-deck-name {
+    font-size: 15px;
+  }
+
+  .grimoire-commander-name {
+    font-size: 12px;
+  }
+
+  .grimoire-empty-icon {
+    font-size: 28px;
+  }
+}
+
+/* ========================================
+   Sanctum Split Layout - Grimoire + Portals
+   ======================================== */
+
+.sanctum-split-layout {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 48px;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* Grimoire section (left) */
+.sanctum-grimoire-section {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* Placeholder when no deck selected */
+.sanctum-grimoire-placeholder {
+  width: 340px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--sanctum-bg-panel);
+  border: 2px dashed var(--sanctum-border);
+  border-radius: 12px;
+  opacity: 0.7;
+}
+
+.sanctum-grimoire-placeholder .placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+  filter: grayscale(0.8);
+}
+
+.sanctum-grimoire-placeholder .placeholder-text {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--sanctum-text-secondary);
+  margin-bottom: 4px;
+}
+
+.sanctum-grimoire-placeholder .placeholder-subtext {
+  font-family: 'Crimson Text', serif;
+  font-size: 13px;
+  color: var(--sanctum-text-muted);
+  font-style: italic;
+}
+
+/* Vertical divider */
+.sanctum-divider {
+  width: 1px;
+  align-self: stretch;
+  background: linear-gradient(to bottom,
+      transparent,
+      var(--sanctum-border) 20%,
+      var(--sanctum-gold-muted) 50%,
+      var(--sanctum-border) 80%,
+      transparent);
+  flex-shrink: 0;
+}
+
+/* Portals section (right) */
+.sanctum-portals-section {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 280px;
+}
+
+.portals-heading {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--sanctum-gold-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.portals-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 900px) {
+  .sanctum-split-layout {
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .sanctum-divider {
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(to right,
+        transparent,
+        var(--sanctum-border) 20%,
+        var(--sanctum-gold-muted) 50%,
+        var(--sanctum-border) 80%,
+        transparent);
+  }
+
+  .sanctum-grimoire-placeholder {
+    width: 100%;
+    max-width: 340px;
+    height: 180px;
+  }
+
+  .portals-heading {
+    margin-top: 4px;
+  }
+
+  .gate-portal {
+    width: 110px;
+    height: 110px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sanctum-split-layout {
+    gap: 20px;
+  }
+
+  .sanctum-grimoire-placeholder {
+    height: 140px;
+  }
+
+  .sanctum-grimoire-placeholder .placeholder-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  .portals-stack {
+    gap: 12px;
+  }
+
+  .gate-portal {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 16px;
+  }
+
+  .gate-arch {
+    padding: 20px;
+  }
+}
+
+/* ========================================
    Grimoire Library Panel - Left Sidebar
    ======================================== */
 
@@ -984,7 +1461,6 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 20;
-  overflow: hidden;
 }
 
 .bookshelf-title-bar {
@@ -1044,8 +1520,8 @@ body {
 .bookshelf-scroll-area {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 16px;
+  overflow-x: visible;
+  padding: 16px 20px 16px 16px;
   scrollbar-width: thin;
   scrollbar-color: var(--sanctum-border) transparent;
 }
@@ -1183,7 +1659,9 @@ body {
 }
 
 @keyframes sanctum-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ========================================
@@ -1234,10 +1712,13 @@ body {
 }
 
 @keyframes logo-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 0 20px rgba(100, 180, 255, 0.4)) drop-shadow(0 0 40px rgba(100, 180, 255, 0.2));
   }
+
   50% {
     transform: scale(1.02);
     filter: drop-shadow(0 0 30px rgba(100, 180, 255, 0.6)) drop-shadow(0 0 60px rgba(100, 180, 255, 0.3));
@@ -1245,8 +1726,15 @@ body {
 }
 
 @keyframes text-fade {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ========================================
@@ -1302,10 +1790,27 @@ body {
 }
 
 @keyframes particles-drift {
-  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-  25% { transform: translateY(-10px) translateX(5px); opacity: 0.4; }
-  50% { transform: translateY(-5px) translateX(-5px); opacity: 0.25; }
-  75% { transform: translateY(-15px) translateX(3px); opacity: 0.35; }
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+
+  25% {
+    transform: translateY(-10px) translateX(5px);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: translateY(-5px) translateX(-5px);
+    opacity: 0.25;
+  }
+
+  75% {
+    transform: translateY(-15px) translateX(3px);
+    opacity: 0.35;
+  }
 }
 
 /* ========================================
@@ -1318,8 +1823,8 @@ body {
   }
 
   .study-desk-area {
-    padding: 32px;
-    gap: 40px;
+    padding: 24px 32px;
+    gap: 20px;
   }
 }
 
@@ -1345,7 +1850,8 @@ body {
   .study-desk-area {
     grid-column: 1;
     grid-row: 2;
-    padding: 24px;
+    padding: 16px 24px;
+    justify-content: flex-start;
   }
 }
 
@@ -1368,7 +1874,7 @@ body {
 
   .study-desk-area {
     padding: 16px;
-    gap: 32px;
+    gap: 16px;
   }
 
   .table-open-book {
@@ -1400,7 +1906,11 @@ body {
 
 /* Remove old mana float animation */
 @keyframes float-mana {
-  0%, 100% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .mana-float {
@@ -1452,41 +1962,18 @@ body {
   margin-bottom: 0;
 }
 
-/* Grimoire book - clean modern card */
-.grimoire-book {
+/* DeckList items inside bookshelf - card style */
+.bookshelf-scroll-area .grimoire-book {
+  width: 100%;
   background: var(--sanctum-bg-elevated);
   border: 1px solid var(--sanctum-border);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
   transition: all 0.25s ease;
-  min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* Remove old book spine and page edges */
-.grimoire-book::before,
-.grimoire-book::after {
-  display: none;
-}
-
-/* Inner content area */
-.grimoire-book-inner {
-  position: relative;
-  margin: 0;
-  padding: 16px 20px;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-}
-
-/* Remove corner decorations */
-.grimoire-book-inner::before,
-.grimoire-book-inner::after {
-  display: none;
-}
-
-.grimoire-book:hover {
+.bookshelf-scroll-area .grimoire-book:hover {
   transform: translateY(-2px);
   background: var(--sanctum-bg-surface);
   border-color: var(--sanctum-text-muted);
@@ -1495,32 +1982,23 @@ body {
     0 0 0 1px var(--sanctum-border-subtle);
 }
 
-.grimoire-book.selected {
+.bookshelf-scroll-area .grimoire-book.selected {
   background: linear-gradient(135deg, var(--sanctum-bg-surface) 0%, var(--sanctum-bg-elevated) 100%);
   border-color: var(--sanctum-gold-muted);
   box-shadow:
     0 0 32px var(--sanctum-gold-glow),
     0 8px 32px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(201, 162, 39, 0.1);
-  animation: none;
   transform: translateY(-2px);
 }
 
-/* Subtle gold accent line on selected */
-.grimoire-book.selected::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--sanctum-gold), transparent);
-  opacity: 0.6;
-}
-
-.grimoire-book.selected .grimoire-book-inner {
+/* Inner content area (for DeckList items) */
+.grimoire-book-inner {
+  position: relative;
+  margin: 0;
+  padding: 16px 20px;
   border: none;
+  border-radius: 0;
   background: transparent;
 }
 
@@ -1624,11 +2102,14 @@ body {
 }
 
 @keyframes core-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       0 0 30px var(--sanctum-blue-glow),
       inset 0 0 30px var(--sanctum-blue-glow);
   }
+
   50% {
     box-shadow:
       0 0 50px rgba(74, 126, 184, 0.35),
@@ -1642,16 +2123,14 @@ body {
   inset: 0;
   border-radius: 50%;
   border: 1px solid transparent;
-  background: conic-gradient(
-    from var(--orb-angle, 0deg),
-    transparent 0%,
-    var(--sanctum-blue-arcane) 10%,
-    transparent 20%,
-    transparent 50%,
-    var(--sanctum-gold-muted) 60%,
-    transparent 70%,
-    transparent 100%
-  );
+  background: conic-gradient(from var(--orb-angle, 0deg),
+      transparent 0%,
+      var(--sanctum-blue-arcane) 10%,
+      transparent 20%,
+      transparent 50%,
+      var(--sanctum-gold-muted) 60%,
+      transparent 70%,
+      transparent 100%);
   -webkit-mask: radial-gradient(transparent 58%, black 60%, black 68%, transparent 70%);
   mask: radial-gradient(transparent 58%, black 60%, black 68%, transparent 70%);
   opacity: 0;
@@ -1674,8 +2153,13 @@ body {
 }
 
 @keyframes orb-swirl-spin {
-  from { --orb-angle: 0deg; }
-  to { --orb-angle: 360deg; }
+  from {
+    --orb-angle: 0deg;
+  }
+
+  to {
+    --orb-angle: 360deg;
+  }
 }
 
 /* Highlight reflection - subtle */
@@ -1685,11 +2169,9 @@ body {
   left: 20px;
   width: 40px;
   height: 20px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.08) 0%,
-    transparent 100%
-  );
+  background: radial-gradient(ellipse at center,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 100%);
   border-radius: 50%;
   transform: rotate(-30deg);
 }
@@ -1718,10 +2200,29 @@ body {
   color: var(--sanctum-blue-arcane);
 }
 
-.rune-1 { top: -8px; left: 50%; transform: translateX(-50%); }
-.rune-2 { top: 50%; right: -8px; transform: translateY(-50%); }
-.rune-3 { bottom: -8px; left: 50%; transform: translateX(-50%); }
-.rune-4 { top: 50%; left: -8px; transform: translateY(-50%); }
+.rune-1 {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.rune-2 {
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+}
+
+.rune-3 {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.rune-4 {
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
+}
 
 /* Hide old orb stand */
 .orb-stand {
@@ -1774,9 +2275,207 @@ body {
 }
 
 @keyframes orb-activate {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); box-shadow: 0 0 60px var(--sanctum-blue-glow); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 60px var(--sanctum-blue-glow);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ========================================
+   Portal Logo Button - Create Room
+   ======================================== */
+
+.portal-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.portal-logo-button {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.portal-logo-button:hover:not(:disabled) {
+  transform: scale(1.03);
+}
+
+.portal-logo-button:disabled {
+  cursor: not-allowed;
+}
+
+/* Sparkle canvas positioned behind logo */
+.portal-sparkle-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Logo wrapper - centered, no clipping */
+.portal-logo-wrapper {
+  position: relative;
+  z-index: 2;
+  transition: all 0.4s ease;
+}
+
+/* Logo image */
+.portal-logo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: all 0.4s ease;
+}
+
+/* Dormant state - desaturated, dim */
+.portal-dormant .portal-logo-wrapper {
+  filter: grayscale(0.7) brightness(0.5);
+  opacity: 0.6;
+}
+
+.portal-dormant .portal-logo-img {
+  filter: drop-shadow(0 0 0 transparent);
+}
+
+/* Active state - vibrant with glow */
+.portal-active .portal-logo-wrapper {
+  filter: none;
+  opacity: 1;
+}
+
+.portal-active .portal-logo-img {
+  filter: drop-shadow(0 0 20px rgba(100, 180, 255, 0.4));
+}
+
+.portal-active:hover .portal-logo-img {
+  filter: drop-shadow(0 0 30px rgba(100, 180, 255, 0.6));
+}
+
+/* Loading overlay */
+.portal-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  z-index: 3;
+}
+
+.portal-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(100, 180, 255, 0.2);
+  border-top-color: rgba(100, 180, 255, 0.9);
+  border-radius: 50%;
+  animation: portal-spin 1s linear infinite;
+}
+
+@keyframes portal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Portal loading state - intensify sparkles */
+.portal-loading .portal-logo-wrapper {
+  animation: portal-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes portal-pulse {
+
+  0%,
+  100% {
+    filter: none;
+    transform: scale(1);
+  }
+
+  50% {
+    filter: brightness(1.2);
+    transform: scale(1.02);
+  }
+}
+
+/* Labels */
+.portal-label {
+  text-align: center;
+}
+
+.portal-label-main {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sanctum-text-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.portal-dormant+.portal-label .portal-label-main {
+  color: var(--sanctum-text-muted);
+}
+
+.portal-label-sub {
+  font-family: 'Crimson Text', serif;
+  font-size: 13px;
+  color: var(--sanctum-text-muted);
+  margin-top: 4px;
+}
+
+/* Error message */
+.portal-error {
+  background: rgba(180, 60, 60, 0.1);
+  border: 1px solid rgba(180, 60, 60, 0.3);
+  color: #e57373;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Crimson Text', serif;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .portal-logo-button {
+    width: 260px;
+    height: 260px;
+  }
+
+  .portal-logo-wrapper {
+    width: 160px !important;
+    height: 160px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .portal-logo-button {
+    width: 220px;
+    height: 220px;
+  }
+
+  .portal-logo-wrapper {
+    width: 140px !important;
+    height: 140px !important;
+  }
 }
 
 /* ========================================
@@ -1803,7 +2502,7 @@ body {
     0 4px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.02);
   overflow: hidden;
-  padding: 32px;
+  padding: 24px;
   transition: all 0.3s ease;
 }
 
@@ -1819,9 +2518,9 @@ body {
 /* Portal visualization - elegant arcane circle */
 .gate-portal {
   position: relative;
-  width: 160px;
-  height: 160px;
-  margin: 0 auto 24px;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
   border-radius: 50%;
   background: var(--sanctum-bg-elevated);
   border: 1px solid var(--sanctum-border-subtle);
@@ -1844,15 +2543,13 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(
-    from var(--gate-portal-angle, 0deg),
-    transparent 0%,
-    var(--sanctum-purple-mystic) 15%,
-    transparent 30%,
-    transparent 70%,
-    var(--sanctum-gold-muted) 85%,
-    transparent 100%
-  );
+  background: conic-gradient(from var(--gate-portal-angle, 0deg),
+      transparent 0%,
+      var(--sanctum-purple-mystic) 15%,
+      transparent 30%,
+      transparent 70%,
+      var(--sanctum-gold-muted) 85%,
+      transparent 100%);
   -webkit-mask: radial-gradient(transparent 55%, black 58%, black 72%, transparent 75%);
   mask: radial-gradient(transparent 55%, black 58%, black 72%, transparent 75%);
   opacity: 0.3;
@@ -1876,8 +2573,13 @@ body {
 }
 
 @keyframes gate-swirl-spin {
-  from { --gate-portal-angle: 0deg; }
-  to { --gate-portal-angle: 360deg; }
+  from {
+    --gate-portal-angle: 0deg;
+  }
+
+  to {
+    --gate-portal-angle: 360deg;
+  }
 }
 
 .portal-glow {
@@ -2024,19 +2726,72 @@ body {
   animation: sparkle-float 2s ease-in-out infinite;
 }
 
-.sparkle-1 { left: 30%; bottom: 30%; animation-delay: 0s; }
-.sparkle-2 { left: 50%; bottom: 40%; animation-delay: 0.5s; }
-.sparkle-3 { left: 70%; bottom: 35%; animation-delay: 1s; }
-.sparkle-4 { left: 40%; bottom: 50%; animation-delay: 1.5s; }
-.sparkle-5 { left: 60%; bottom: 45%; animation-delay: 2s; }
-.sparkle-6 { left: 25%; bottom: 55%; animation-delay: 2.5s; }
-.sparkle-7 { left: 75%; bottom: 50%; animation-delay: 3s; }
-.sparkle-8 { left: 45%; bottom: 60%; animation-delay: 0.3s; }
-.sparkle-9 { left: 55%; bottom: 25%; animation-delay: 0.8s; }
-.sparkle-10 { left: 35%; bottom: 65%; animation-delay: 1.3s; }
+.sparkle-1 {
+  left: 30%;
+  bottom: 30%;
+  animation-delay: 0s;
+}
+
+.sparkle-2 {
+  left: 50%;
+  bottom: 40%;
+  animation-delay: 0.5s;
+}
+
+.sparkle-3 {
+  left: 70%;
+  bottom: 35%;
+  animation-delay: 1s;
+}
+
+.sparkle-4 {
+  left: 40%;
+  bottom: 50%;
+  animation-delay: 1.5s;
+}
+
+.sparkle-5 {
+  left: 60%;
+  bottom: 45%;
+  animation-delay: 2s;
+}
+
+.sparkle-6 {
+  left: 25%;
+  bottom: 55%;
+  animation-delay: 2.5s;
+}
+
+.sparkle-7 {
+  left: 75%;
+  bottom: 50%;
+  animation-delay: 3s;
+}
+
+.sparkle-8 {
+  left: 45%;
+  bottom: 60%;
+  animation-delay: 0.3s;
+}
+
+.sparkle-9 {
+  left: 55%;
+  bottom: 25%;
+  animation-delay: 0.8s;
+}
+
+.sparkle-10 {
+  left: 35%;
+  bottom: 65%;
+  animation-delay: 1.3s;
+}
 
 /* Hide extra sparkles */
-.sparkle-11, .sparkle-12, .sparkle-13, .sparkle-14, .sparkle-15 {
+.sparkle-11,
+.sparkle-12,
+.sparkle-13,
+.sparkle-14,
+.sparkle-15 {
   display: none;
 }
 
@@ -2045,14 +2800,17 @@ body {
     opacity: 0;
     transform: translateY(0) scale(0.5);
   }
+
   20% {
     opacity: 0.8;
     transform: translateY(-8px) scale(1);
   }
+
   80% {
     opacity: 0.3;
     transform: translateY(-40px) scale(0.6);
   }
+
   100% {
     opacity: 0;
     transform: translateY(-60px) scale(0.2);
@@ -2072,8 +2830,17 @@ body {
 }
 
 @keyframes portal-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
 }
 
 /* ========================================
@@ -2117,8 +2884,13 @@ body {
 }
 
 @keyframes deck-viewer-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .deck-viewer-modal {
@@ -2138,8 +2910,15 @@ body {
 }
 
 @keyframes deck-viewer-slide-up {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .deck-viewer-header {
