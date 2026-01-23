@@ -143,7 +143,7 @@ export function DeckViewer({ deckId, onClose }: DeckViewerProps) {
     }
   };
 
-  // Get the current image URL for preview
+  // Get the current image URL for preview (art crop only)
   const getPreviewImageUrl = () => {
     if (!previewCard) return null;
 
@@ -151,16 +151,21 @@ export function DeckViewer({ deckId, onClose }: DeckViewerProps) {
 
     // Double-faced cards with separate images
     if (card?.cardFaces && card.cardFaces[previewFaceIndex]?.imageUris) {
-      return card.cardFaces[previewFaceIndex].imageUris!.large || card.cardFaces[previewFaceIndex].imageUris!.normal;
+      const faceUris = card.cardFaces[previewFaceIndex].imageUris!;
+      return faceUris.artCrop || faceUris.large || faceUris.normal;
     }
 
     // Regular cards
     if (card?.imageUris) {
-      return card.imageUris.large || card.imageUris.normal;
+      return card.imageUris.artCrop || card.imageUris.large || card.imageUris.normal;
     }
 
-    // Fallback to enriched card imageUrl
-    return previewCard.imageUrl || null;
+    // Fallback to Scryfall art_crop API
+    if (previewCard.name) {
+      return `https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=${encodeURIComponent(previewCard.name)}`;
+    }
+
+    return null;
   };
 
   const card = previewCard?.card;
@@ -244,47 +249,51 @@ export function DeckViewer({ deckId, onClose }: DeckViewerProps) {
 
             {/* Card Preview */}
             <div className="deck-viewer-preview">
-              {previewCard ? (
-                <>
-                  <div
-                    className={`deck-viewer-preview-image ${isDoubleFaced ? 'flippable' : ''}`}
-                    onClick={isDoubleFaced ? toggleCardFace : undefined}
-                  >
-                    {getPreviewImageUrl() ? (
-                      <img
-                        src={getPreviewImageUrl()!}
-                        alt={previewCard.name}
-                        loading="eager"
-                      />
-                    ) : (
-                      <div className="deck-viewer-preview-placeholder">
-                        <span>No image available</span>
-                      </div>
-                    )}
-                    {isDoubleFaced && (
-                      <div className="deck-viewer-flip-hint">
-                        Click to flip
-                      </div>
-                    )}
+              <div className="deck-viewer-preview-scroll">
+                {previewCard ? (
+                  <>
+                    <div
+                      className={`deck-viewer-preview-image ${isDoubleFaced ? 'flippable' : ''}`}
+                      onClick={isDoubleFaced ? toggleCardFace : undefined}
+                    >
+                      {getPreviewImageUrl() ? (
+                        <img
+                          src={getPreviewImageUrl()!}
+                          alt={previewCard.name}
+                          loading="eager"
+                        />
+                      ) : (
+                        <div className="deck-viewer-preview-placeholder">
+                          <span>No image available</span>
+                        </div>
+                      )}
+                      {isDoubleFaced && (
+                        <div className="deck-viewer-flip-hint">
+                          Click to flip
+                        </div>
+                      )}
+                    </div>
+                    <div className="deck-viewer-preview-info">
+                      <h4 className="deck-viewer-preview-name">{previewCard.name}</h4>
+                      <p className="deck-viewer-preview-type">{previewCard.card?.typeLine || 'Unknown type'}</p>
+                      {previewCard.card?.oracleText && (
+                        <div className="deck-viewer-preview-text">
+                          <ManaText text={previewCard.card.oracleText} symbolSize={14} />
+                        </div>
+                      )}
+                      {(previewCard.card?.power || previewCard.card?.toughness) && (
+                        <p className="deck-viewer-preview-pt">
+                          {previewCard.card.power}/{previewCard.card.toughness}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="deck-viewer-preview-empty">
+                    <p>Select a card to preview</p>
                   </div>
-                  <div className="deck-viewer-preview-info">
-                    <h4 className="deck-viewer-preview-name">{previewCard.name}</h4>
-                    <p className="deck-viewer-preview-type">{previewCard.card?.typeLine || 'Unknown type'}</p>
-                    {previewCard.card?.oracleText && (
-                      <p className="deck-viewer-preview-text">{previewCard.card.oracleText}</p>
-                    )}
-                    {(previewCard.card?.power || previewCard.card?.toughness) && (
-                      <p className="deck-viewer-preview-pt">
-                        {previewCard.card.power}/{previewCard.card.toughness}
-                      </p>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="deck-viewer-preview-empty">
-                  <p>Select a card to preview</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         )}
