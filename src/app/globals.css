@@ -3999,6 +3999,7 @@ body {
   height: 200px;
   margin-bottom: -30px;
   z-index: 2;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Side crystal containers */
@@ -4008,6 +4009,7 @@ body {
   flex-direction: column;
   gap: 2px;
   align-items: center;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .crystal-right {
@@ -4028,12 +4030,13 @@ body {
   display: flex;
   justify-content: center;
   z-index: 3;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Crystal images */
 .crystal-img {
   filter: drop-shadow(0 0 20px rgba(80, 160, 255, 0.4));
-  transition: filter 0.4s ease;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .crystal-main {
@@ -4074,6 +4077,7 @@ body {
   pointer-events: none;
   animation: crystal-glow-pulse 3s ease-in-out infinite;
   z-index: -1;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Inner crystal pulse */
@@ -4095,6 +4099,7 @@ body {
   animation: crystal-inner-pulse 2s ease-in-out infinite;
   z-index: 4;
   mix-blend-mode: screen;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Float animations */
@@ -4136,6 +4141,222 @@ body {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.1);
   }
+}
+
+/* ========================================
+   Dormant State - No Grimoire Selected
+   Crystals lay horizontal on pedestal
+   ======================================== */
+
+/* Keep assembly same size as active - only crystals move */
+
+/* Main crystal lays flat/horizontal resting on pedestal center */
+.portal-dormant .crystal-center {
+  position: absolute;
+  bottom: -45px;
+  transform: rotate(90deg);
+  z-index: 5;
+}
+
+.portal-dormant .crystal-main {
+  animation: none;
+  width: 70px;
+  filter:
+    grayscale(0.5)
+    brightness(0.75)
+    drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.6));
+  opacity: 0.9;
+}
+
+/* Side crystals come from off-screen when dormant */
+.portal-dormant .crystal-right {
+  top: auto;
+  bottom: -20px;
+  right: -80px;
+  transform: translateX(0) rotate(85deg);
+  opacity: 0;
+}
+
+.portal-dormant .crystal-left {
+  top: auto;
+  bottom: -20px;
+  left: -80px;
+  transform: translateX(0) scaleX(-1) rotate(-85deg);
+  opacity: 0;
+}
+
+.portal-dormant .crystal-large-tilted,
+.portal-dormant .crystal-small-lower {
+  animation: none;
+  filter:
+    grayscale(0.5)
+    brightness(0.75)
+    drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* Hide all magical effects */
+.portal-dormant .crystal-glow,
+.portal-dormant .crystal-pulse {
+  opacity: 0;
+}
+
+/* No energy beam */
+.portal-dormant::before {
+  opacity: 0 !important;
+}
+
+/* Hide particles */
+.portal-dormant .crystal-particles {
+  opacity: 0;
+}
+
+/* Desaturate pedestal slightly */
+.portal-dormant .pedestal-img {
+  filter: brightness(0.85) saturate(0.7);
+}
+
+/* Dim the input/label area */
+.portal-dormant .pedestal-input,
+.portal-dormant .pedestal-create-label {
+  opacity: 0.4;
+  filter: grayscale(0.8);
+  text-shadow: none;
+}
+
+.portal-dormant .pedestal-input::placeholder {
+  color: rgba(100, 80, 60, 0.3);
+}
+
+/* Dim the arrows */
+.portal-dormant .portal-arrow {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Dim mode indicator */
+.portal-dormant .portal-mode-indicator {
+  opacity: 0.3;
+}
+
+/* No pedestal glow */
+.portal-dormant .pedestal-wrapper::before {
+  opacity: 0 !important;
+}
+
+/* ========================================
+   Crystal Slide Transitions (Mode Switch)
+   ======================================== */
+
+/* Exit animations - current crystal slides out */
+.crystal-slide-exit-right .crystal-assembly {
+  animation: crystal-exit-right 0.4s ease-in forwards;
+}
+
+.crystal-slide-exit-left .crystal-assembly {
+  animation: crystal-exit-left 0.4s ease-in forwards;
+}
+
+/* Enter animations - new crystal slides in */
+.crystal-slide-enter-left .crystal-assembly {
+  animation: crystal-enter-from-left 0.4s ease-out forwards;
+}
+
+.crystal-slide-enter-right .crystal-assembly {
+  animation: crystal-enter-from-right 0.4s ease-out forwards;
+}
+
+@keyframes crystal-exit-right {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(150px);
+    opacity: 0;
+  }
+}
+
+@keyframes crystal-exit-left {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-150px);
+    opacity: 0;
+  }
+}
+
+@keyframes crystal-enter-from-left {
+  0% {
+    transform: translateX(-150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes crystal-enter-from-right {
+  0% {
+    transform: translateX(150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Override normal transitions during slide */
+.crystal-slide-exit-right .crystal-center,
+.crystal-slide-exit-right .crystal-left,
+.crystal-slide-exit-right .crystal-right,
+.crystal-slide-exit-left .crystal-center,
+.crystal-slide-exit-left .crystal-left,
+.crystal-slide-exit-left .crystal-right,
+.crystal-slide-enter-left .crystal-center,
+.crystal-slide-enter-left .crystal-left,
+.crystal-slide-enter-left .crystal-right,
+.crystal-slide-enter-right .crystal-center,
+.crystal-slide-enter-right .crystal-left,
+.crystal-slide-enter-right .crystal-right {
+  transition: none !important;
+}
+
+/* Transition for awakening - staggered timing */
+.crystal-portal .crystal-center {
+  transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.crystal-portal .crystal-left {
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+}
+
+.crystal-portal .crystal-right {
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+}
+
+.crystal-portal .crystal-img {
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crystal-portal .crystal-glow,
+.crystal-portal .crystal-pulse {
+  transition: opacity 0.5s ease 0.4s;
+}
+
+.crystal-portal .crystal-particles {
+  transition: opacity 0.5s ease 0.5s;
+}
+
+.crystal-portal .pedestal-img,
+.crystal-portal .pedestal-input,
+.crystal-portal .pedestal-create-label,
+.crystal-portal .portal-arrow,
+.crystal-portal .portal-mode-indicator {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
 }
 
 /* Pedestal container */

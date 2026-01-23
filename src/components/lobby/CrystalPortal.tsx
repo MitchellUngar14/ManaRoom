@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 type PortalMode = 'join' | 'create';
+type SlideDirection = 'none' | 'exit-left' | 'exit-right' | 'enter-left' | 'enter-right';
 
 interface CrystalPortalProps {
   selectedDeckId: string | null;
@@ -16,6 +17,8 @@ export function CrystalPortal({ selectedDeckId, onJoin, onCreateRoom }: CrystalP
   const [roomKey, setRoomKey] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isActivating, setIsActivating] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<SlideDirection>('none');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const isCreateMode = mode === 'create';
 
@@ -80,8 +83,26 @@ export function CrystalPortal({ selectedDeckId, onJoin, onCreateRoom }: CrystalP
   };
 
   const switchMode = (direction: 'left' | 'right') => {
+    if (isTransitioning) return;
+
     setError(null);
-    setMode(prev => prev === 'join' ? 'create' : 'join');
+    setIsTransitioning(true);
+
+    // Right arrow clicked = current exits right, new enters from left
+    // Left arrow clicked = current exits left, new enters from right
+    setSlideDirection(direction === 'right' ? 'exit-right' : 'exit-left');
+
+    // After exit animation, switch mode and set enter direction
+    setTimeout(() => {
+      setMode(prev => prev === 'join' ? 'create' : 'join');
+      setSlideDirection(direction === 'right' ? 'enter-left' : 'enter-right');
+
+      // Clear transition state after entry animation
+      setTimeout(() => {
+        setSlideDirection('none');
+        setIsTransitioning(false);
+      }, 400);
+    }, 400);
   };
 
   const hasSelectedDeck = !!selectedDeckId;
@@ -91,8 +112,10 @@ export function CrystalPortal({ selectedDeckId, onJoin, onCreateRoom }: CrystalP
   const crystalLarge = isCreateMode ? '/crystal-large-tilted-green.png' : '/crystal-large-tilted.png';
   const crystalSmall = isCreateMode ? '/crystal-small-tilted-green.png' : '/crystal-small-tilted.png';
 
+  const slideClass = slideDirection !== 'none' ? `crystal-slide-${slideDirection}` : '';
+
   return (
-    <div className={`crystal-portal ${isActivating ? 'portal-activating' : ''} ${hasSelectedDeck ? 'portal-ready' : ''} ${isCreateMode ? 'portal-create-mode' : 'portal-join-mode'}`}>
+    <div className={`crystal-portal ${isActivating ? 'portal-activating' : ''} ${hasSelectedDeck ? 'portal-ready' : 'portal-dormant'} ${isCreateMode ? 'portal-create-mode' : 'portal-join-mode'} ${slideClass}`}>
       {/* Floating Crystals Container */}
       <div className="crystal-assembly">
         {/* Left side crystals - mirrored */}
@@ -203,7 +226,7 @@ export function CrystalPortal({ selectedDeckId, onJoin, onCreateRoom }: CrystalP
                   setError(null);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="ROOM CODE"
+                placeholder="CODE"
                 maxLength={6}
                 disabled={isActivating}
                 className="pedestal-input"
