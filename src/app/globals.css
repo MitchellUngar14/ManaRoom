@@ -1521,7 +1521,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: visible;
-  padding: 16px 20px 16px 16px;
+  padding: 12px 24px 12px 12px;
   scrollbar-width: thin;
   scrollbar-color: var(--sanctum-border) transparent;
 }
@@ -1962,44 +1962,188 @@ body {
   margin-bottom: 0;
 }
 
-/* DeckList items inside bookshelf - card style */
-.bookshelf-scroll-area .grimoire-book {
-  width: 100%;
-  background: var(--sanctum-bg-elevated);
-  border: 1px solid var(--sanctum-border);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.25s ease;
-  overflow: visible;
+/* ========================================
+   Book Spine Stack - Deck List
+   ======================================== */
+
+.book-spine-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.bookshelf-scroll-area .grimoire-book:hover {
-  transform: translateY(-2px);
-  background: var(--sanctum-bg-surface);
-  border-color: var(--sanctum-text-muted);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.3),
-    0 0 0 1px var(--sanctum-border-subtle);
-}
-
-.bookshelf-scroll-area .grimoire-book.selected {
-  background: linear-gradient(135deg, var(--sanctum-bg-surface) 0%, var(--sanctum-bg-elevated) 100%);
-  border-color: var(--sanctum-gold-muted);
-  box-shadow:
-    0 0 32px var(--sanctum-gold-glow),
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(201, 162, 39, 0.1);
-  transform: translateY(-2px);
-}
-
-/* Inner content area (for DeckList items) */
-.grimoire-book-inner {
+.book-spine {
   position: relative;
-  margin: 0;
-  padding: 16px 20px;
-  border: none;
-  border-radius: 0;
-  background: transparent;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  margin-bottom: -3px;
+}
+
+.book-spine:hover {
+  transform: translateX(8px) scale(1.02);
+  z-index: 10;
+}
+
+.book-spine:active {
+  transform: translateX(4px) scale(1.01);
+}
+
+.book-spine.selected {
+  transform: translateX(12px) scale(1.03);
+  z-index: 11;
+}
+
+/* Book spine background image */
+.book-spine-bg {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Text overlay on spine center parchment area */
+.book-spine-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48%;
+  text-align: center;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.book-spine-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #050200;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+  line-height: 1.15;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  max-width: 100%;
+}
+
+.book-spine-commander {
+  font-family: 'Crimson Text', serif;
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 600;
+  color: #1a0a00;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+  line-height: 1.1;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Selection glow effect - blue gem glow */
+.book-spine-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: linear-gradient(
+    90deg,
+    rgba(80, 160, 255, 0.2) 0%,
+    transparent 15%,
+    transparent 85%,
+    rgba(80, 160, 255, 0.2) 100%
+  );
+}
+
+.book-spine.selected .book-spine-glow {
+  opacity: 1;
+}
+
+.book-spine:hover .book-spine-glow {
+  opacity: 0.6;
+}
+
+.book-spine.selected:hover .book-spine-glow {
+  opacity: 1;
+}
+
+/* Blue gems glow on selected */
+.book-spine.selected .book-spine-bg {
+  filter:
+    drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 10px rgba(80, 160, 255, 0.6))
+    brightness(1.1);
+}
+
+/* Delete button */
+.book-spine-delete {
+  position: absolute;
+  top: 50%;
+  right: 5%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 10, 5, 0.85);
+  border: 1px solid rgba(180, 140, 80, 0.4);
+  border-radius: 50%;
+  color: rgba(255, 220, 180, 0.8);
+  opacity: 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.book-spine:hover .book-spine-delete {
+  opacity: 1;
+}
+
+.book-spine-delete:hover {
+  background: rgba(140, 40, 40, 0.9);
+  border-color: rgba(255, 100, 100, 0.6);
+  color: white;
+  transform: translateY(-50%) scale(1.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .book-spine-title {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  .book-spine-stack {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .book-spine {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .book-spine-bg {
+    height: 50px;
+    width: auto;
+  }
+
+  .book-spine:hover,
+  .book-spine.selected {
+    transform: translateY(-4px);
+  }
 }
 
 /* Text styling - elegant typography */
