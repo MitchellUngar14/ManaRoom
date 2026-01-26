@@ -44,6 +44,10 @@ export function Exile({ cards, isOpponent }: ExileProps) {
     moveCard(card.instanceId, 'exile', 'hand');
   }, [moveCard]);
 
+  const handleReturnToBattlefield = useCallback((card: GameCard) => {
+    moveCard(card.instanceId, 'exile', 'battlefield', { x: 0.5, y: 0.5 });
+  }, [moveCard]);
+
   const contextMenuOptions = [
     { label: 'View', icon: 'view' as const, onClick: handleViewExile },
   ];
@@ -161,15 +165,24 @@ export function Exile({ cards, isOpponent }: ExileProps) {
                           </span>
                         )}
 
-                        {/* Return to hand button (only for own exile) */}
+                        {/* Return buttons (only for own exile) */}
                         {!isOpponent && (
-                          <button
-                            onClick={() => handleReturnToHand(card)}
-                            className="game-btn game-btn-small game-btn-accent opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Return to hand"
-                          >
-                            To Hand
-                          </button>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleReturnToHand(card)}
+                              className="game-btn game-btn-small game-btn-accent"
+                              title="Return to hand"
+                            >
+                              To Hand
+                            </button>
+                            <button
+                              onClick={() => handleReturnToBattlefield(card)}
+                              className="game-btn game-btn-small"
+                              title="Return to battlefield"
+                            >
+                              To Battlefield
+                            </button>
+                          </div>
                         )}
                       </div>
                     );

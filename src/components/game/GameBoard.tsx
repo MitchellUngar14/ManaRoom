@@ -7,6 +7,9 @@ import {
   DragStartEvent,
   DragEndEvent,
   pointerWithin,
+  useSensor,
+  useSensors,
+  PointerSensor,
 } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
@@ -156,7 +159,7 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
 }
 
 export function GameBoard() {
-  const { myId, players, roomKey, moveCard, repositionCard, previewCard, setPreviewCard } = useGameStore();
+  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard } = useGameStore();
   const { isPopoutOpen, openPopout, closePopout } = usePopoutWindow();
   const { theme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
@@ -166,6 +169,14 @@ export function GameBoard() {
   const [sideZonesCollapsed, setSideZonesCollapsed] = useState(false);
   const [editingCard, setEditingCard] = useState<BoardCard | null>(null);
   const [showPlacementGuides, setShowPlacementGuides] = useState(true);
+
+  // Configure drag sensor to require movement before activating (allows clicks to work)
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8, // Require 8px movement before drag starts
+    },
+  });
+  const sensors = useSensors(pointerSensor);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -313,6 +324,15 @@ export function GameBoard() {
     // Skip if same zone (except battlefield which is handled above)
     if (fromZone === toZone) return;
 
+    // Check if card is a token or copy being moved from battlefield to graveyard/exile
+    const cardData = active.data.current.card as BoardCard;
+    const isTokenOrCopy = cardData?.isToken || cardData?.isCopy;
+    if (fromZone === 'battlefield' && (toZone === 'graveyard' || toZone === 'exile') && isTokenOrCopy) {
+      // Tokens and copies are removed from the game instead of going to graveyard/exile
+      removeCard(cardId, fromZone);
+      return;
+    }
+
     moveCard(cardId, fromZone, toZone, position);
   };
 
@@ -327,6 +347,7 @@ export function GameBoard() {
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       collisionDetection={pointerWithin}

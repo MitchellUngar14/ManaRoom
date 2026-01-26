@@ -80,6 +80,7 @@ export interface CardMovedEvent {
   fromZone: ZoneType;
   toZone: ZoneType;
   position?: { x: number; y: number };
+  libraryPosition?: 'top' | 'bottom';
 }
 
 export interface CardTappedEvent {

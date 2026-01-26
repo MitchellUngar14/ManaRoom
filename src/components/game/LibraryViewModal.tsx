@@ -22,6 +22,11 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
     onClose();
   }, [moveCard, onClose]);
 
+  const handleTutorToBattlefield = useCallback((card: GameCard) => {
+    moveCard(card.instanceId, 'library', 'battlefield', { x: 0.5, y: 0.5 });
+    onClose();
+  }, [moveCard, onClose]);
+
   const filteredCards = useMemo(() => {
     if (!searchQuery.trim()) {
       return cards;
@@ -170,14 +175,23 @@ export function LibraryViewModal({ isOpen, cards, onClose }: LibraryViewModalPro
                           </span>
                         )}
 
-                        {/* Tutor to hand button */}
-                        <button
-                          onClick={() => handleTutorToHand(card)}
-                          className="game-btn game-btn-small game-btn-accent opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Add to hand"
-                        >
-                          To Hand
-                        </button>
+                        {/* Tutor buttons */}
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleTutorToHand(card)}
+                            className="game-btn game-btn-small game-btn-accent"
+                            title="Add to hand"
+                          >
+                            To Hand
+                          </button>
+                          <button
+                            onClick={() => handleTutorToBattlefield(card)}
+                            className="game-btn game-btn-small"
+                            title="Put onto battlefield"
+                          >
+                            To Battlefield
+                          </button>
+                        </div>
                       </div>
                     );
                   })}

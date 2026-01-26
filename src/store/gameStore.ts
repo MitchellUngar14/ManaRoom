@@ -50,7 +50,8 @@ interface GameStore {
     cardId: string,
     fromZone: ZoneType,
     toZone: ZoneType,
-    position?: { x: number; y: number }
+    position?: { x: number; y: number },
+    libraryPosition?: 'top' | 'bottom'
   ) => void;
   repositionCard: (cardId: string, position: { x: number; y: number }) => void;
   tapCard: (cardId: string) => void;
@@ -63,6 +64,7 @@ interface GameStore {
   takeControl: (cardId: string, fromPlayerId: string) => void;
   updateCardStats: (cardId: string, stats: { counters?: number; modifiedPower?: number; modifiedToughness?: number }) => void;
   createCardCopy: (card: BoardCard) => void;
+  scryLibrary: (topCardIds: string[], bottomCardIds: string[]) => void;
 
   // UI actions
   setPreviewCard: (card: GameCard | null) => void;
@@ -217,6 +219,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
           });
         }
         console.log(`Player ${data.playerId} shuffled their library`);
+      });
+
+      socket.on('game:scryed', (data: { playerId: string; library?: GameCard[]; count?: number }) => {
+        // If we received the library (meaning we're the player who scried), update our state
+        if (data.library && data.playerId === get().myId) {
+          set((state) => {
+            const player = state.players[data.playerId];
+            if (!player) return state;
+
+            return {
+              players: {
+                ...state.players,
+                [data.playerId]: {
+                  ...player,
+                  zones: {
+                    ...player.zones,
+                    library: data.library!,
+                  },
+                },
+              },
+            };
+          });
+        }
       });
 
       socket.on('game:lifeChanged', (data: { playerId: string; life: number }) => {
@@ -455,7 +480,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ roomKey: null, gameState: null, players: {} });
   },
 
-  moveCard: (cardId, fromZone, toZone, position) => {
+  moveCard: (cardId, fromZone, toZone, position, libraryPosition) => {
     const { socket, myId } = get();
     if (!socket || !myId) return;
 
@@ -471,8 +496,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const [card] = fromCards.splice(cardIndex, 1);
       const toCards = [...player.zones[toZone]];
 
-      // If moving to battlefield, add position
+      // Prepare the card to add
+      let cardToAdd: GameCard;
       if (toZone === 'battlefield' && position) {
+        // If moving to battlefield, add position
         const boardCard: BoardCard = {
           ...card,
           position,
@@ -480,20 +507,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
           faceDown: false,
           counters: 0,
         };
-        toCards.push(boardCard as GameCard);
+        cardToAdd = boardCard as GameCard;
       } else if (fromZone === 'battlefield') {
         // Leaving battlefield - remove battlefield-specific properties (untap, clear position, etc.)
         const boardCard = card as BoardCard;
-        const cleanCard: GameCard = {
+        cardToAdd = {
           instanceId: card.instanceId,
           cardName: card.cardName,
           scryfallId: card.scryfallId,
           imageUrl: card.imageUrl,
           card: boardCard.card,
         };
-        toCards.push(cleanCard);
       } else {
-        toCards.push(card);
+        cardToAdd = card;
+      }
+
+      // Add to destination zone (handle library positioning)
+      if (toZone === 'library' && libraryPosition === 'bottom') {
+        toCards.unshift(cardToAdd); // Add to beginning (bottom of library)
+      } else {
+        toCards.push(cardToAdd); // Add to end (top of library, or normal for other zones)
       }
 
       return {
@@ -511,7 +544,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    socket.emit('game:moveCard', { cardId, fromZone, toZone, position });
+    socket.emit('game:moveCard', { cardId, fromZone, toZone, position, libraryPosition });
   },
 
   repositionCard: (cardId, position) => {
@@ -730,6 +763,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
+  scryLibrary: (topCardIds, bottomCardIds) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    socket.emit('game:scry', { topCardIds, bottomCardIds });
+  },
+
   setPreviewCard: (card) => set({ previewCard: card }),
 
   // Internal setters
@@ -759,7 +799,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const toCardsFiltered = player.zones[event.toZone].filter(
         (c) => c.instanceId !== event.cardId
       );
-      const toCards = [...toCardsFiltered, event.cardData];
+
+      // Handle library positioning (bottom means unshift, top/default means push)
+      let toCards;
+      if (event.toZone === 'library' && event.libraryPosition === 'bottom') {
+        toCards = [event.cardData, ...toCardsFiltered];
+      } else {
+        toCards = [...toCardsFiltered, event.cardData];
+      }
 
       return {
         players: {

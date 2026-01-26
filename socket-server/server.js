@@ -346,7 +346,7 @@ io.on('connection', (socket) => {
   });
 
   // Move card between zones
-  socket.on('game:moveCard', ({ cardId, fromZone, toZone, position }) => {
+  socket.on('game:moveCard', ({ cardId, fromZone, toZone, position, libraryPosition }) => {
     if (!currentRoom || !playerId) return;
 
     const room = rooms.get(currentRoom);
@@ -362,34 +362,48 @@ io.on('connection', (socket) => {
 
     const [card] = fromCards.splice(cardIndex, 1);
 
-    // Add to destination zone
+    // Prepare the card to add
+    let cardToAdd;
     if (toZone === 'battlefield' && position) {
       // Entering battlefield - add battlefield-specific properties
-      player.zones[toZone].push({
+      cardToAdd = {
         ...card,
         position,
         tapped: false,
         faceDown: false,
         counters: 0,
-      });
+      };
     } else if (fromZone === 'battlefield') {
       // Leaving battlefield - remove battlefield-specific properties (untap, clear position, etc.)
       const { tapped, position: _pos, faceDown, counters, modifiedPower, modifiedToughness, ...cleanCard } = card;
-      player.zones[toZone].push(cleanCard);
+      cardToAdd = cleanCard;
     } else {
-      player.zones[toZone].push(card);
+      cardToAdd = card;
+    }
+
+    // Add to destination zone (handle library positioning)
+    if (toZone === 'library' && libraryPosition === 'bottom') {
+      player.zones[toZone].unshift(cardToAdd); // Add to beginning (bottom of library)
+    } else {
+      player.zones[toZone].push(cardToAdd); // Add to end (top of library, or normal for other zones)
     }
 
     room.lastActivity = new Date();
+
+    // Get the card data from the correct position
+    const addedCardData = toZone === 'library' && libraryPosition === 'bottom'
+      ? player.zones[toZone][0]
+      : player.zones[toZone][player.zones[toZone].length - 1];
 
     // Broadcast to all players in room (including sender for confirmation)
     io.to(currentRoom).emit('game:cardMoved', {
       playerId,
       cardId,
-      cardData: player.zones[toZone][player.zones[toZone].length - 1],
+      cardData: addedCardData,
       fromZone,
       toZone,
       position,
+      libraryPosition,
     });
   });
 
@@ -478,6 +492,56 @@ io.on('connection', (socket) => {
 
     // Notify other players (they don't need to see the library contents)
     socket.to(currentRoom).emit('game:shuffled', { playerId });
+  });
+
+  // Scry library (look at top X cards, put some on top and some on bottom)
+  socket.on('game:scry', ({ topCardIds, bottomCardIds }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    // Get the cards being scried from the library
+    const allScryIds = [...topCardIds, ...bottomCardIds];
+    const scryCards = new Map();
+
+    // Remove scried cards from library and store them
+    player.zones.library = player.zones.library.filter((card) => {
+      if (allScryIds.includes(card.instanceId)) {
+        scryCards.set(card.instanceId, card);
+        return false;
+      }
+      return true;
+    });
+
+    // Add bottom cards to the beginning of library (bottom of deck)
+    // bottomCardIds[0] will be closest to the top among the bottom cards
+    for (let i = bottomCardIds.length - 1; i >= 0; i--) {
+      const card = scryCards.get(bottomCardIds[i]);
+      if (card) {
+        player.zones.library.unshift(card);
+      }
+    }
+
+    // Add top cards to the end of library (top of deck)
+    // topCardIds[0] will be drawn first (very top)
+    for (let i = topCardIds.length - 1; i >= 0; i--) {
+      const card = scryCards.get(topCardIds[i]);
+      if (card) {
+        player.zones.library.push(card);
+      }
+    }
+
+    room.lastActivity = new Date();
+
+    // Send updated library to the player who scried
+    socket.emit('game:scryed', { playerId, library: player.zones.library });
+
+    // Notify other players (they don't see the contents)
+    socket.to(currentRoom).emit('game:scryed', { playerId, count: allScryIds.length });
   });
 
   // Restart game

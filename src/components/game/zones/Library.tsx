@@ -2,9 +2,10 @@
 
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/types';
-import { CardBack } from '../Card';
+import { Card, CardBack } from '../Card';
 import { CardContextMenu } from '../CardContextMenu';
 import { LibraryViewModal } from '../LibraryViewModal';
+import { ScryModal } from '../ScryModal';
 import { useGameStore } from '@/store/gameStore';
 
 interface LibraryProps {
@@ -15,6 +16,8 @@ interface LibraryProps {
 export function Library({ cards, isOpponent }: LibraryProps) {
   const { drawCard, shuffle } = useGameStore();
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [scryModalOpen, setScryModalOpen] = useState(false);
+  const topCard = cards[cards.length - 1];
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
     position: { x: number; y: number };
@@ -50,7 +53,13 @@ export function Library({ cards, isOpponent }: LibraryProps) {
     closeContextMenu();
   }, [shuffle, closeContextMenu]);
 
+  const handleScry = useCallback(() => {
+    setScryModalOpen(true);
+    closeContextMenu();
+  }, [closeContextMenu]);
+
   const contextMenuOptions = [
+    { label: 'Scry', icon: 'scry' as const, onClick: handleScry },
     { label: 'View Library', icon: 'view' as const, onClick: handleViewLibrary },
     { label: 'Shuffle', icon: 'shuffle' as const, onClick: handleShuffle },
   ];
@@ -59,13 +68,22 @@ export function Library({ cards, isOpponent }: LibraryProps) {
     <>
       <div
         className="h-full flex flex-col cursor-pointer"
-        onClick={handleClick}
         onContextMenu={handleContextMenu}
-        title={isOpponent ? "Opponent's library" : 'Click to draw a card'}
+        title={isOpponent ? "Opponent's library" : 'Click to draw, or drag to battlefield/hand'}
       >
         <span className="text-[9px] mb-0.5 text-center" style={{ color: 'var(--theme-text-muted)' }}>Library</span>
-        <div className="flex-1 w-28 hover:brightness-110 transition-all">
-          <CardBack count={cards.length} />
+        <div className="flex-1 w-28 hover:brightness-110 transition-all relative">
+          {topCard && !isOpponent ? (
+            <>
+              <Card card={topCard} zone="library" isOpponent={isOpponent} showBack={true} onClick={handleClick} />
+              {/* Card count overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span className="text-2xl font-bold text-white drop-shadow-lg">{cards.length}</span>
+              </div>
+            </>
+          ) : (
+            <CardBack count={cards.length} />
+          )}
         </div>
       </div>
 
@@ -80,6 +98,12 @@ export function Library({ cards, isOpponent }: LibraryProps) {
         isOpen={viewModalOpen}
         cards={cards}
         onClose={() => setViewModalOpen(false)}
+      />
+
+      <ScryModal
+        isOpen={scryModalOpen}
+        cards={cards}
+        onClose={() => setScryModalOpen(false)}
       />
     </>
   );

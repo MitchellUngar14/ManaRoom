@@ -59,10 +59,11 @@ export function Card({
   const isHand = zone === 'hand';
   const isGraveyard = zone === 'graveyard';
   const isExile = zone === 'exile';
+  const isLibrary = zone === 'library';
   // Don't show hover effects on drag overlay cards
   const showHoverEffects = (isHand || isBattlefield) && !isDragOverlay;
-  // Cards in graveyard/exile should not have their own context menu - the zone handles it
-  const disableContextMenu = isGraveyard || isExile;
+  // Cards in graveyard/exile/library should not have their own context menu - the zone handles it
+  const disableContextMenu = isGraveyard || isExile || isLibrary;
 
   const [isHovered, setIsHovered] = useState(false);
   const [hoverRect, setHoverRect] = useState<DOMRect | null>(null);
@@ -80,8 +81,8 @@ export function Card({
   const { attributes, listeners: dndListeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.instanceId,
     data: { card, zone },
-    // Disable dragging for opponent cards, readOnly, overlay, and graveyard/exile (use modal to move those)
-    disabled: isOpponent || readOnly || isDragOverlay || isGraveyard || isExile,
+    // Disable dragging for opponent cards, readOnly, and overlay
+    disabled: isOpponent || readOnly || isDragOverlay,
   });
 
   // Clear hover state when drag starts so portal doesn't show stale position
@@ -149,14 +150,39 @@ export function Card({
   }, [card.instanceId, tapCard]);
 
   const handleGoToGraveyard = useCallback(() => {
-    if (isToken(card)) {
-      // Tokens are removed from the game when they would go to graveyard
+    if (isToken(card) || boardCard.isCopy) {
+      // Tokens and copies are removed from the game when they would go to graveyard
       removeCard(card.instanceId, 'battlefield');
     } else {
       // Regular cards go to graveyard
       moveCard(card.instanceId, 'battlefield', 'graveyard');
     }
-  }, [card, moveCard, removeCard]);
+  }, [card, boardCard.isCopy, moveCard, removeCard]);
+
+  const handleGoToExile = useCallback(() => {
+    if (isToken(card) || boardCard.isCopy) {
+      // Tokens and copies are removed from the game when they would go to exile
+      removeCard(card.instanceId, 'battlefield');
+    } else {
+      // Regular cards go to exile
+      moveCard(card.instanceId, 'battlefield', 'exile');
+    }
+  }, [card, boardCard.isCopy, moveCard, removeCard]);
+
+  const handleToTopOfLibrary = useCallback(() => {
+    moveCard(card.instanceId, 'hand', 'library', undefined, 'top');
+    closeContextMenu();
+  }, [card.instanceId, moveCard, closeContextMenu]);
+
+  const handleToBottomOfLibrary = useCallback(() => {
+    moveCard(card.instanceId, 'hand', 'library', undefined, 'bottom');
+    closeContextMenu();
+  }, [card.instanceId, moveCard, closeContextMenu]);
+
+  const handleDiscard = useCallback(() => {
+    moveCard(card.instanceId, 'hand', 'graveyard');
+    closeContextMenu();
+  }, [card.instanceId, moveCard, closeContextMenu]);
 
   const handleTakeControl = useCallback(() => {
     if (ownerId) {
@@ -179,7 +205,7 @@ export function Card({
     : undefined;
 
   const imageUrl = showBack
-    ? '/card-back.png'
+    ? '/mtg-card-back.jpg'
     : card.imageUrl || card.card?.imageUris?.normal || '';
 
   // Build context menu options
@@ -207,6 +233,11 @@ export function Card({
       icon: 'destroy',
       onClick: handleGoToGraveyard,
     });
+    contextMenuOptions.push({
+      label: 'Exile',
+      icon: 'exile',
+      onClick: handleGoToExile,
+    });
   }
 
   // Add "Take Control" option for opponent battlefield cards
@@ -216,6 +247,25 @@ export function Card({
       label: 'Take Control',
       icon: 'steal',
       onClick: handleTakeControl,
+    });
+  }
+
+  // Add hand-specific options (own cards only)
+  if (isHand && !isOpponent && !readOnly) {
+    contextMenuOptions.push({
+      label: 'To Top of Library',
+      icon: 'toTop',
+      onClick: handleToTopOfLibrary,
+    });
+    contextMenuOptions.push({
+      label: 'To Bottom of Library',
+      icon: 'toBottom',
+      onClick: handleToBottomOfLibrary,
+    });
+    contextMenuOptions.push({
+      label: 'Discard',
+      icon: 'destroy',
+      onClick: handleDiscard,
     });
   }
 
