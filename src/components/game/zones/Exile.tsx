@@ -62,7 +62,7 @@ export function Exile({ cards, isOpponent }: ExileProps) {
         >
           Exile ({cards.length})
         </span>
-        <div className="flex-1 w-24">
+        <div className="flex-1 w-28">
           {topCard ? (
             <div
               className="h-full hover:brightness-110 transition-all"

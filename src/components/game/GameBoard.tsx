@@ -130,16 +130,16 @@ function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
 
             <div className="game-modal-body">
               <div className="flex justify-center gap-2">
-                <div className="h-32">
+                <div className="h-44">
                   <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
                 </div>
-                <div className="h-32">
+                <div className="h-44">
                   <Library cards={opponent.zones.library} isOpponent={true} />
                 </div>
-                <div className="h-32">
+                <div className="h-44">
                   <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
                 </div>
-                <div className="h-32">
+                <div className="h-44">
                   <Exile cards={opponent.zones.exile} isOpponent={true} />
                 </div>
               </div>
@@ -491,23 +491,22 @@ export function GameBoard() {
           </button>
 
           <div
-            className={`transition-all duration-300 ease-in-out ${
-              bottomBarCollapsed ? 'h-0 overflow-hidden' : 'h-52 overflow-visible'
-            }`}
+            className={`transition-all duration-300 ease-in-out ${bottomBarCollapsed ? 'h-0 overflow-hidden' : 'h-52 overflow-visible'
+              }`}
           >
             <div className="h-52 flex game-hand-zone overflow-visible">
               {/* My zones (left side) */}
               <div className="shrink-0 game-side-zones">
-                <DropZone id="commandZone" className="w-24 shrink-0">
+                <DropZone id="commandZone" className="w-28 shrink-0">
                   <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                 </DropZone>
-                <DropZone id="library" className="w-24 shrink-0">
+                <DropZone id="library" className="w-28 shrink-0">
                   <Library cards={myPlayer.zones.library} isOpponent={false} />
                 </DropZone>
-                <DropZone id="graveyard" className="w-24 shrink-0">
+                <DropZone id="graveyard" className="w-28 shrink-0">
                   <Graveyard cards={myPlayer.zones.graveyard} isOpponent={false} />
                 </DropZone>
-                <DropZone id="exile" className="w-24 shrink-0">
+                <DropZone id="exile" className="w-28 shrink-0">
                   <Exile cards={myPlayer.zones.exile} isOpponent={false} />
                 </DropZone>
               </div>

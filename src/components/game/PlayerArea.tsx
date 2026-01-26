@@ -56,17 +56,17 @@ export function PlayerArea({ player, isOpponent }: PlayerAreaProps) {
       {/* Main play area */}
       <div className="flex-1 flex gap-2">
         {/* Left sidebar: Library, Graveyard, Exile, Command Zone */}
-        <div className="w-28 flex flex-col gap-2">
-          <DropZone id="commandZone" className="h-20">
+        <div className="w-40 flex flex-col gap-2">
+          <DropZone id="commandZone" className="h-44">
             <CommandZone cards={zones.commandZone} isOpponent={isOpponent} />
           </DropZone>
-          <DropZone id="library" className="h-20">
+          <DropZone id="library" className="h-44">
             <Library cards={zones.library} isOpponent={isOpponent} />
           </DropZone>
           <DropZone id="graveyard" className="flex-1">
             <Graveyard cards={zones.graveyard} isOpponent={isOpponent} />
           </DropZone>
-          <DropZone id="exile" className="h-20">
+          <DropZone id="exile" className="h-44">
             <Exile cards={zones.exile} isOpponent={isOpponent} />
           </DropZone>
         </div>

@@ -177,16 +177,16 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
 
             <div className="game-modal-body">
               <div className="flex justify-center gap-2">
-                <div className="h-32">
+                <div className="h-44">
                   <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
                 </div>
-                <div className="h-32">
+                <div className="h-44">
                   <Library cards={opponent.zones.library} isOpponent={true} />
                 </div>
-                <div className="h-32">
+                <div className="h-44">
                   <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
                 </div>
-                <div className="h-32">
+                <div className="h-44">
                   <Exile cards={opponent.zones.exile} isOpponent={true} />
                 </div>
               </div>

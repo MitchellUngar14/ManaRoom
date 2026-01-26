@@ -64,7 +64,7 @@ export function Library({ cards, isOpponent }: LibraryProps) {
         title={isOpponent ? "Opponent's library" : 'Click to draw a card'}
       >
         <span className="text-[9px] mb-0.5 text-center" style={{ color: 'var(--theme-text-muted)' }}>Library</span>
-        <div className="flex-1 w-24 hover:brightness-110 transition-all">
+        <div className="flex-1 w-28 hover:brightness-110 transition-all">
           <CardBack count={cards.length} />
         </div>
       </div>
