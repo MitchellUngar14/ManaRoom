@@ -8,13 +8,14 @@ ManaRoom is a multiplayer Commander (Magic: The Gathering) web application for p
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router) with React 19 and TypeScript
+- **Framework:** Next.js 16.1 (App Router) with React 19 and TypeScript
 - **Database:** Neon PostgreSQL with Drizzle ORM
 - **Real-time:** Socket.io (separate server on port 3001)
 - **State:** Zustand (manages both UI state and socket client)
 - **Drag & Drop:** @dnd-kit/core with Framer Motion animations
 - **Desktop:** Electron wrapper for standalone app
 - **Card Data:** Scryfall API with database caching
+- **Styling:** Tailwind CSS
 
 ## Commands
 
@@ -89,15 +90,21 @@ All in `src/components/game/zones/`:
 ### Socket Events
 
 Client → Server:
-- `room:create`, `room:join`, `room:rejoin`, `room:leave`, `room:spectate`
-- `game:moveCard`, `game:repositionCard`, `game:tapCard`
-- `game:setLife`, `game:shuffle`, `game:restart`, `game:drawCard`
-- `game:addToken`, `game:removeCard`, `game:updateCardStats`
+- Room: `room:create`, `room:join`, `room:rejoin`, `room:leave`, `room:spectate`
+- Card movement: `game:moveCard`, `game:repositionCard`
+- Card state: `game:tapCard`, `game:untapAll`, `game:updateCardStats`
+- Library: `game:shuffle`, `game:scry`
+- Player: `game:setLife`
+- Tokens/copies: `game:addToken`, `game:removeCard`, `game:createCopy`, `game:takeControl`
+- Game flow: `game:restart`
 
-Server → Room (broadcasts):
-- `room:playerJoined`, `room:playerLeft`, `room:gameState`
-- `game:cardMoved`, `game:cardRepositioned`, `game:cardTapped`
-- `game:lifeChanged`, `game:shuffled`, `game:restarted`
+Server → Client:
+- Room: `room:joined`, `room:playerJoined`, `room:playerLeft`, `room:playerDisconnected`, `room:playerReconnected`
+- Game: `game:started`, `game:restarted`
+- Card: `game:cardMoved`, `game:cardRepositioned`, `game:cardTapped`, `game:allUntapped`, `game:cardRemoved`, `game:cardStatsUpdated`
+- Library: `game:shuffled`, `game:scryed`
+- Player: `game:lifeChanged`
+- Tokens/copies: `game:tokenAdded`, `game:copyCreated`, `game:controlChanged`
 
 ### Database Schema
 
@@ -118,8 +125,13 @@ gameHistory  → id, roomKey, players (JSONB), startedAt, endedAt (optional, not
 ### Card Instances
 Each card in-game has a unique `instanceId` (UUID) separate from `scryfallId`. This enables tracking multiple copies, tokens, and per-card state (tapped, counters, power/toughness modifiers).
 
-### Popout Windows
-The `/room/[key]/opponent-view` route is a spectator-mode page designed for multi-monitor setups. It reads room context from `sessionStorage` and connects as a spectator via socket.
+### Popout Windows / Spectator Mode
+The `/room/[key]/opponent-view` route is a spectator-mode page designed for multi-monitor setups. It reads room context from `sessionStorage` and connects as a spectator via socket using `connectAsSpectator()`. The `actingAsPlayerId` state enables spectators to emit actions on behalf of a player.
+
+### Reconnection Handling
+- Players get 60 seconds to reconnect after disconnect (browser refresh, network issues)
+- `sessionStorage` stores `playerId_${roomKey}` for automatic rejoin attempts
+- Server tracks disconnected players in memory and broadcasts `room:playerDisconnected` / `room:playerReconnected`
 
 ### Authentication
 JWT tokens stored in HTTP-only cookies with 7-day expiry. All API routes use `getSession()` from `src/lib/auth.ts`.
@@ -130,3 +142,12 @@ JWT tokens stored in HTTP-only cookies with 7-day expiry. All API routes use `ge
 - Fuzzy search fallback when exact match fails
 - Cards cached in `cardCache` table to avoid repeated API calls
 - Double-faced cards handled via `card_faces[0].image_uris`
+
+## Development Setup
+
+To run the full application locally:
+1. Start the socket server: `node socket-server/server.js` (port 3001)
+2. Start Next.js dev server: `npm run dev` (port 3000)
+3. Open http://localhost:3000
+
+For Electron desktop development: `npm run electron:dev` handles both servers.

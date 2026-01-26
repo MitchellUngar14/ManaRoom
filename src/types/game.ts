@@ -18,6 +18,8 @@ export interface BoardCard extends GameCard {
   // Power/toughness modifications (for creatures)
   modifiedPower?: number;
   modifiedToughness?: number;
+  // Whether this card is a token (created via token generator)
+  isToken?: boolean;
   // Whether this card is a copy (created via "Make a token copy")
   isCopy?: boolean;
 }
