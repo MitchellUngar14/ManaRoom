@@ -163,6 +163,7 @@ export function GameBoard() {
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
   const [bottomBarCollapsed, setBottomBarCollapsed] = useState(false);
+  const [sideZonesCollapsed, setSideZonesCollapsed] = useState(false);
   const [editingCard, setEditingCard] = useState<BoardCard | null>(null);
   const [showPlacementGuides, setShowPlacementGuides] = useState(true);
 
@@ -495,21 +496,47 @@ export function GameBoard() {
               }`}
           >
             <div className="h-52 flex game-hand-zone overflow-visible">
-              {/* My zones (left side) */}
-              <div className="shrink-0 game-side-zones">
-                <DropZone id="commandZone" className="w-28 shrink-0">
-                  <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
-                </DropZone>
-                <DropZone id="library" className="w-28 shrink-0">
-                  <Library cards={myPlayer.zones.library} isOpponent={false} />
-                </DropZone>
-                <DropZone id="graveyard" className="w-28 shrink-0">
-                  <Graveyard cards={myPlayer.zones.graveyard} isOpponent={false} />
-                </DropZone>
-                <DropZone id="exile" className="w-28 shrink-0">
-                  <Exile cards={myPlayer.zones.exile} isOpponent={false} />
-                </DropZone>
+              {/* My zones (left side) - collapsible */}
+              <div
+                className="shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
+                style={{ width: sideZonesCollapsed ? '0px' : '476px' }}
+              >
+                <div className="game-side-zones h-full" style={{ width: '476px' }}>
+                  <DropZone id="commandZone" className="w-28 shrink-0">
+                    <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
+                  </DropZone>
+                  <DropZone id="library" className="w-28 shrink-0">
+                    <Library cards={myPlayer.zones.library} isOpponent={false} />
+                  </DropZone>
+                  <DropZone id="graveyard" className="w-28 shrink-0">
+                    <Graveyard cards={myPlayer.zones.graveyard} isOpponent={false} />
+                  </DropZone>
+                  <DropZone id="exile" className="w-28 shrink-0">
+                    <Exile cards={myPlayer.zones.exile} isOpponent={false} />
+                  </DropZone>
+                </div>
               </div>
+
+              {/* Side zones collapse toggle */}
+              <button
+                onClick={() => setSideZonesCollapsed(!sideZonesCollapsed)}
+                className={`game-side-zones-toggle ${sideZonesCollapsed ? 'collapsed' : ''}`}
+                title={sideZonesCollapsed ? 'Show zones' : 'Hide zones'}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
 
               {/* Hand (right side, takes remaining space) */}
               <DropZone id="hand" className="flex-1 min-w-0 overflow-visible">

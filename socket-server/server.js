@@ -364,6 +364,7 @@ io.on('connection', (socket) => {
 
     // Add to destination zone
     if (toZone === 'battlefield' && position) {
+      // Entering battlefield - add battlefield-specific properties
       player.zones[toZone].push({
         ...card,
         position,
@@ -371,6 +372,10 @@ io.on('connection', (socket) => {
         faceDown: false,
         counters: 0,
       });
+    } else if (fromZone === 'battlefield') {
+      // Leaving battlefield - remove battlefield-specific properties (untap, clear position, etc.)
+      const { tapped, position: _pos, faceDown, counters, modifiedPower, modifiedToughness, ...cleanCard } = card;
+      player.zones[toZone].push(cleanCard);
     } else {
       player.zones[toZone].push(card);
     }

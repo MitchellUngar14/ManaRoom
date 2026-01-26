@@ -481,6 +481,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
           counters: 0,
         };
         toCards.push(boardCard as GameCard);
+      } else if (fromZone === 'battlefield') {
+        // Leaving battlefield - remove battlefield-specific properties (untap, clear position, etc.)
+        const boardCard = card as BoardCard;
+        const cleanCard: GameCard = {
+          instanceId: card.instanceId,
+          cardName: card.cardName,
+          scryfallId: card.scryfallId,
+          imageUrl: card.imageUrl,
+          card: boardCard.card,
+        };
+        toCards.push(cleanCard);
       } else {
         toCards.push(card);
       }

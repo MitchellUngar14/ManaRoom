@@ -3726,7 +3726,6 @@ body {
 /* Side zones container */
 .game-side-zones {
   background: var(--theme-bg-tertiary);
-  border-right: 1px solid var(--theme-border);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -3759,6 +3758,34 @@ body {
 }
 
 .game-collapse-btn.collapsed svg {
+  transform: rotate(180deg);
+}
+
+/* Side zones toggle (between zones and hand) */
+.game-side-zones-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 100%;
+  background: var(--theme-bg-secondary);
+  border-left: 1px solid var(--theme-border);
+  border-right: 1px solid var(--theme-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.game-side-zones-toggle:hover {
+  background: var(--theme-bg-tertiary);
+}
+
+.game-side-zones-toggle svg {
+  color: var(--theme-text-muted);
+  transition: transform 0.3s ease;
+}
+
+.game-side-zones-toggle.collapsed svg {
   transform: rotate(180deg);
 }
 
