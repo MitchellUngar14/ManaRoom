@@ -454,6 +454,35 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Untap all cards
+  socket.on('game:untapAll', () => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    // Untap all tapped cards on battlefield
+    const untappedCardIds = [];
+    player.zones.battlefield.forEach((card) => {
+      if (card.tapped) {
+        card.tapped = false;
+        untappedCardIds.push(card.instanceId);
+      }
+    });
+
+    if (untappedCardIds.length > 0) {
+      room.lastActivity = new Date();
+
+      io.to(currentRoom).emit('game:allUntapped', {
+        playerId,
+        cardIds: untappedCardIds,
+      });
+    }
+  });
+
   // Set life total
   socket.on('game:setLife', ({ life }) => {
     if (!currentRoom || !playerId) return;

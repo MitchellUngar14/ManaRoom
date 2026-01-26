@@ -14,8 +14,9 @@ import {
 import { useDroppable } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
-import { usePopoutWindow } from '@/hooks/usePopoutWindow';
+import { useMultiPopoutWindow } from '@/hooks/useMultiPopoutWindow';
 import { Card } from './Card';
+import { OpponentArea } from './OpponentArea';
 import { Hand } from './zones/Hand';
 import { Battlefield } from './zones/Battlefield';
 import { Library } from './zones/Library';
@@ -92,79 +93,20 @@ function DropZone({
   );
 }
 
-// Opponent zones popout component
-function OpponentZonesPopout({ opponent }: { opponent: PlayerState }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
-      {/* Toggle button - positioned in top-left of opponent battlefield */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="absolute top-2 left-2 z-20 game-btn game-btn-small"
-      >
-        <span>{opponent.displayName}</span>
-        <span className="game-info-divider" style={{ height: '12px', margin: '0 4px' }} />
-        <span style={{ color: 'var(--theme-text-muted)' }}>Hand: {opponent.zones.hand.length}</span>
-        <span className="game-info-divider" style={{ height: '12px', margin: '0 4px' }} />
-        <span style={{ color: 'var(--theme-text-muted)' }}>Lib: {opponent.zones.library.length}</span>
-      </button>
-
-      {/* Popout modal */}
-      {isOpen && (
-        <div
-          className="game-modal-overlay"
-          onClick={() => setIsOpen(false)}
-        >
-          <div
-            className="game-modal"
-            style={{ width: '100%', maxWidth: '500px' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="game-modal-header">
-              <h3 className="game-modal-title">{opponent.displayName}&apos;s Zones</h3>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="game-modal-close"
-              >
-                &times;
-              </button>
-            </div>
-
-            <div className="game-modal-body">
-              <div className="flex justify-center gap-2">
-                <div className="h-44">
-                  <CommandZone cards={opponent.zones.commandZone} isOpponent={true} />
-                </div>
-                <div className="h-44">
-                  <Library cards={opponent.zones.library} isOpponent={true} />
-                </div>
-                <div className="h-44">
-                  <Graveyard cards={opponent.zones.graveyard} isOpponent={true} />
-                </div>
-                <div className="h-44">
-                  <Exile cards={opponent.zones.exile} isOpponent={true} />
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 text-center" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)', fontSize: '14px' }}>
-                Hand: {opponent.zones.hand.length} cards
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
 export function GameBoard() {
-  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard } = useGameStore();
-  const { isPopoutOpen, openPopout, closePopout } = usePopoutWindow();
+  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll } = useGameStore();
+  const { poppedOutIds, openPopout, closePopout, hasAnyPopouts } = useMultiPopoutWindow();
   const { theme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
+
+  // Handle popout for a specific opponent
+  const handlePopout = (opponentId: string) => {
+    if (roomKey && myId) {
+      openPopout(roomKey, opponentId, myId);
+    }
+  };
   const [bottomBarCollapsed, setBottomBarCollapsed] = useState(false);
   const [sideZonesCollapsed, setSideZonesCollapsed] = useState(false);
   const [editingCard, setEditingCard] = useState<BoardCard | null>(null);
@@ -272,7 +214,12 @@ export function GameBoard() {
 
   const myPlayer = myId ? players[myId] : null;
   const opponents = Object.values(players).filter((p) => p.odId !== myId);
-  const opponent = opponents[0]; // For 1v1, just get the first opponent
+
+  // Check if all opponents are popped out
+  const allOpponentsPopped = opponents.length > 0 && opponents.every((o) => poppedOutIds.includes(o.odId));
+
+  // Get list of popped out opponents for the indicator bar
+  const poppedOutOpponents = opponents.filter((o) => poppedOutIds.includes(o.odId));
 
   const handleDragStart = (event: DragStartEvent) => {
     const { card, zone } = event.active.data.current as {
@@ -358,110 +305,77 @@ export function GameBoard() {
       <div className="h-full flex flex-col theme-battlefield relative z-10">
         {/* Battlefield area - full width */}
         <div className="flex-1 flex flex-col min-h-0">
-          {/* Opponent's battlefield (top half) - hidden when popped out */}
-          {!isPopoutOpen && (
+          {/* Opponent area (top half) - hidden when all opponents are popped out */}
+          {!allOpponentsPopped && (
             <div className="flex-1 border-b relative transition-colors duration-500" style={{ borderColor: 'var(--theme-border)' }}>
-              {opponent ? (
-                <>
-                  {/* Opponent zones popout button */}
-                  <OpponentZonesPopout opponent={opponent} />
-
-                  {/* Pop out button */}
-                  <button
-                    onClick={() => roomKey && myId && openPopout(roomKey, opponent.odId, myId)}
-                    className="absolute top-2 right-24 z-20 game-btn game-btn-small"
-                    title="Pop out opponent's battlefield to separate window"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
-                    <span>Pop Out</span>
-                  </button>
-
-                  {/* Mirror toggle button */}
-                  <button
-                    onClick={() => setMirrorOpponent(!mirrorOpponent)}
-                    className={`absolute top-2 right-2 z-20 game-btn game-btn-small ${mirrorOpponent ? 'game-btn-active' : ''}`}
-                    title={mirrorOpponent ? 'Show mirrored view' : 'Show cards right-side up'}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="17 1 21 5 17 9" />
-                      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                      <polyline points="7 23 3 19 7 15" />
-                      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-                    </svg>
-                    <span>{mirrorOpponent ? 'Mirrored' : 'Mirror'}</span>
-                  </button>
-
-                  {/* Opponent battlefield */}
-                  <div className="absolute inset-0">
-                    <Battlefield
-                      cards={opponent.zones.battlefield}
-                      isOpponent={true}
-                      ownerId={opponent.odId}
-                      allowTakeControl={true}
-                      mirrorCards={!mirrorOpponent}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="h-full game-waiting">
-                  <span>Waiting for opponent...</span>
-                </div>
-              )}
+              <OpponentArea
+                opponents={opponents}
+                poppedOutIds={poppedOutIds}
+                mirrorOpponent={mirrorOpponent}
+                onToggleMirror={() => setMirrorOpponent(!mirrorOpponent)}
+                onPopout={handlePopout}
+                roomKey={roomKey}
+                myId={myId}
+              />
             </div>
           )}
 
-          {/* Popout indicator bar - shown when battlefield is popped out */}
-          {isPopoutOpen && opponent && (
+          {/* Popout indicator bar - shown when any opponents are popped out */}
+          {poppedOutOpponents.length > 0 && (
             <div className="shrink-0 game-popout-bar">
               <div className="game-popout-info">
-                <span>
-                  {opponent.displayName}&apos;s battlefield is in a separate window
-                </span>
-                <span className="game-info-divider" />
-                <span>Life: {opponent.life}</span>
+                {poppedOutOpponents.map((o, idx) => (
+                  <span key={o.odId}>
+                    {idx > 0 && <span className="game-info-divider" />}
+                    <span>{o.displayName} (Life: {o.life})</span>
+                    <button
+                      onClick={() => closePopout(o.odId)}
+                      className="ml-2 hover:text-red-400"
+                      title={`Close ${o.displayName}'s popout`}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
               </div>
-              <button
-                onClick={closePopout}
-                className="game-btn game-btn-small"
-              >
-                Close Popout
-              </button>
+              <span style={{ color: 'var(--theme-text-muted)', fontSize: '12px' }}>
+                {poppedOutOpponents.length === 1 ? 'Battlefield' : 'Battlefields'} in separate {poppedOutOpponents.length === 1 ? 'window' : 'windows'}
+              </span>
             </div>
           )}
 
-          {/* My battlefield (bottom half - expands when opponent is popped out) */}
+          {/* My battlefield (bottom half - expands when all opponents are popped out) */}
           <DropZone id="battlefield" className="flex-1 relative">
             <Battlefield
               cards={myPlayer.zones.battlefield}
               isOpponent={false}
-              largeCards={isPopoutOpen}
+              largeCards={allOpponentsPopped}
               onEditCard={setEditingCard}
               showPlacementGuides={showPlacementGuides}
             />
+            {/* Untap all button */}
+            <button
+              onClick={untapAll}
+              className="absolute bottom-2 right-24 z-20 game-btn game-btn-small"
+              title="Untap all your cards"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" x2="9" y1="12" y2="12" />
+              </svg>
+              <span>Untap All</span>
+            </button>
             {/* Placement guides toggle */}
             <button
               onClick={() => setShowPlacementGuides(!showPlacementGuides)}
@@ -572,7 +486,7 @@ export function GameBoard() {
       <DragOverlay>
         {activeCard && (
           <motion.div
-            className={`${isPopoutOpen && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}
+            className={`${allOpponentsPopped && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}
             initial={{ scale: 1.5 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}

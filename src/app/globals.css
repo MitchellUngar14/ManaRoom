@@ -4002,6 +4002,144 @@ body {
 }
 
 /* ========================================
+   Opponent Area - Multi-Player Layout
+   ======================================== */
+
+.opponent-area {
+  display: grid;
+  gap: 2px;
+  height: 100%;
+  width: 100%;
+}
+
+.opponent-area[data-count="1"] {
+  grid-template-columns: 1fr;
+}
+
+.opponent-area[data-count="2"] {
+  grid-template-columns: 1fr 1fr;
+}
+
+.opponent-area[data-count="3"] {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.opponent-battlefield-cell {
+  position: relative;
+  border-right: 1px solid var(--theme-border);
+  transition: all 0.3s ease;
+}
+
+.opponent-battlefield-cell:last-child {
+  border-right: none;
+}
+
+/* Opponent Thumbnail Sidebar (Focus Mode) */
+.opponent-thumbnail-sidebar {
+  width: 140px;
+  min-width: 140px;
+  background: var(--theme-bg-secondary);
+  border-left: 1px solid var(--theme-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.opponent-thumbnail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--theme-bg-elevated);
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.opponent-thumbnail:hover {
+  background: var(--theme-bg-tertiary);
+  border-color: var(--theme-accent-muted);
+}
+
+.opponent-thumbnail-focused {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 12px var(--theme-accent-glow);
+}
+
+.opponent-thumbnail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.opponent-thumbnail-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--theme-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
+}
+
+.opponent-thumbnail-life {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--theme-accent);
+}
+
+.opponent-thumbnail-stats {
+  display: flex;
+  gap: 12px;
+  color: var(--theme-text-muted);
+  font-family: 'Crimson Text', serif;
+  font-size: 11px;
+}
+
+.opponent-thumbnail-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.opponent-thumbnail-stat svg {
+  opacity: 0.6;
+}
+
+.opponent-thumbnail-popout {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--theme-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+  border-radius: 4px;
+}
+
+.opponent-thumbnail:hover .opponent-thumbnail-popout {
+  opacity: 1;
+}
+
+.opponent-thumbnail-popout:hover {
+  color: var(--theme-accent);
+  background: var(--theme-bg-secondary);
+}
+
+/* ========================================
    Crystal Portal - Join Room Component
    ======================================== */
 

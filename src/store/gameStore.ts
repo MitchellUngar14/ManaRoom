@@ -55,6 +55,7 @@ interface GameStore {
   ) => void;
   repositionCard: (cardId: string, position: { x: number; y: number }) => void;
   tapCard: (cardId: string) => void;
+  untapAll: () => void;
   setLife: (amount: number) => void;
   shuffle: () => void;
   restart: () => void;
@@ -144,6 +145,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       socket.on('game:cardTapped', (data: CardTappedEvent) => {
         get()._onCardTapped(data);
+      });
+
+      socket.on('game:allUntapped', (data: { playerId: string; cardIds: string[] }) => {
+        // Skip if this is our own action - we already did the optimistic update
+        const { myId } = get();
+        if (data.playerId === myId) return;
+
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const battlefield = player.zones.battlefield.map((card) => {
+            if (data.cardIds.includes(card.instanceId)) {
+              return { ...card, tapped: false };
+            }
+            return card;
+          });
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield,
+                },
+              },
+            },
+          };
+        });
       });
 
       socket.on('game:cardRepositioned', (data: { playerId: string; cardId: string; position: { x: number; y: number } }) => {
@@ -612,6 +644,40 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     socket.emit('game:tapCard', { cardId });
+  },
+
+  untapAll: () => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update - untap all tapped cards
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const battlefield = player.zones.battlefield.map((card) => {
+        const boardCard = card as BoardCard;
+        if (boardCard.tapped) {
+          return { ...boardCard, tapped: false };
+        }
+        return card;
+      });
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              battlefield,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:untapAll');
   },
 
   setLife: (amount) => {

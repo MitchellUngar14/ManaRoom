@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { useTheme } from '@/hooks/useTheme';
 import { OpponentBattlefieldPopout } from '@/components/game/OpponentBattlefieldPopout';
 
 export default function OpponentViewPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const roomKey = params.key as string;
   const initRef = useRef(false);
 
@@ -34,16 +35,26 @@ export default function OpponentViewPage() {
 
     const init = async () => {
       try {
-        // Get opponent ID from sessionStorage (set by main window)
-        const storedOpponentId = sessionStorage.getItem('popout_opponentId');
+        // Get opponent ID - check URL params first, then sessionStorage
+        // URL params are more reliable for multi-opponent popouts
+        const urlOpponentId = searchParams.get('opponentId');
+        let storedOpponentId = urlOpponentId;
+        let storedMyPlayerId: string | null = null;
+
+        if (urlOpponentId) {
+          // Multi-opponent mode: use URL param and keyed sessionStorage
+          storedMyPlayerId = sessionStorage.getItem(`popout_${urlOpponentId}_myPlayerId`);
+        } else {
+          // Legacy mode: try old sessionStorage keys
+          storedOpponentId = sessionStorage.getItem('popout_opponentId');
+          storedMyPlayerId = sessionStorage.getItem('popout_myPlayerId');
+        }
+
         if (!storedOpponentId) {
           setError('No opponent ID found. Please close and reopen from main window.');
           setLoading(false);
           return;
         }
-
-        // Get main player ID (to act on their behalf for actions like Take Control)
-        const storedMyPlayerId = sessionStorage.getItem('popout_myPlayerId');
 
         setOpponentId(storedOpponentId);
 
@@ -65,7 +76,7 @@ export default function OpponentViewPage() {
     return () => {
       disconnect();
     };
-  }, [roomKey, connect, connectAsSpectator, disconnect]);
+  }, [roomKey, searchParams, connect, connectAsSpectator, disconnect]);
 
   // Update document title
   useEffect(() => {

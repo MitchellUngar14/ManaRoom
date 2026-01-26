@@ -17,6 +17,7 @@ interface BattlefieldProps {
   onEditCard?: (card: BoardCard) => void;
   showPlacementGuides?: boolean;
   showEntryEffects?: boolean;
+  scale?: number;
 }
 
 interface EntryEffect {
@@ -25,7 +26,7 @@ interface EntryEffect {
   y: number;
 }
 
-export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false, onEditCard, showPlacementGuides = false, showEntryEffects }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false, onEditCard, showPlacementGuides = false, showEntryEffects, scale = 1.0 }: BattlefieldProps) {
   // Track cards we've seen to detect new entries
   const seenCardsRef = useRef<Set<string>>(new Set());
   const [entryEffects, setEntryEffects] = useState<EntryEffect[]>([]);
@@ -82,8 +83,9 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
   const handleEffectComplete = useCallback((id: string) => {
     setEntryEffects(prev => prev.filter(effect => effect.id !== id));
   }, []);
-  // Card width class based on size
-  const cardWidthClass = largeCards ? 'w-40' : 'w-28';
+  // Card width class based on size - scale adjusts the actual size
+  const baseWidth = largeCards ? 160 : 112; // w-40 = 160px, w-28 = 112px
+  const scaledWidth = baseWidth * scale;
 
   return (
     <div
@@ -174,11 +176,12 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
           return (
             <div
               key={card.instanceId}
-              className={`${cardWidthClass} absolute ${mirrorCards ? 'rotate-180' : ''}`}
+              className={`absolute ${mirrorCards ? 'rotate-180' : ''}`}
               style={{
                 left: `${displayX * 100}%`,
                 top: `${displayY * 100}%`,
                 transform: 'translate(-50%, -50%)',
+                width: `${scaledWidth}px`,
               }}
             >
               <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />
