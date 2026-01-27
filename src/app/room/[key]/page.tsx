@@ -227,13 +227,33 @@ export default function RoomPage() {
               ManaRoom
             </h1>
             <span
-              className="text-xs px-2 py-0.5 rounded"
+              className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
               style={{
                 color: 'var(--theme-text-secondary)',
                 background: 'rgba(0,0,0,0.3)',
               }}
             >
               Room: {displayRoomKey}
+              <button
+                onClick={() => navigator.clipboard.writeText(displayRoomKey)}
+                className="ml-1 p-0.5 rounded hover:bg-white/10 transition-colors"
+                title="Copy room code"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
             </span>
             <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
             {/* Battlefield background toggle */}
@@ -348,7 +368,7 @@ export default function RoomPage() {
                   Share this room code with your opponent:
                 </p>
                 <div
-                  className="rounded-lg px-4 py-2 mb-2"
+                  className="rounded-lg px-4 py-2 mb-2 flex items-center justify-center gap-2"
                   style={{ background: 'var(--theme-bg-elevated)' }}
                 >
                   <span
@@ -357,6 +377,27 @@ export default function RoomPage() {
                   >
                     {displayRoomKey}
                   </span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(displayRoomKey)}
+                    className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                    style={{ color: 'var(--theme-text-secondary)' }}
+                    title="Copy room code"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  </button>
                 </div>
                 <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                   {playerCount} player{playerCount !== 1 ? 's' : ''} in room — feel free to experiment with your cards!

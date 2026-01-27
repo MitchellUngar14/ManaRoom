@@ -81,24 +81,25 @@ export function LifeCounter() {
 
   const myPlayer = myId ? players[myId] : null;
   const opponents = Object.values(players).filter((p) => p.odId !== myId);
-  const opponent = opponents[0];
 
   if (!myPlayer) return null;
 
   const myLife = myPlayer.life ?? 40;
-  const opponentLife = opponent?.life ?? 40;
 
   return (
-    <div className="flex items-center gap-4">
-      {/* Opponent life */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-400 max-w-[60px] truncate" title={opponent?.displayName}>
-          {opponent?.displayName ?? 'Opponent'}
-        </span>
-        <LifeDisplay value={opponentLife} isLow={opponentLife <= 10} />
-      </div>
+    <div className="flex items-center gap-3">
+      {/* All opponents' life totals */}
+      {opponents.map((opponent, index) => (
+        <div key={opponent.odId} className="flex items-center gap-2">
+          {index > 0 && <span className="text-gray-600 text-sm">|</span>}
+          <span className="text-xs text-gray-400 max-w-[50px] truncate" title={opponent.displayName}>
+            {opponent.displayName}
+          </span>
+          <LifeDisplay value={opponent.life ?? 40} isLow={(opponent.life ?? 40) <= 10} />
+        </div>
+      ))}
 
-      <span className="text-gray-600 text-sm">vs</span>
+      {opponents.length > 0 && <span className="text-gray-600 text-sm">vs</span>}
 
       {/* My life */}
       <div className="flex items-center gap-1">
@@ -113,7 +114,7 @@ export function LifeCounter() {
           cutoutImage="/PlusCutout.png"
           title="Increase life"
         />
-        <span className="text-xs text-gray-400 max-w-[60px] truncate ml-1" title={myPlayer.displayName}>
+        <span className="text-xs text-gray-400 max-w-[50px] truncate ml-1" title={myPlayer.displayName}>
           {myPlayer.displayName}
         </span>
       </div>

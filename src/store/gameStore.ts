@@ -36,6 +36,7 @@ interface GameStore {
   // UI state
   previewCard: GameCard | null;
   attachingCardId: string | null; // Card ID that's waiting to be attached to a target
+  viewLibraryOpen: boolean;
 
   // Actions
   connect: () => Promise<void>;
@@ -74,6 +75,7 @@ interface GameStore {
 
   // UI actions
   setPreviewCard: (card: GameCard | null) => void;
+  setViewLibraryOpen: (open: boolean) => void;
 
   // Internal state updates
   _setConnected: (connected: boolean) => void;
@@ -96,6 +98,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   actingAsPlayerId: null,
   previewCard: null,
   attachingCardId: null,
+  viewLibraryOpen: false,
 
   connect: async () => {
     return new Promise((resolve, reject) => {
@@ -1133,6 +1136,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setPreviewCard: (card) => set({ previewCard: card }),
+  setViewLibraryOpen: (open) => set({ viewLibraryOpen: open }),
   setAttachingCardId: (cardId) => set({ attachingCardId: cardId }),
 
   // Internal setters

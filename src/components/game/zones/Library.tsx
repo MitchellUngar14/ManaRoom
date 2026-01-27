@@ -14,8 +14,8 @@ interface LibraryProps {
 }
 
 export function Library({ cards, isOpponent }: LibraryProps) {
-  const { drawCard, shuffle } = useGameStore();
-  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const { drawCard, shuffle, viewLibraryOpen, setViewLibraryOpen } = useGameStore();
+  const viewModalOpen = isOpponent ? false : viewLibraryOpen;
   const [scryModalOpen, setScryModalOpen] = useState(false);
   const topCard = cards[cards.length - 1];
   const [contextMenu, setContextMenu] = useState<{
@@ -44,9 +44,9 @@ export function Library({ cards, isOpponent }: LibraryProps) {
   }, []);
 
   const handleViewLibrary = useCallback(() => {
-    setViewModalOpen(true);
+    setViewLibraryOpen(true);
     closeContextMenu();
-  }, [closeContextMenu]);
+  }, [setViewLibraryOpen, closeContextMenu]);
 
   const handleShuffle = useCallback(() => {
     shuffle();
@@ -97,7 +97,7 @@ export function Library({ cards, isOpponent }: LibraryProps) {
       <LibraryViewModal
         isOpen={viewModalOpen}
         cards={cards}
-        onClose={() => setViewModalOpen(false)}
+        onClose={() => setViewLibraryOpen(false)}
       />
 
       <ScryModal

@@ -102,7 +102,7 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ showBattlefieldBackground = true }: GameBoardProps) {
-  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, orderCards, shuffle, attachingCardId, setAttachingCardId } = useGameStore();
+  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, orderCards, shuffle, drawCard, attachingCardId, setAttachingCardId, setLife, setViewLibraryOpen } = useGameStore();
   const { poppedOutIds, openPopout, closePopout, hasAnyPopouts } = useMultiPopoutWindow();
   const { theme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
@@ -233,6 +233,46 @@ export function GameBoard({ showBattlefieldBackground = true }: GameBoardProps) 
         shuffle();
       }
 
+      // D key draws a card
+      if (e.key === 'd' || e.key === 'D') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        drawCard();
+      }
+
+      // G key sends hovered card to graveyard
+      if (e.key === 'g' || e.key === 'G') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        const hovered = getHoveredCard();
+        const zone = getHoveredCardZone();
+        if (hovered && zone === 'battlefield') {
+          // Check if it's our card
+          const { myId, players } = useGameStore.getState();
+          if (myId && players[myId]) {
+            const isOurCard = players[myId].zones.battlefield.some(
+              (c) => c.instanceId === hovered.instanceId
+            );
+            if (isOurCard) {
+              moveCard(hovered.instanceId, 'battlefield', 'graveyard');
+            }
+          }
+        }
+      }
+
+      // L key opens View Library modal
+      if (e.key === 'l' || e.key === 'L') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        setViewLibraryOpen(true);
+      }
+
       // O key orders/organizes cards on battlefield
       if (e.key === 'o' || e.key === 'O') {
         // Don't trigger if typing in an input
@@ -250,11 +290,35 @@ export function GameBoard({ showBattlefieldBackground = true }: GameBoardProps) 
         }
         untapAll();
       }
+
+      // + key increases life
+      if (e.key === '+' || e.key === '=') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        const { myId, players } = useGameStore.getState();
+        if (myId && players[myId]) {
+          setLife((players[myId].life ?? 40) + 1);
+        }
+      }
+
+      // - key decreases life
+      if (e.key === '-' || e.key === '_') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        const { myId, players } = useGameStore.getState();
+        if (myId && players[myId]) {
+          setLife((players[myId].life ?? 40) - 1);
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [previewCard, setPreviewCard, attachingCardId, setAttachingCardId, shuffle, orderCards, untapAll]);
+  }, [previewCard, setPreviewCard, attachingCardId, setAttachingCardId, shuffle, drawCard, moveCard, setViewLibraryOpen, orderCards, untapAll, setLife]);
 
   const myPlayer = myId ? players[myId] : null;
   const opponents = Object.values(players).filter((p) => p.odId !== myId);
