@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { GameBoard } from '@/components/game/GameBoard';
 import { GameControls } from '@/components/game/GameControls';
 import { LifeCounter } from '@/components/game/LifeCounter';
 import { ThemeSelector } from '@/components/game/ThemeSelector';
+import { FancySquareButton } from '@/components/game/FancySquareButton';
 import { LogoLoader } from '@/components/ui/LogoLoader';
 import { useGameStore } from '@/store/gameStore';
 import { useTheme } from '@/hooks/useTheme';
@@ -189,39 +191,115 @@ export default function RoomPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Header with collapse toggle */}
+      {/* Header Rail - Fixed at top */}
       <div
-        className={`relative shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
-          headerCollapsed ? 'h-0' : 'h-auto'
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-700 ease-in-out ${
+          headerCollapsed ? '-translate-y-full' : 'translate-y-0'
         }`}
       >
-        <header className="bg-gray-900 px-4 py-2 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="font-semibold">ManaRoom</h1>
-            <span className="text-gray-500 text-sm">Room: {displayRoomKey}</span>
+        {/* Rail texture background - flipped so gold trim is at bottom */}
+        <div
+          className="relative h-12"
+          style={{
+            backgroundImage: 'url(/rail-texture.png)',
+            backgroundRepeat: 'repeat-x',
+            backgroundSize: 'auto 100%',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.5)',
+            transform: 'scaleY(-1)',
+          }}
+        >
+          {/* Inner container flipped back so content is right-side up */}
+          <div
+            className="absolute inset-0"
+            style={{ transform: 'scaleY(-1)' }}
+          >
+          {/* Left section - Logo and Room */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-4">
+            <h1
+              className="font-semibold text-sm"
+              style={{
+                color: 'var(--theme-accent)',
+                textShadow: '0 0 10px var(--theme-accent-glow)',
+                fontFamily: 'Cinzel, serif',
+              }}
+            >
+              ManaRoom
+            </h1>
+            <span
+              className="text-xs px-2 py-0.5 rounded"
+              style={{
+                color: 'var(--theme-text-secondary)',
+                background: 'rgba(0,0,0,0.3)',
+              }}
+            >
+              Room: {displayRoomKey}
+            </span>
             <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
           </div>
-          <LifeCounter />
-          <div className="flex items-center gap-3">
-            <button
+
+          {/* Center section - Life Counter */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <LifeCounter />
+          </div>
+
+          {/* Right section - Controls */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+            <FancySquareButton
               onClick={toggleFullscreen}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-gray-400 hover:text-gray-200 transition-colors"
+              cutoutImage={isFullscreen ? '/ExpandInCutout.png' : '/ExpandOutCutout.png'}
               title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            >
-              {isFullscreen ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v2a1 1 0 01-2 0V5a3 3 0 013-3h2a1 1 0 010 2H5zm10 0a1 1 0 011-1h2a3 3 0 013 3v2a1 1 0 01-2 0V5a1 1 0 00-1-1h-2a1 1 0 010-2zM5 16a1 1 0 001 1h2a1 1 0 010 2H5a3 3 0 01-3-3v-2a1 1 0 012 0v2zm12 0a1 1 0 01-1 1h-2a1 1 0 010 2h2a3 3 0 003-3v-2a1 1 0 00-2 0v2z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H5v3a1 1 0 01-2 0V4zm12 0a1 1 0 011 1v3a1 1 0 01-2 0V5h-3a1 1 0 010-2h4zM3 16a1 1 0 011-1h3a1 1 0 010 2H5v-3a1 1 0 00-2 0v4zm12 0a1 1 0 01-1 1h-3a1 1 0 010-2h3v-3a1 1 0 012 0v4z" clipRule="evenodd" />
-                </svg>
-              )}
-            </button>
+            />
             <GameControls />
           </div>
-        </header>
+
+          {/* Center Jewel Toggle - Below the rail */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2 z-50 flex justify-center items-center pointer-events-auto"
+            style={{
+              bottom: '-40px',
+              width: '64px',
+              height: '64px',
+            }}
+          >
+            <button
+              onClick={() => setHeaderCollapsed(!headerCollapsed)}
+              className="w-full h-full focus:outline-none filter hover:brightness-125 transition-all active:scale-95 group relative"
+              title={headerCollapsed ? 'Show header' : 'Hide header'}
+            >
+              <motion.div
+                className="w-full h-full relative flex items-center justify-center"
+                animate={{
+                  rotate: headerCollapsed ? 45 : 225,
+                }}
+                transition={{ duration: 0.5, type: 'spring' }}
+              >
+                {/* Diamond Container */}
+                <div
+                  className="w-10 h-10 relative transform bg-black shadow-lg overflow-hidden"
+                  style={{ boxShadow: '0 0 10px rgba(0,0,0,0.5)' }}
+                >
+                  <div className="absolute inset-0 bg-blue-500 blur-md opacity-20 group-hover:opacity-40 transition-opacity" />
+                  <img
+                    src="/jewel-icon.png"
+                    alt="Toggle"
+                    className="w-full h-full object-cover"
+                    style={{ transform: 'rotate(-45deg) scale(1.4)' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-white opacity-10 pointer-events-none" />
+                </div>
+              </motion.div>
+            </button>
+          </div>
+          </div>
+        </div>
       </div>
+
+      {/* Spacer for fixed header */}
+      <div
+        className={`shrink-0 transition-all duration-700 ease-in-out ${
+          headerCollapsed ? 'h-0' : 'h-12'
+        }`}
+      />
 
       {/* Game board */}
       <div className="flex-1 overflow-hidden relative">
@@ -230,45 +308,35 @@ export default function RoomPage() {
         {/* Waiting for opponent overlay */}
         {isWaiting && (
           <div className="absolute inset-0 z-30 pointer-events-none">
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-auto">
-              <div className="bg-gray-900/95 backdrop-blur rounded-lg px-6 py-4 text-center shadow-xl border border-gray-700">
-                <p className="text-gray-400 text-sm mb-2">
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 pointer-events-auto">
+              <div
+                className="rounded-lg px-6 py-4 text-center shadow-xl"
+                style={{
+                  background: 'var(--theme-bg-secondary)',
+                  border: '1px solid var(--theme-border)',
+                }}
+              >
+                <p className="text-sm mb-2" style={{ color: 'var(--theme-text-muted)' }}>
                   Share this room code with your opponent:
                 </p>
-                <div className="bg-gray-800 rounded-lg px-4 py-2 mb-2">
-                  <span className="text-2xl font-mono tracking-wider">{displayRoomKey}</span>
+                <div
+                  className="rounded-lg px-4 py-2 mb-2"
+                  style={{ background: 'var(--theme-bg-elevated)' }}
+                >
+                  <span
+                    className="text-2xl font-mono tracking-wider"
+                    style={{ color: 'var(--theme-accent)' }}
+                  >
+                    {displayRoomKey}
+                  </span>
                 </div>
-                <p className="text-gray-500 text-xs">
+                <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                   {playerCount} player{playerCount !== 1 ? 's' : ''} in room — feel free to experiment with your cards!
                 </p>
               </div>
             </div>
           </div>
         )}
-
-        {/* Collapse toggle button - positioned at top of game board area */}
-        <button
-          onClick={() => setHeaderCollapsed(!headerCollapsed)}
-          className="absolute top-0 left-1/2 -translate-x-1/2 z-20 bg-gray-800 hover:bg-gray-700 px-3 py-0.5 rounded-b"
-          title={headerCollapsed ? 'Show header' : 'Hide header'}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`text-gray-400 transition-transform duration-300 ${
-              headerCollapsed ? 'rotate-180' : ''
-            }`}
-          >
-            <polyline points="18 15 12 9 6 15" />
-          </svg>
-        </button>
       </div>
     </div>
   );

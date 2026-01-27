@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { TokenSearch } from './TokenSearch';
+import { FancyButton } from './FancyButton';
 
 export function GameControls() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export function GameControls() {
   const [showTokenSearch, setShowTokenSearch] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleCopyRoomKey = () => {
@@ -71,29 +72,25 @@ export function GameControls() {
   return (
     <>
       <div className="flex items-center gap-2">
-        <button
+        <FancyButton
           onClick={shuffle}
-          className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded"
+          cutoutImage="/ShuffleCutout.png"
           title="Shuffle library"
-        >
-          Shuffle
-        </button>
+        />
 
-        <button
+        <FancyButton
           onClick={() => setShowTokenSearch(true)}
-          className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded"
+          cutoutImage="/TokensCutout.png"
           title="Search for tokens"
-        >
-          Tokens
-        </button>
+        />
 
-        <button
-          ref={menuButtonRef}
-          onClick={handleMenuToggle}
-          className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded"
-        >
-          Menu
-        </button>
+        <div ref={menuButtonRef}>
+          <FancyButton
+            onClick={handleMenuToggle}
+            cutoutImage="/MenuCutout.png"
+            title="Game menu"
+          />
+        </div>
 
         {showMenu && createPortal(
           <div
