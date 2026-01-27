@@ -27,6 +27,7 @@ import { CardPreviewPane } from './CardPreviewPane';
 import { CardEditModal } from './CardEditModal';
 import { AmbientEffects } from './AmbientEffects';
 import { ZoneGlowEffect } from './ZoneGlowEffect';
+import { FancyButton } from './FancyButton';
 import { useTheme } from '@/hooks/useTheme';
 import type { GameCard, BoardCard, ZoneType, PlayerState } from '@/types';
 
@@ -308,17 +309,48 @@ export function GameBoard() {
         <div className="flex-1 flex flex-col min-h-0">
           {/* Opponent area (top half) - hidden when all opponents are popped out */}
           {!allOpponentsPopped && (
-            <div className="flex-1 border-b relative transition-colors duration-500" style={{ borderColor: 'var(--theme-border)' }}>
-              <OpponentArea
-                opponents={opponents}
-                poppedOutIds={poppedOutIds}
-                mirrorOpponent={mirrorOpponent}
-                onToggleMirror={() => setMirrorOpponent(!mirrorOpponent)}
-                onPopout={handlePopout}
-                roomKey={roomKey}
-                myId={myId}
-              />
-            </div>
+            <>
+              <div className="flex-1 relative transition-colors duration-500">
+                <OpponentArea
+                  opponents={opponents}
+                  poppedOutIds={poppedOutIds}
+                  mirrorOpponent={mirrorOpponent}
+                  onToggleMirror={() => setMirrorOpponent(!mirrorOpponent)}
+                  onPopout={handlePopout}
+                  roomKey={roomKey}
+                  myId={myId}
+                />
+              </div>
+              {/* Magical divider between battlefields */}
+              <div className="relative h-1 shrink-0 overflow-visible">
+                {/* Base glow */}
+                <div
+                  className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px]"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, var(--theme-accent) 20%, var(--theme-accent) 80%, transparent 100%)`,
+                    boxShadow: `0 0 10px var(--theme-accent), 0 0 20px var(--theme-accent-glow), 0 0 30px var(--theme-accent-glow)`,
+                  }}
+                />
+                {/* Animated shimmer */}
+                <div
+                  className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] battlefield-divider-shimmer"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, transparent 40%, white 50%, transparent 60%, transparent 100%)`,
+                    backgroundSize: '200% 100%',
+                    opacity: 0.4,
+                  }}
+                />
+                {/* Soft outer glow */}
+                <div
+                  className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-4 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, var(--theme-accent-glow) 20%, var(--theme-accent-glow) 80%, transparent 100%)`,
+                    filter: 'blur(8px)',
+                    opacity: 0.5,
+                  }}
+                />
+              </div>
+            </>
           )}
 
           {/* Popout indicator bar - shown when any opponents are popped out */}
@@ -354,53 +386,6 @@ export function GameBoard() {
               onEditCard={setEditingCard}
               showPlacementGuides={showPlacementGuides}
             />
-            {/* Untap all button */}
-            <button
-              onClick={untapAll}
-              className="absolute bottom-2 right-24 z-20 game-btn game-btn-small"
-              title="Untap all your cards"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" x2="9" y1="12" y2="12" />
-              </svg>
-              <span>Untap All</span>
-            </button>
-            {/* Placement guides toggle */}
-            <button
-              onClick={() => setShowPlacementGuides(!showPlacementGuides)}
-              className={`absolute bottom-2 right-2 z-20 game-btn game-btn-small ${showPlacementGuides ? 'game-btn-active' : ''}`}
-              title={showPlacementGuides ? 'Hide placement guides' : 'Show placement guides'}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
-              <span>Guides</span>
-            </button>
           </DropZone>
         </div>
 
@@ -446,6 +431,20 @@ export function GameBoard() {
                   pointerEvents: 'none' // Rail itself doesn't block clicks
                 }}
               >
+                {/* Rail buttons - Right side */}
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3 pointer-events-auto">
+                  <FancyButton
+                    onClick={untapAll}
+                    cutoutImage="/UntapAllCutout.png"
+                    title="Untap all your cards"
+                  />
+                  <FancyButton
+                    onClick={() => setShowPlacementGuides(!showPlacementGuides)}
+                    cutoutImage="/GuidesCutout.png"
+                    title={showPlacementGuides ? 'Hide placement guides' : 'Show placement guides'}
+                  />
+                </div>
+
                 {/* Center Jewel Toggle - Centered in Hand Rail */}
                 <div
                   className="absolute left-1/2 -translate-x-1/2 z-50 flex justify-center items-center pointer-events-auto"
@@ -552,7 +551,7 @@ export function GameBoard() {
                   <motion.div
                     className="w-14 h-14 relative z-10"
                     style={{ marginTop: '-20px' }} // Raise it significantly to center in the visual base
-                    animate={{ rotate: sideZonesCollapsed ? 180 : 0 }}
+                    animate={{ rotate: sideZonesCollapsed ? 0 : 180 }}
                     transition={{ duration: 0.7 }}
                   >
                     <img

@@ -427,6 +427,20 @@ body {
   }
 }
 
+/* Battlefield divider shimmer animation */
+.battlefield-divider-shimmer {
+  animation: divider-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes divider-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

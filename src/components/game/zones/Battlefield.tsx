@@ -90,12 +90,17 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
   return (
     <div
       className={`h-full relative overflow-hidden transition-colors duration-500 game-battlefield ${fullScreen ? 'min-h-screen' : ''}`}
-      style={{
-        backgroundImage: 'url(/battlefield-background.png)',
-        backgroundRepeat: 'repeat',
-        backgroundSize: 'auto',
-      }}
     >
+      {/* Background layer - flipped for opponent */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'url(/battlefield-background.png)',
+          backgroundRepeat: 'repeat',
+          backgroundSize: 'auto',
+          transform: isOpponent ? 'scaleY(-1)' : 'none',
+        }}
+      />
       {/* Placement guides - only shown for player's battlefield */}
       {showPlacementGuides && !isOpponent && (
         <div className="absolute inset-0 flex pointer-events-none z-0">
@@ -205,12 +210,6 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
         />
       ))}
 
-      {/* Empty state - only show for opponent */}
-      {cards.length === 0 && isOpponent && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-sm transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Battlefield</span>
-        </div>
-      )}
     </div>
   );
 }
