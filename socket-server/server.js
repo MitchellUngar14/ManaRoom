@@ -483,6 +483,33 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Order cards on battlefield
+  socket.on('game:orderCards', ({ cardUpdates }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    // Update card positions on server
+    cardUpdates.forEach(({ cardId, position }) => {
+      const card = player.zones.battlefield.find((c) => c.instanceId === cardId);
+      if (card) {
+        card.position = position;
+      }
+    });
+
+    room.lastActivity = new Date();
+
+    // Broadcast to other players
+    socket.to(currentRoom).emit('game:cardsOrdered', {
+      playerId,
+      cardUpdates,
+    });
+  });
+
   // Set life total
   socket.on('game:setLife', ({ life }) => {
     if (!currentRoom || !playerId) return;

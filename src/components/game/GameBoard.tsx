@@ -97,7 +97,7 @@ function DropZone({
 }
 
 export function GameBoard() {
-  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, shuffle } = useGameStore();
+  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, orderCards, shuffle } = useGameStore();
   const { poppedOutIds, openPopout, closePopout, hasAnyPopouts } = useMultiPopoutWindow();
   const { theme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
@@ -430,6 +430,11 @@ export function GameBoard() {
                     onClick={() => setShowTokenSearch(true)}
                     cutoutImage="/TokensCutout.png"
                     title="Search for tokens"
+                  />
+                  <FancyButton
+                    onClick={orderCards}
+                    cutoutImage="/OrderCutout.png"
+                    title="Organize cards by type"
                   />
                 </div>
               </div>

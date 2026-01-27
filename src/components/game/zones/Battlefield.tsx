@@ -183,6 +183,8 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
           // Keep X the same so left stays left and right stays right
           const displayX = boardCard.position?.x ?? 0.5;
           const displayY = isOpponent ? (1 - (boardCard.position?.y ?? 0.5)) : (boardCard.position?.y ?? 0.5);
+          // Z-index based on Y position - cards lower on battlefield appear in front
+          const zIndex = Math.floor(displayY * 100);
           return (
             <div
               key={card.instanceId}
@@ -192,6 +194,7 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
                 top: `${displayY * 100}%`,
                 transform: 'translate(-50%, -50%)',
                 width: `${scaledWidth}px`,
+                zIndex,
               }}
             >
               <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />

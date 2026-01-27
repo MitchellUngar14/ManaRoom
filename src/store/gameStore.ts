@@ -56,6 +56,7 @@ interface GameStore {
   repositionCard: (cardId: string, position: { x: number; y: number }) => void;
   tapCard: (cardId: string) => void;
   untapAll: () => void;
+  orderCards: () => void;
   setLife: (amount: number) => void;
   shuffle: () => void;
   restart: () => void;
@@ -159,6 +160,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
           const battlefield = player.zones.battlefield.map((card) => {
             if (data.cardIds.includes(card.instanceId)) {
               return { ...card, tapped: false };
+            }
+            return card;
+          });
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield,
+                },
+              },
+            },
+          };
+        });
+      });
+
+      socket.on('game:cardsOrdered', (data: { playerId: string; cardUpdates: { cardId: string; position: { x: number; y: number } }[] }) => {
+        // Skip if this is our own action - we already did the optimistic update
+        const { myId } = get();
+        if (data.playerId === myId) return;
+
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const battlefield = player.zones.battlefield.map((card) => {
+            const update = data.cardUpdates.find((u) => u.cardId === card.instanceId);
+            if (update) {
+              return { ...card, position: update.position };
             }
             return card;
           });
@@ -678,6 +711,112 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     socket.emit('game:untapAll');
+  },
+
+  orderCards: () => {
+    const { socket, myId, players } = get();
+    if (!socket || !myId) return;
+
+    const player = players[myId];
+    if (!player) return;
+
+    const battlefield = player.zones.battlefield;
+    if (battlefield.length === 0) return;
+
+    // Categorize cards by type
+    const creatures: BoardCard[] = [];
+    const permanents: BoardCard[] = []; // Non-creature, non-land permanents
+    const lands: BoardCard[] = [];
+
+    battlefield.forEach((card) => {
+      const boardCard = card as BoardCard;
+      const typeLine = (boardCard.card?.typeLine || '').toLowerCase();
+
+      // Skip instants and sorceries (shouldn't be on battlefield anyway)
+      if (typeLine.includes('instant') || typeLine.includes('sorcery')) {
+        return;
+      }
+
+      if (typeLine.includes('creature')) {
+        creatures.push(boardCard);
+      } else if (typeLine.includes('land')) {
+        lands.push(boardCard);
+      } else {
+        // Artifacts, enchantments, planeswalkers, etc.
+        permanents.push(boardCard);
+      }
+    });
+
+    // Sort each category by card name to group same cards together
+    const sortByName = (a: BoardCard, b: BoardCard) =>
+      (a.cardName || '').localeCompare(b.cardName || '');
+
+    creatures.sort(sortByName);
+    permanents.sort(sortByName);
+    lands.sort(sortByName);
+
+    // Calculate positions for each category
+    // Left third: creatures (x: 0.05 - 0.30)
+    // Middle third: permanents (x: 0.35 - 0.65)
+    // Right third: lands (x: 0.70 - 0.95)
+    const cardUpdates: { cardId: string; position: { x: number; y: number } }[] = [];
+
+    const positionCards = (cards: BoardCard[], xStart: number, xEnd: number) => {
+      if (cards.length === 0) return;
+
+      const xRange = xEnd - xStart;
+      const cols = Math.ceil(Math.sqrt(cards.length * 1.5)); // Slightly more columns than rows
+      const rows = Math.ceil(cards.length / cols);
+
+      const xSpacing = xRange / (cols + 1);
+      const ySpacing = 0.8 / (rows + 1); // Use 80% of vertical space
+
+      cards.forEach((card, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        const x = xStart + xSpacing * (col + 1);
+        const y = 0.1 + ySpacing * (row + 1); // Start 10% from top
+
+        cardUpdates.push({
+          cardId: card.instanceId,
+          position: { x, y },
+        });
+      });
+    };
+
+    positionCards(creatures, 0.02, 0.30);
+    positionCards(permanents, 0.35, 0.65);
+    positionCards(lands, 0.70, 0.98);
+
+    // Optimistic update
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const updatedBattlefield = player.zones.battlefield.map((card) => {
+        const update = cardUpdates.find((u) => u.cardId === card.instanceId);
+        if (update) {
+          return { ...card, position: update.position };
+        }
+        return card;
+      });
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              battlefield: updatedBattlefield,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:orderCards', { cardUpdates });
   },
 
   setLife: (amount) => {
