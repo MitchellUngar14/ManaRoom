@@ -308,6 +308,42 @@ body {
   }
 }
 
+/* Zone glow rising particles */
+.zone-glow-particle {
+  position: absolute;
+  bottom: 0;
+  background: var(--theme-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--theme-accent), 0 0 12px var(--theme-accent-glow);
+  opacity: 0;
+  animation: zone-particle-rise linear infinite;
+}
+
+@keyframes zone-particle-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+
+  10% {
+    opacity: var(--particle-opacity, 0.5);
+    transform: translateY(-10px) scale(1);
+  }
+
+  50% {
+    opacity: calc(var(--particle-opacity, 0.5) * 0.7);
+  }
+
+  90% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-150px) scale(0.3);
+  }
+}
+
 /* Zone highlights */
 .zone-highlight {
   @apply ring-2 ring-blue-500 ring-opacity-50;

@@ -26,6 +26,7 @@ import { CommandZone } from './zones/CommandZone';
 import { CardPreviewPane } from './CardPreviewPane';
 import { CardEditModal } from './CardEditModal';
 import { AmbientEffects } from './AmbientEffects';
+import { ZoneGlowEffect } from './ZoneGlowEffect';
 import { useTheme } from '@/hooks/useTheme';
 import type { GameCard, BoardCard, ZoneType, PlayerState } from '@/types';
 
@@ -500,6 +501,9 @@ export function GameBoard() {
                     boxShadow: 'inset 0 10px 20px rgba(0,0,0,0.8)'
                   }}
                 >
+                  {/* Rising glow effect from bottom */}
+                  <ZoneGlowEffect particleCount={10} intensity="subtle" />
+
                   <DropZone id="commandZone" className="w-28 shrink-0">
                     <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                   </DropZone>

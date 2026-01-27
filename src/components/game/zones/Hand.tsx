@@ -3,6 +3,7 @@
 import type { GameCard } from '@/types';
 import { Card } from '../Card';
 import { setHoveredCard } from '../GameBoard';
+import { ZoneGlowEffect } from '../ZoneGlowEffect';
 
 interface HandProps {
   cards: GameCard[];
@@ -30,6 +31,9 @@ export function Hand({ cards }: HandProps) {
         boxShadow: 'inset 0 10px 20px rgba(0,0,0,0.8)'
       }}
     >
+      {/* Rising glow effect from bottom */}
+      <ZoneGlowEffect particleCount={15} intensity="subtle" />
+
       {/* Header - positioned absolutely so it doesn't clip cards */}
       <div className="absolute top-1 left-14 z-0">
         <span className="text-xs transition-colors duration-500 font-medium" style={{ color: '#e4e4e7', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Hand ({cards.length})</span>
