@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BattlefieldTheme, getTheme, defaultTheme, themeToCSSVariables } from '@/lib/themes';
 
 const THEME_STORAGE_KEY = 'manaroom-battlefield-theme';
+const THEME_CHANGE_EVENT = 'manaroom-theme-change';
 
 export function useTheme() {
   const [theme, setThemeState] = useState<BattlefieldTheme>(defaultTheme);
@@ -17,6 +18,19 @@ export function useTheme() {
       setThemeState(savedTheme);
     }
     setIsLoaded(true);
+  }, []);
+
+  // Listen for theme changes from other components
+  useEffect(() => {
+    const handleThemeChange = (event: CustomEvent<string>) => {
+      const newTheme = getTheme(event.detail);
+      setThemeState(newTheme);
+    };
+
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange as EventListener);
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange as EventListener);
+    };
   }, []);
 
   // Apply CSS variables when theme changes
@@ -38,6 +52,9 @@ export function useTheme() {
     const newTheme = getTheme(themeId);
     setThemeState(newTheme);
     localStorage.setItem(THEME_STORAGE_KEY, themeId);
+
+    // Dispatch event to notify other useTheme instances
+    window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, { detail: themeId }));
   }, []);
 
   return {

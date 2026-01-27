@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import type { GameCard, BoardCard } from '@/types';
 import { Card } from '../Card';
 import { CardEntryEffect } from '../CardEntryEffect';
+import { useTheme } from '@/hooks/useTheme';
 
 interface BattlefieldProps {
   cards: GameCard[];
@@ -30,6 +31,8 @@ interface EntryEffect {
 }
 
 export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false, onEditCard, showPlacementGuides = false, showEntryEffects, scale = 1.0, draggingCardId, draggingPosition, showBackground = true }: BattlefieldProps) {
+  const { theme } = useTheme();
+
   // Track cards we've seen to detect new entries
   const seenCardsRef = useRef<Set<string>>(new Set());
   const [entryEffects, setEntryEffects] = useState<EntryEffect[]>([]);
@@ -93,11 +96,22 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
   return (
     <div
       className={`h-full relative overflow-hidden transition-colors duration-500 game-battlefield ${fullScreen ? 'min-h-screen' : ''}`}
+      style={theme?.playmat?.enabled ? { background: 'transparent' } : undefined}
     >
-      {/* Background layer - flipped for opponent */}
-      {showBackground && (
+      {/* Background layer - playmat or tiled texture */}
+      {theme?.playmat?.enabled ? (
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none z-[1]"
+          style={{
+            backgroundImage: `url(${isOpponent ? theme.playmat.opponentImage : theme.playmat.playerImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      ) : showBackground && (
+        <div
+          className="absolute inset-0 pointer-events-none z-[1]"
           style={{
             backgroundImage: 'url(/battlefield-background.png)',
             backgroundRepeat: 'repeat',
@@ -108,7 +122,7 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
       )}
       {/* Placement guides - only shown for player's battlefield */}
       {showPlacementGuides && !isOpponent && (
-        <div className="absolute inset-0 flex pointer-events-none z-0">
+        <div className="absolute inset-0 flex pointer-events-none z-[2]">
           {/* Creatures zone - left third */}
           <div className="flex-1 border-r flex flex-col items-center justify-center" style={{ borderColor: 'var(--theme-border-subtle)' }}>
             <div className="flex flex-col items-center gap-2 magical-rune-container">

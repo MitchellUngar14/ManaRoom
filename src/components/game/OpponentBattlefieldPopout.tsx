@@ -145,7 +145,7 @@ export function OpponentBattlefieldPopout({ opponent, roomKey }: OpponentBattlef
         >
           <Battlefield
             cards={opponent.zones.battlefield}
-            isOpponent={false}
+            isOpponent={true}
             ownerId={opponent.odId}
             allowTakeControl={true}
             readOnly={false}

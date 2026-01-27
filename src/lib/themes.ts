@@ -26,6 +26,11 @@ export interface BattlefieldTheme {
     to: string;
     direction: string;
   };
+  playmat?: {
+    enabled: boolean;
+    playerImage: string;
+    opponentImage: string;
+  };
 }
 
 export const themes: Record<string, BattlefieldTheme> = {
@@ -252,6 +257,33 @@ export const themes: Record<string, BattlefieldTheme> = {
       ambientType: 'particles',
       ambientColor: '#d4a853',
       ambientOpacity: 0.3,
+    },
+  },
+
+  'rengoku': {
+    id: 'rengoku',
+    name: 'Rengoku',
+    description: 'Demon Slayer flame hashira with custom playmats',
+    colors: {
+      bgPrimary: '#2d1810',
+      bgSecondary: '#3d2820',
+      bgTertiary: '#4d3830',
+      accent: '#d97706',
+      accentGlow: 'rgba(217, 119, 6, 0.3)',
+      textPrimary: '#fef3c7',
+      textSecondary: '#d6d3d1',
+      border: '#78350f',
+    },
+    effects: {
+      ambientEnabled: true,
+      ambientType: 'fire',
+      ambientColor: '#f97316',
+      ambientOpacity: 0.4,
+    },
+    playmat: {
+      enabled: true,
+      playerImage: '/RengokuPlaymat.png',
+      opponentImage: '/AkazaPlaymat.png',
     },
   },
 };
