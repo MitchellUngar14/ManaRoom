@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export interface MenuOption {
   label: string;
-  icon: 'preview' | 'tap' | 'untap' | 'destroy' | 'exile' | 'bounce' | 'copy' | 'counter' | 'view' | 'shuffle' | 'steal' | 'edit' | 'scry' | 'toTop' | 'toBottom' | 'focus' | 'unfocus' | 'popout';
+  icon: 'preview' | 'tap' | 'untap' | 'destroy' | 'exile' | 'bounce' | 'copy' | 'counter' | 'view' | 'shuffle' | 'steal' | 'edit' | 'scry' | 'toTop' | 'toBottom' | 'focus' | 'unfocus' | 'popout' | 'attach' | 'detach';
   onClick: () => void;
 }
 
@@ -204,6 +204,28 @@ function PopoutIcon() {
   );
 }
 
+function AttachIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Link/chain icon for attaching */}
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function DetachIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Broken link icon for detaching */}
+      <path d="M9 17H7A5 5 0 0 1 7 7" />
+      <path d="M15 7h2a5 5 0 0 1 4 8" />
+      <line x1="8" x2="12" y1="12" y2="12" />
+      <line x1="2" x2="22" y1="2" y2="22" />
+    </svg>
+  );
+}
+
 const iconMap: Record<MenuOption['icon'], React.FC> = {
   preview: PreviewIcon,
   tap: TapIcon,
@@ -223,6 +245,8 @@ const iconMap: Record<MenuOption['icon'], React.FC> = {
   focus: FocusIcon,
   unfocus: UnfocusIcon,
   popout: PopoutIcon,
+  attach: AttachIcon,
+  detach: DetachIcon,
 };
 
 export function CardContextMenu({

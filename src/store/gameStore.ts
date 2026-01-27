@@ -35,6 +35,7 @@ interface GameStore {
 
   // UI state
   previewCard: GameCard | null;
+  attachingCardId: string | null; // Card ID that's waiting to be attached to a target
 
   // Actions
   connect: () => Promise<void>;
@@ -67,6 +68,9 @@ interface GameStore {
   updateCardStats: (cardId: string, stats: { counters?: number; modifiedPower?: number; modifiedToughness?: number }) => void;
   createCardCopy: (card: BoardCard) => void;
   scryLibrary: (topCardIds: string[], bottomCardIds: string[]) => void;
+  attachCard: (cardId: string, targetId: string) => void;
+  detachCard: (cardId: string) => void;
+  setAttachingCardId: (cardId: string | null) => void;
 
   // UI actions
   setPreviewCard: (card: GameCard | null) => void;
@@ -91,6 +95,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   spectatorMode: false,
   actingAsPlayerId: null,
   previewCard: null,
+  attachingCardId: null,
 
   connect: async () => {
     return new Promise((resolve, reject) => {
@@ -192,6 +197,67 @@ export const useGameStore = create<GameStore>((set, get) => ({
             const update = data.cardUpdates.find((u) => u.cardId === card.instanceId);
             if (update) {
               return { ...card, position: update.position };
+            }
+            return card;
+          });
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield,
+                },
+              },
+            },
+          };
+        });
+      });
+
+      socket.on('game:cardAttached', (data: { playerId: string; cardId: string; targetId: string }) => {
+        const { myId } = get();
+        if (data.playerId === myId) return;
+
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const battlefield = player.zones.battlefield.map((card) => {
+            if (card.instanceId === data.cardId) {
+              return { ...card, attachedTo: data.targetId };
+            }
+            return card;
+          });
+
+          return {
+            players: {
+              ...state.players,
+              [data.playerId]: {
+                ...player,
+                zones: {
+                  ...player.zones,
+                  battlefield,
+                },
+              },
+            },
+          };
+        });
+      });
+
+      socket.on('game:cardDetached', (data: { playerId: string; cardId: string }) => {
+        const { myId } = get();
+        if (data.playerId === myId) return;
+
+        set((state) => {
+          const player = state.players[data.playerId];
+          if (!player) return state;
+
+          const battlefield = player.zones.battlefield.map((card) => {
+            if (card.instanceId === data.cardId) {
+              const { attachedTo, ...rest } = card;
+              return rest as BoardCard;
             }
             return card;
           });
@@ -616,14 +682,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { socket, myId } = get();
     if (!socket || !myId) return;
 
-    // Optimistic update
+    // Optimistic update - also move any cards attached to this card
     set((state) => {
       const player = state.players[myId];
       if (!player) return state;
 
+      // Find the card being moved to calculate delta
+      const movingCard = player.zones.battlefield.find((c) => c.instanceId === cardId);
+      if (!movingCard) return state;
+
+      const oldPos = movingCard.position || { x: 0.5, y: 0.5 };
+      const deltaX = position.x - oldPos.x;
+      const deltaY = position.y - oldPos.y;
+
+      // Find all cards attached to this card
+      const attachedCardIds = player.zones.battlefield
+        .filter((c) => c.attachedTo === cardId)
+        .map((c) => c.instanceId);
+
       const battlefield = player.zones.battlefield.map((card) => {
         if (card.instanceId === cardId) {
           return { ...card, position };
+        }
+        // Move attached cards by the same delta
+        if (attachedCardIds.includes(card.instanceId)) {
+          const cardPos = card.position || { x: 0.5, y: 0.5 };
+          return {
+            ...card,
+            position: {
+              x: cardPos.x + deltaX,
+              y: cardPos.y + deltaY,
+            },
+          };
         }
         return card;
       });
@@ -975,7 +1065,75 @@ export const useGameStore = create<GameStore>((set, get) => ({
     socket.emit('game:scry', { topCardIds, bottomCardIds });
   },
 
+  attachCard: (cardId, targetId) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const battlefield = player.zones.battlefield.map((card) => {
+        if (card.instanceId === cardId) {
+          return { ...card, attachedTo: targetId };
+        }
+        return card;
+      });
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              battlefield,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:attachCard', { cardId, targetId });
+  },
+
+  detachCard: (cardId) => {
+    const { socket, myId } = get();
+    if (!socket || !myId) return;
+
+    // Optimistic update
+    set((state) => {
+      const player = state.players[myId];
+      if (!player) return state;
+
+      const battlefield = player.zones.battlefield.map((card) => {
+        if (card.instanceId === cardId) {
+          const { attachedTo, ...rest } = card;
+          return rest as BoardCard;
+        }
+        return card;
+      });
+
+      return {
+        players: {
+          ...state.players,
+          [myId]: {
+            ...player,
+            zones: {
+              ...player.zones,
+              battlefield,
+            },
+          },
+        },
+      };
+    });
+
+    socket.emit('game:detachCard', { cardId });
+  },
+
   setPreviewCard: (card) => set({ previewCard: card }),
+  setAttachingCardId: (cardId) => set({ attachingCardId: cardId }),
 
   // Internal setters
   _setConnected: (connected) => set({ connected }),

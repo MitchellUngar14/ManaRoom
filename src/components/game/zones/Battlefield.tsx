@@ -18,6 +18,9 @@ interface BattlefieldProps {
   showPlacementGuides?: boolean;
   showEntryEffects?: boolean;
   scale?: number;
+  draggingCardId?: string;
+  draggingPosition?: { x: number; y: number } | null;
+  showBackground?: boolean;
 }
 
 interface EntryEffect {
@@ -26,7 +29,7 @@ interface EntryEffect {
   y: number;
 }
 
-export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false, onEditCard, showPlacementGuides = false, showEntryEffects, scale = 1.0 }: BattlefieldProps) {
+export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = false, mirrorCards = false, readOnly = false, fullScreen = false, largeCards = false, onEditCard, showPlacementGuides = false, showEntryEffects, scale = 1.0, draggingCardId, draggingPosition, showBackground = true }: BattlefieldProps) {
   // Track cards we've seen to detect new entries
   const seenCardsRef = useRef<Set<string>>(new Set());
   const [entryEffects, setEntryEffects] = useState<EntryEffect[]>([]);
@@ -92,15 +95,17 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
       className={`h-full relative overflow-hidden transition-colors duration-500 game-battlefield ${fullScreen ? 'min-h-screen' : ''}`}
     >
       {/* Background layer - flipped for opponent */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'url(/battlefield-background.png)',
-          backgroundRepeat: 'repeat',
-          backgroundSize: 'auto',
-          transform: isOpponent ? 'scaleY(-1)' : 'none',
-        }}
-      />
+      {showBackground && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'url(/battlefield-background.png)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: 'auto',
+            transform: isOpponent ? 'scaleY(-1)' : 'none',
+          }}
+        />
+      )}
       {/* Placement guides - only shown for player's battlefield */}
       {showPlacementGuides && !isOpponent && (
         <div className="absolute inset-0 flex pointer-events-none z-0">
@@ -177,30 +182,112 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
 
       {/* Cards on battlefield */}
       <div className="absolute inset-0 p-2">
-        {cards.map((card) => {
-          const boardCard = card as BoardCard;
-          // For opponent cards: only mirror Y so cards near opponent appear near the divider
-          // Keep X the same so left stays left and right stays right
-          const displayX = boardCard.position?.x ?? 0.5;
-          const displayY = isOpponent ? (1 - (boardCard.position?.y ?? 0.5)) : (boardCard.position?.y ?? 0.5);
-          // Z-index based on Y position - cards lower on battlefield appear in front
-          const zIndex = Math.floor(displayY * 100);
-          return (
-            <div
-              key={card.instanceId}
-              className={`absolute ${mirrorCards ? 'rotate-180' : ''}`}
-              style={{
-                left: `${displayX * 100}%`,
-                top: `${displayY * 100}%`,
-                transform: 'translate(-50%, -50%)',
-                width: `${scaledWidth}px`,
-                zIndex,
-              }}
-            >
-              <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />
-            </div>
-          );
-        })}
+        {(() => {
+          // Separate cards into base cards (not attached) and attached cards
+          const baseCards = cards.filter((card) => !(card as BoardCard).attachedTo);
+          const attachedCards = cards.filter((card) => (card as BoardCard).attachedTo);
+
+          // Build a map of targetId -> attached cards for efficient lookup
+          const attachmentsMap = new Map<string, BoardCard[]>();
+          attachedCards.forEach((card) => {
+            const boardCard = card as BoardCard;
+            const targetId = boardCard.attachedTo!;
+            if (!attachmentsMap.has(targetId)) {
+              attachmentsMap.set(targetId, []);
+            }
+            attachmentsMap.get(targetId)!.push(boardCard);
+          });
+
+          // Render all cards - base cards first, then attached cards positioned relative to targets
+          const renderedCards: React.ReactNode[] = [];
+
+          // Render base cards
+          baseCards.forEach((card) => {
+            const boardCard = card as BoardCard;
+            // Use dragging position if this card is being dragged
+            const isDragging = card.instanceId === draggingCardId;
+            const baseX = isDragging && draggingPosition ? draggingPosition.x : (boardCard.position?.x ?? 0.5);
+            const baseY = isDragging && draggingPosition ? draggingPosition.y : (boardCard.position?.y ?? 0.5);
+            const displayX = baseX;
+            const displayY = isOpponent ? (1 - baseY) : baseY;
+            const zIndex = Math.floor(displayY * 40);
+
+            renderedCards.push(
+              <div
+                key={card.instanceId}
+                className={`absolute ${mirrorCards ? 'rotate-180' : ''}`}
+                style={{
+                  left: `${displayX * 100}%`,
+                  top: `${displayY * 100}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: `${scaledWidth}px`,
+                  zIndex,
+                }}
+              >
+                <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />
+              </div>
+            );
+
+            // Render any cards attached to this base card
+            const attachments = attachmentsMap.get(card.instanceId) || [];
+            attachments.forEach((attachedCard, attachIndex) => {
+              // Position attachments slightly offset from the base card (bottom-right)
+              // Stack them diagonally with each attachment offset more
+              const offsetY = 0.06 * (attachIndex + 1); // Stack downward
+              const offsetX = 0.03 * (attachIndex + 1); // Right offset for visibility
+              const attachedDisplayX = displayX + offsetX;
+              const attachedDisplayY = displayY + offsetY;
+              // Attached cards render above their target
+              const attachedZIndex = zIndex + 1 + attachIndex;
+
+              renderedCards.push(
+                <div
+                  key={attachedCard.instanceId}
+                  className={`absolute ${mirrorCards ? 'rotate-180' : ''} ${isDragging ? 'transition-none' : ''}`}
+                  style={{
+                    left: `${attachedDisplayX * 100}%`,
+                    top: `${attachedDisplayY * 100}%`,
+                    transform: 'translate(-50%, -50%)',
+                    width: `${scaledWidth}px`,
+                    zIndex: attachedZIndex,
+                  }}
+                >
+                  <Card card={attachedCard} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />
+                </div>
+              );
+            });
+          });
+
+          // Render any orphaned attached cards (target no longer exists)
+          // These render at their own position
+          attachedCards.forEach((card) => {
+            const boardCard = card as BoardCard;
+            const targetExists = baseCards.some(c => c.instanceId === boardCard.attachedTo);
+            if (!targetExists) {
+              const displayX = boardCard.position?.x ?? 0.5;
+              const displayY = isOpponent ? (1 - (boardCard.position?.y ?? 0.5)) : (boardCard.position?.y ?? 0.5);
+              const zIndex = Math.floor(displayY * 40);
+
+              renderedCards.push(
+                <div
+                  key={card.instanceId}
+                  className={`absolute ${mirrorCards ? 'rotate-180' : ''}`}
+                  style={{
+                    left: `${displayX * 100}%`,
+                    top: `${displayY * 100}%`,
+                    transform: 'translate(-50%, -50%)',
+                    width: `${scaledWidth}px`,
+                    zIndex,
+                  }}
+                >
+                  <Card card={card} zone="battlefield" isOpponent={isOpponent} ownerId={ownerId} allowTakeControl={allowTakeControl} readOnly={readOnly} onEditCard={onEditCard} />
+                </div>
+              );
+            }
+          });
+
+          return renderedCards;
+        })()}
       </div>
 
       {/* Entry effects for new opponent cards */}

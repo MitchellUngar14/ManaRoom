@@ -34,6 +34,7 @@ export default function RoomPage() {
   const [joining, setJoining] = useState(true);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showBattlefieldBg, setShowBattlefieldBg] = useState(true);
   const { theme, setTheme } = useTheme();
 
   // Fullscreen toggle
@@ -235,6 +236,33 @@ export default function RoomPage() {
               Room: {displayRoomKey}
             </span>
             <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
+            {/* Battlefield background toggle */}
+            <button
+              onClick={() => setShowBattlefieldBg(!showBattlefieldBg)}
+              className="relative w-8 h-8 rounded overflow-hidden border-2 transition-all"
+              style={{
+                borderColor: showBattlefieldBg ? 'var(--theme-accent)' : 'var(--theme-border)',
+                boxShadow: showBattlefieldBg ? '0 0 8px var(--theme-accent)' : 'none',
+              }}
+              title={showBattlefieldBg ? 'Hide battlefield texture' : 'Show battlefield texture'}
+            >
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: 'url(/battlefield-background.png)',
+                  backgroundSize: 'cover',
+                  opacity: showBattlefieldBg ? 1 : 0.3,
+                }}
+              />
+              {!showBattlefieldBg && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className="w-full h-0.5 rotate-45"
+                    style={{ backgroundColor: 'var(--theme-accent)' }}
+                  />
+                </div>
+              )}
+            </button>
           </div>
 
           {/* Center section - Life Counter */}
@@ -303,7 +331,7 @@ export default function RoomPage() {
 
       {/* Game board */}
       <div className="flex-1 overflow-hidden relative">
-        <GameBoard />
+        <GameBoard showBattlefieldBackground={showBattlefieldBg} />
 
         {/* Waiting for opponent overlay */}
         {isWaiting && (

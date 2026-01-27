@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   DragOverlay,
   DragStartEvent,
   DragEndEvent,
+  DragMoveEvent,
   pointerWithin,
   useSensor,
   useSensors,
@@ -96,12 +97,17 @@ function DropZone({
   );
 }
 
-export function GameBoard() {
-  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, orderCards, shuffle } = useGameStore();
+interface GameBoardProps {
+  showBattlefieldBackground?: boolean;
+}
+
+export function GameBoard({ showBattlefieldBackground = true }: GameBoardProps) {
+  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, orderCards, shuffle, attachingCardId, setAttachingCardId } = useGameStore();
   const { poppedOutIds, openPopout, closePopout, hasAnyPopouts } = useMultiPopoutWindow();
   const { theme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
   const [activeZone, setActiveZone] = useState<ZoneType | null>(null);
+  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
   const [mirrorOpponent, setMirrorOpponent] = useState(false);
 
   // Handle popout for a specific opponent
@@ -127,6 +133,13 @@ export function GameBoard() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape key cancels attach mode
+      if (e.key === 'Escape') {
+        if (attachingCardId) {
+          setAttachingCardId(null);
+        }
+      }
+
       // Ctrl key toggles bottom bar
       if (e.key === 'Control') {
         setBottomBarCollapsed(prev => !prev);
@@ -210,11 +223,38 @@ export function GameBoard() {
           }
         }
       }
+
+      // S key shuffles library
+      if (e.key === 's' || e.key === 'S') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        shuffle();
+      }
+
+      // O key orders/organizes cards on battlefield
+      if (e.key === 'o' || e.key === 'O') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        orderCards();
+      }
+
+      // U key untaps all cards
+      if (e.key === 'u' || e.key === 'U') {
+        // Don't trigger if typing in an input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        untapAll();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [previewCard, setPreviewCard]);
+  }, [previewCard, setPreviewCard, attachingCardId, setAttachingCardId, shuffle, orderCards, untapAll]);
 
   const myPlayer = myId ? players[myId] : null;
   const opponents = Object.values(players).filter((p) => p.odId !== myId);
@@ -234,10 +274,38 @@ export function GameBoard() {
     setActiveZone(zone);
   };
 
+  // Track drag position for attached cards to follow
+  const battlefieldRef = useRef<HTMLDivElement>(null);
+  const handleDragMove = (event: DragMoveEvent) => {
+    if (!battlefieldRef.current) return;
+    const { active } = event;
+    const zone = active.data.current?.zone as ZoneType;
+
+    // Only track position for battlefield cards
+    if (zone !== 'battlefield') {
+      setDragPosition(null);
+      return;
+    }
+
+    const rect = battlefieldRef.current.getBoundingClientRect();
+    const translated = active.rect.current.translated;
+
+    if (translated) {
+      const cardHeightPercent = translated.height / rect.height;
+      const minY = cardHeightPercent * 0.4;
+
+      setDragPosition({
+        x: Math.max(0.05, Math.min(0.95, (translated.left - rect.left + translated.width / 2) / rect.width)),
+        y: Math.max(minY, Math.min(0.95, (translated.top - rect.top + translated.height / 2) / rect.height)),
+      });
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCard(null);
     setActiveZone(null);
+    setDragPosition(null);
 
     if (!over || !active.data.current) return;
 
@@ -300,6 +368,7 @@ export function GameBoard() {
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
       collisionDetection={pointerWithin}
     >
@@ -321,6 +390,7 @@ export function GameBoard() {
                   onPopout={handlePopout}
                   roomKey={roomKey}
                   myId={myId}
+                  showBackground={showBattlefieldBackground}
                 />
               </div>
               {/* Magical divider between battlefields */}
@@ -381,13 +451,30 @@ export function GameBoard() {
 
           {/* My battlefield (bottom half - expands when all opponents are popped out) */}
           <DropZone id="battlefield" className="flex-1 relative">
-            <Battlefield
-              cards={myPlayer.zones.battlefield}
-              isOpponent={false}
-              largeCards={allOpponentsPopped}
-              onEditCard={setEditingCard}
-              showPlacementGuides={showPlacementGuides}
-            />
+            {/* Attach mode indicator */}
+            {attachingCardId && (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-40 bg-amber-500/90 text-black px-4 py-2 rounded-lg shadow-lg flex items-center gap-3 animate-pulse">
+                <span className="font-semibold">Click a card to attach to</span>
+                <button
+                  onClick={() => setAttachingCardId(null)}
+                  className="bg-black/20 hover:bg-black/30 px-2 py-1 rounded text-sm"
+                >
+                  Cancel (Esc)
+                </button>
+              </div>
+            )}
+            <div ref={battlefieldRef} className="h-full">
+              <Battlefield
+                cards={myPlayer.zones.battlefield}
+                isOpponent={false}
+                largeCards={allOpponentsPopped}
+                onEditCard={setEditingCard}
+                showPlacementGuides={showPlacementGuides}
+                draggingCardId={activeZone === 'battlefield' ? activeCard?.instanceId : undefined}
+                draggingPosition={dragPosition}
+                showBackground={showBattlefieldBackground}
+              />
+            </div>
           </DropZone>
         </div>
 
@@ -435,6 +522,7 @@ export function GameBoard() {
                     onClick={orderCards}
                     cutoutImage="/OrderCutout.png"
                     title="Organize cards by type"
+                    maskSize="45% auto"
                   />
                 </div>
               </div>

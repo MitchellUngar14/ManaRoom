@@ -19,6 +19,7 @@ interface OpponentAreaProps {
   onPopout: (opponentId: string) => void;
   roomKey: string | null;
   myId: string | null;
+  showBackground?: boolean;
 }
 
 // Opponent zones popout modal component
@@ -102,6 +103,7 @@ export function OpponentArea({
   onPopout,
   roomKey,
   myId,
+  showBackground = true,
 }: OpponentAreaProps) {
   const [focusedOpponentId, setFocusedOpponentId] = useState<string | null>(null);
   const [zonesModalOpponent, setZonesModalOpponent] = useState<PlayerState | null>(null);
@@ -249,6 +251,7 @@ export function OpponentArea({
               mirrorCards={!mirrorOpponent}
               scale={1.0}
               showEntryEffects={false}
+              showBackground={showBackground}
             />
           </div>
         </div>
@@ -342,6 +345,7 @@ export function OpponentArea({
               mirrorCards={!mirrorOpponent}
               scale={scale}
               showEntryEffects={!hasFocusedRef.current}
+              showBackground={showBackground}
             />
           </div>
         </div>

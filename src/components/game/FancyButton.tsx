@@ -5,6 +5,7 @@ interface FancyButtonProps {
   cutoutImage: string;
   title?: string;
   className?: string;
+  maskSize?: string;
 }
 
 export function FancyButton({
@@ -12,6 +13,7 @@ export function FancyButton({
   cutoutImage,
   title,
   className = '',
+  maskSize = '60% auto',
 }: FancyButtonProps) {
   return (
     <button
@@ -39,12 +41,12 @@ export function FancyButton({
         style={{
           background: `linear-gradient(180deg, var(--theme-accent) 0%, var(--theme-accent) 100%)`,
           maskImage: `url(${cutoutImage})`,
-          maskSize: '60% auto',
+          maskSize: maskSize,
           maskPosition: 'center calc(50% + 3px)',
           maskRepeat: 'no-repeat',
           maskMode: 'luminance',
           WebkitMaskImage: `url(${cutoutImage})`,
-          WebkitMaskSize: '60% auto',
+          WebkitMaskSize: maskSize,
           WebkitMaskPosition: 'center calc(50% + 3px)',
           WebkitMaskRepeat: 'no-repeat',
           filter: 'drop-shadow(0 0 6px var(--theme-accent)) drop-shadow(0 0 12px var(--theme-accent)) drop-shadow(0 0 20px var(--theme-accent-glow))',
@@ -58,12 +60,12 @@ export function FancyButton({
           background: 'white',
           mixBlendMode: 'overlay',
           maskImage: `url(${cutoutImage})`,
-          maskSize: '60% auto',
+          maskSize: maskSize,
           maskPosition: 'center calc(50% + 3px)',
           maskRepeat: 'no-repeat',
           maskMode: 'luminance',
           WebkitMaskImage: `url(${cutoutImage})`,
-          WebkitMaskSize: '60% auto',
+          WebkitMaskSize: maskSize,
           WebkitMaskPosition: 'center calc(50% + 3px)',
           WebkitMaskRepeat: 'no-repeat',
           opacity: 0.5,
@@ -76,12 +78,12 @@ export function FancyButton({
         style={{
           background: `var(--theme-accent)`,
           maskImage: `url(${cutoutImage})`,
-          maskSize: '60% auto',
+          maskSize: maskSize,
           maskPosition: 'center calc(50% + 3px)',
           maskRepeat: 'no-repeat',
           maskMode: 'luminance',
           WebkitMaskImage: `url(${cutoutImage})`,
-          WebkitMaskSize: '60% auto',
+          WebkitMaskSize: maskSize,
           WebkitMaskPosition: 'center calc(50% + 3px)',
           WebkitMaskRepeat: 'no-repeat',
           filter: 'blur(6px) drop-shadow(0 0 15px var(--theme-accent))',
@@ -95,12 +97,12 @@ export function FancyButton({
         style={{
           background: `var(--theme-accent)`,
           maskImage: `url(${cutoutImage})`,
-          maskSize: '60% auto',
+          maskSize: maskSize,
           maskPosition: 'center calc(50% + 3px)',
           maskRepeat: 'no-repeat',
           maskMode: 'luminance',
           WebkitMaskImage: `url(${cutoutImage})`,
-          WebkitMaskSize: '60% auto',
+          WebkitMaskSize: maskSize,
           WebkitMaskPosition: 'center calc(50% + 3px)',
           WebkitMaskRepeat: 'no-repeat',
           filter: 'blur(8px) drop-shadow(0 0 20px var(--theme-accent)) drop-shadow(0 0 40px var(--theme-accent))',

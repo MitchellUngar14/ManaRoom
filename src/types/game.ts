@@ -22,6 +22,8 @@ export interface BoardCard extends GameCard {
   isToken?: boolean;
   // Whether this card is a copy (created via "Make a token copy")
   isCopy?: boolean;
+  // For Equipment/Auras - the instanceId of the card this is attached to
+  attachedTo?: string;
 }
 
 // All zones a player can have cards in

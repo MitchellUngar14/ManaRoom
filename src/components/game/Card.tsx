@@ -40,6 +40,23 @@ function isToken(card: GameCard): boolean {
   return false;
 }
 
+// Helper to check if a card is an Equipment
+function isEquipment(card: GameCard): boolean {
+  const typeLine = card.card?.typeLine?.toLowerCase() || '';
+  return typeLine.includes('equipment');
+}
+
+// Helper to check if a card is an Aura
+function isAura(card: GameCard): boolean {
+  const typeLine = card.card?.typeLine?.toLowerCase() || '';
+  return typeLine.includes('aura');
+}
+
+// Helper to check if a card can be attached (Equipment or Aura)
+function canAttach(card: GameCard): boolean {
+  return isEquipment(card) || isAura(card);
+}
+
 export function Card({
   card,
   zone,
@@ -52,7 +69,7 @@ export function Card({
   onClick,
   onEditCard,
 }: CardProps) {
-  const { tapCard, setPreviewCard, moveCard, removeCard, takeControl } = useGameStore();
+  const { tapCard, setPreviewCard, moveCard, removeCard, takeControl, attachCard, detachCard, attachingCardId, setAttachingCardId } = useGameStore();
   const boardCard = card as BoardCard;
   const isTapped = boardCard.tapped;
   const isBattlefield = zone === 'battlefield';
@@ -109,6 +126,13 @@ export function Card({
   };
 
   const handleClick = () => {
+    // Check if we're in attach mode and clicked on a valid target
+    if (attachingCardId && isBattlefield && attachingCardId !== card.instanceId) {
+      attachCard(attachingCardId, card.instanceId);
+      setAttachingCardId(null);
+      return;
+    }
+
     if (onClick) {
       onClick();
     } else if (isBattlefield && !isOpponent && !readOnly) {
@@ -198,6 +222,16 @@ export function Card({
     closeContextMenu();
   }, [boardCard, onEditCard, closeContextMenu]);
 
+  const handleStartAttach = useCallback(() => {
+    setAttachingCardId(card.instanceId);
+    closeContextMenu();
+  }, [card.instanceId, setAttachingCardId, closeContextMenu]);
+
+  const handleDetach = useCallback(() => {
+    detachCard(card.instanceId);
+    closeContextMenu();
+  }, [card.instanceId, detachCard, closeContextMenu]);
+
   const style = transform
     ? {
       transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -238,6 +272,23 @@ export function Card({
       icon: 'exile',
       onClick: handleGoToExile,
     });
+
+    // Add Attach/Detach options for Equipment and Auras
+    if (canAttach(card)) {
+      if (boardCard.attachedTo) {
+        contextMenuOptions.push({
+          label: 'Detach',
+          icon: 'detach',
+          onClick: handleDetach,
+        });
+      } else {
+        contextMenuOptions.push({
+          label: 'Attach',
+          icon: 'attach',
+          onClick: handleStartAttach,
+        });
+      }
+    }
   }
 
   // Add "Take Control" option for opponent battlefield cards
@@ -290,6 +341,13 @@ export function Card({
     setHoverRect(null);
   }, [card, isDragging]);
 
+  // Check if this card is a valid attach target (in attach mode and not the attaching card itself)
+  const isValidAttachTarget = attachingCardId && isBattlefield && attachingCardId !== card.instanceId;
+  // Check if this card is currently being selected for attachment
+  const isAttaching = attachingCardId === card.instanceId;
+  // Check if this card is attached to something
+  const isAttached = isBattlefield && boardCard.attachedTo;
+
   return (
     <>
       <div
@@ -315,6 +373,27 @@ export function Card({
           onPointerEnter={handlePointerEnter}
           onPointerLeave={handlePointerLeave}
         >
+          {/* Attach mode target highlight */}
+          {isValidAttachTarget && (
+            <div className="absolute inset-0 rounded ring-4 ring-cyan-400 ring-opacity-80 animate-pulse z-10 pointer-events-none" />
+          )}
+          {/* Attaching card highlight (the card being attached) */}
+          {isAttaching && (
+            <div className="absolute inset-0 rounded ring-4 ring-amber-400 ring-opacity-80 animate-pulse z-10 pointer-events-none" />
+          )}
+          {/* Attached indicator */}
+          {isAttached && (
+            <div
+              className="absolute -top-1 -left-1 text-[10px] font-bold px-1 rounded z-10"
+              style={{
+                backgroundColor: 'var(--theme-accent)',
+                color: 'var(--theme-text-primary)',
+                boxShadow: '0 0 8px var(--theme-accent), 0 0 16px var(--theme-accent), 0 0 24px var(--theme-accent)',
+              }}
+            >
+              ⛓
+            </div>
+          )}
           {imageUrl ? (
             <Image
               src={imageUrl}

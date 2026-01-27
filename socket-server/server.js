@@ -420,14 +420,40 @@ io.on('connection', (socket) => {
     const card = player.zones.battlefield.find((c) => c.instanceId === cardId);
     if (!card) return;
 
+    // Calculate delta for moving attached cards
+    const oldPos = card.position || { x: 0.5, y: 0.5 };
+    const deltaX = position.x - oldPos.x;
+    const deltaY = position.y - oldPos.y;
+
+    // Update main card position
     card.position = position;
+
+    // Find and move all cards attached to this card
+    const attachedCards = player.zones.battlefield.filter((c) => c.attachedTo === cardId);
+    attachedCards.forEach((attachedCard) => {
+      const attachedPos = attachedCard.position || { x: 0.5, y: 0.5 };
+      attachedCard.position = {
+        x: attachedPos.x + deltaX,
+        y: attachedPos.y + deltaY,
+      };
+    });
+
     room.lastActivity = new Date();
 
-    // Broadcast to other players (not sender, they already updated optimistically)
+    // Broadcast main card reposition to other players
     socket.to(currentRoom).emit('game:cardRepositioned', {
       playerId,
       cardId,
       position,
+    });
+
+    // Broadcast attached card repositions to other players
+    attachedCards.forEach((attachedCard) => {
+      socket.to(currentRoom).emit('game:cardRepositioned', {
+        playerId,
+        cardId: attachedCard.instanceId,
+        position: attachedCard.position,
+      });
     });
   });
 
@@ -507,6 +533,53 @@ io.on('connection', (socket) => {
     socket.to(currentRoom).emit('game:cardsOrdered', {
       playerId,
       cardUpdates,
+    });
+  });
+
+  // Attach card (Equipment/Aura)
+  socket.on('game:attachCard', ({ cardId, targetId }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    const card = player.zones.battlefield.find((c) => c.instanceId === cardId);
+    if (card) {
+      card.attachedTo = targetId;
+    }
+
+    room.lastActivity = new Date();
+
+    socket.to(currentRoom).emit('game:cardAttached', {
+      playerId,
+      cardId,
+      targetId,
+    });
+  });
+
+  // Detach card (Equipment/Aura)
+  socket.on('game:detachCard', ({ cardId }) => {
+    if (!currentRoom || !playerId) return;
+
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const player = room.players.get(playerId);
+    if (!player) return;
+
+    const card = player.zones.battlefield.find((c) => c.instanceId === cardId);
+    if (card) {
+      delete card.attachedTo;
+    }
+
+    room.lastActivity = new Date();
+
+    socket.to(currentRoom).emit('game:cardDetached', {
+      playerId,
+      cardId,
     });
   });
 
