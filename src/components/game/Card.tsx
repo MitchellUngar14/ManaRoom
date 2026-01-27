@@ -200,8 +200,8 @@ export function Card({
 
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
+      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    }
     : undefined;
 
   const imageUrl = showBack
@@ -305,7 +305,7 @@ export function Card({
           style={style}
           {...attributes}
           {...listeners}
-          className={`card-container relative cursor-pointer select-none ${isDragging ? 'opacity-0' : ''} ${isHovered && showHoverEffects && !isDragging && hoverRect ? 'opacity-0' : ''}`}
+          className={`card-container relative cursor-pointer select-none shadow-xl ${isDragging ? 'opacity-0' : ''} ${isHovered && showHoverEffects && !isDragging && hoverRect ? 'opacity-0' : ''}`}
           animate={{
             rotate: isTapped ? 90 : 0,
           }}

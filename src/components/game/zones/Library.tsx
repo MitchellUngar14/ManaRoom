@@ -71,7 +71,7 @@ export function Library({ cards, isOpponent }: LibraryProps) {
         onContextMenu={handleContextMenu}
         title={isOpponent ? "Opponent's library" : 'Click to draw, or drag to battlefield/hand'}
       >
-        <span className="text-[9px] mb-0.5 text-center" style={{ color: 'var(--theme-text-muted)' }}>Library</span>
+        <span className="text-[9px] mb-0.5 text-center font-medium" style={{ color: '#e4e4e7', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Library</span>
         <div className="flex-1 w-28 hover:brightness-110 transition-all relative">
           {topCard && !isOpponent ? (
             <>

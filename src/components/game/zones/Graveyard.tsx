@@ -60,8 +60,8 @@ export function Graveyard({ cards, isOpponent }: GraveyardProps) {
         onContextMenu={handleContextMenu}
       >
         <span
-          className="text-[9px] mb-0.5 text-center"
-          style={{ color: 'var(--theme-text-muted)' }}
+          className="text-[9px] mb-0.5 text-center font-medium"
+          style={{ color: '#e4e4e7', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}
           onClick={() => setExpanded(true)}
         >
           Grave ({cards.length})

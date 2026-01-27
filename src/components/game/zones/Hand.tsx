@@ -20,14 +20,23 @@ export function Hand({ cards }: HandProps) {
   };
 
   return (
-    <div className="h-full relative overflow-visible">
+    <div
+      className="h-full relative overflow-visible"
+      style={{
+        backgroundImage: 'url(/hand-background.png)',
+        backgroundRepeat: 'repeat',
+        backgroundSize: 'auto',
+        // Add a subtle inner shadow/inset to give depth
+        boxShadow: 'inset 0 10px 20px rgba(0,0,0,0.8)'
+      }}
+    >
       {/* Header - positioned absolutely so it doesn't clip cards */}
-      <div className="absolute top-1 left-3 z-0">
-        <span className="text-xs transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Hand ({cards.length})</span>
+      <div className="absolute top-1 left-14 z-0">
+        <span className="text-xs transition-colors duration-500 font-medium" style={{ color: '#e4e4e7', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Hand ({cards.length})</span>
       </div>
 
       {/* Cards */}
-      <div className="h-full px-4 py-3 overflow-x-auto overflow-y-visible">
+      <div className="h-full pl-12 pr-4 py-3 overflow-x-auto overflow-y-visible">
         <div
           className="h-full flex items-center gap-2"
           onPointerMove={handleContainerMouseMove}

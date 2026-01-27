@@ -11,7 +11,7 @@ interface CommandZoneProps {
 export function CommandZone({ cards, isOpponent }: CommandZoneProps) {
   return (
     <div className="h-full flex flex-col">
-      <span className="text-[9px] mb-0.5 text-center" style={{ color: 'var(--theme-text-muted)' }}>Command</span>
+      <span className="text-[9px] mb-0.5 text-center font-medium" style={{ color: '#e4e4e7', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Command</span>
       <div className="flex-1 w-28">
         {cards.length > 0 ? (
           <div className="h-full hover:brightness-110 transition-all">

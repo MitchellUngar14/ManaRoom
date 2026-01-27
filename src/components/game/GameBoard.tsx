@@ -404,39 +404,102 @@ export function GameBoard() {
         </div>
 
         {/* Bottom bar: Hand + Zones */}
-        <div className="relative">
-          {/* Collapse toggle button - positioned at bottom of battlefield */}
-          <button
-            onClick={() => setBottomBarCollapsed(!bottomBarCollapsed)}
-            className={`game-collapse-btn ${bottomBarCollapsed ? 'collapsed' : ''}`}
-            title={bottomBarCollapsed ? 'Show hand & zones' : 'Hide hand & zones'}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
-          </button>
+        {/* Bottom bar: Hand + Zones */}
+        <div className="relative overflow-visible">
+          {/* Collapse toggle button - positioned relative to the container, floating above the content */}
+          {/* Center Jewel Toggle - Diamond Shape */}
+
 
           <div
-            className={`transition-all duration-300 ease-in-out ${bottomBarCollapsed ? 'h-0 overflow-hidden' : 'h-52 overflow-visible'
+            className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-700 ease-in-out ${bottomBarCollapsed ? 'translate-y-full' : 'translate-y-0'
               }`}
           >
-            <div className="h-52 flex game-hand-zone overflow-visible">
+            <div className="h-52 flex game-hand-zone overflow-visible relative">
+              {/* Decorative rail above entire bottom section */}
+              {/* Zones Rail (Left) */}
+              <div
+                className="absolute left-0 z-0 pointer-events-none transition-all duration-700 ease-in-out overflow-hidden"
+                style={{
+                  top: '-40px',
+                  width: sideZonesCollapsed ? '0px' : '500px',
+                  height: '42px',
+                  backgroundImage: 'url(/rail-texture.png)',
+                  backgroundRepeat: 'repeat-x',
+                  backgroundSize: 'auto 100%',
+                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', // Clean edges
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.5)'
+                }}
+              />
+
+              {/* Hand Rail (Right) - Flexes with remaining space */}
+              <div
+                className="absolute right-0 z-40 transition-all duration-700 ease-in-out"
+                style={{
+                  top: '-40px',
+                  left: sideZonesCollapsed ? '0px' : '500px',
+                  height: '42px',
+                  backgroundImage: 'url(/rail-texture.png)',
+                  backgroundRepeat: 'repeat-x',
+                  backgroundSize: 'auto 100%',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.5)',
+                  pointerEvents: 'none' // Rail itself doesn't block clicks
+                }}
+              >
+                {/* Center Jewel Toggle - Centered in Hand Rail */}
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 z-50 flex justify-center items-center pointer-events-auto"
+                  style={{
+                    top: '-24px', // Float above rail
+                    width: '64px',
+                    height: '64px',
+                  }}
+                >
+                  <button
+                    onClick={() => setBottomBarCollapsed(!bottomBarCollapsed)}
+                    className="w-full h-full focus:outline-none filter hover:brightness-125 transition-all active:scale-95 group relative"
+                    title={bottomBarCollapsed ? 'Show hand & zones' : 'Hide hand & zones'}
+                  >
+                    <motion.div
+                      className="w-full h-full relative flex items-center justify-center"
+                      animate={{
+                        rotate: bottomBarCollapsed ? 225 : 45
+                      }}
+                      transition={{ duration: 0.5, type: 'spring' }}
+                    >
+                      {/* Diamond Container */}
+                      <div className="w-10 h-10 relative transform bg-black shadow-lg overflow-hidden"
+                        style={{ boxShadow: '0 0 10px rgba(0,0,0,0.5)' }}>
+
+                        <div className="absolute inset-0 bg-blue-500 blur-md opacity-20 group-hover:opacity-40 transition-opacity" />
+
+                        <img
+                          src="/jewel-icon.png"
+                          alt="Toggle"
+                          className="w-full h-full object-cover"
+                          style={{ transform: 'rotate(-45deg) scale(1.4)' }}
+                        />
+
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-white opacity-10 pointer-events-none" />
+                      </div>
+                    </motion.div>
+                  </button>
+                </div>
+              </div>
               {/* My zones (left side) - collapsible */}
               <div
-                className="shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
-                style={{ width: sideZonesCollapsed ? '0px' : '476px' }}
+                className="shrink-0 transition-all duration-700 ease-in-out overflow-hidden"
+                style={{ width: sideZonesCollapsed ? '0px' : '500px' }}
               >
-                <div className="game-side-zones h-full" style={{ width: '476px' }}>
+                <div
+                  className="game-side-zones h-full relative"
+                  style={{
+                    width: '500px',
+                    backgroundImage: 'url(/hand-background.png)',
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: 'auto',
+                    boxShadow: 'inset 0 10px 20px rgba(0,0,0,0.8)'
+                  }}
+                >
                   <DropZone id="commandZone" className="w-28 shrink-0">
                     <CommandZone cards={myPlayer.zones.commandZone} isOpponent={false} />
                   </DropZone>
@@ -453,25 +516,51 @@ export function GameBoard() {
               </div>
 
               {/* Side zones collapse toggle */}
-              <button
-                onClick={() => setSideZonesCollapsed(!sideZonesCollapsed)}
-                className={`game-side-zones-toggle ${sideZonesCollapsed ? 'collapsed' : ''}`}
-                title={sideZonesCollapsed ? 'Show zones' : 'Hide zones'}
+              {/* Side zones collapse toggle - Full height divider */}
+              {/* Side zones collapse toggle - Below Rail Divider */}
+              <div
+                className="absolute z-50 flex items-center justify-center pointer-events-auto transition-all duration-700 ease-in-out"
+                style={{
+                  top: '0px',     // Starts comfortably below the rail (which is at -40px)
+                  bottom: '0px',  // Goes to bottom of container
+                  left: sideZonesCollapsed ? '-20px' : '480px',
+                  width: '40px',
+                }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <button
+                  onClick={() => setSideZonesCollapsed(!sideZonesCollapsed)}
+                  className="w-full h-full flex flex-col items-center justify-center focus:outline-none hover:brightness-125 transition-all active:scale-95 group relative"
+                  title={sideZonesCollapsed ? 'Show zones' : 'Hide zones'}
                 >
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
+                  {/* Toggle Base - Vertically Centered Pillar */}
+                  <div
+                    className="absolute left-0 right-0 bg-no-repeat bg-center"
+                    style={{
+                      top: '0',
+                      bottom: '0',
+                      backgroundImage: 'url(/side-toggle-base.png)',
+                      backgroundSize: '100% 100%',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                    }}
+                  />
+
+                  {/* Arrow Icon - Centered */}
+                  <motion.div
+                    className="w-14 h-14 relative z-10"
+                    style={{ marginTop: '-20px' }} // Raise it significantly to center in the visual base
+                    animate={{ rotate: sideZonesCollapsed ? 180 : 0 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <img
+                      src="/side-toggle-arrow.png"
+                      alt="Arrow"
+                      className="w-full h-full object-contain filter drop-shadow hover:brightness-150"
+                    />
+                  </motion.div>
+                </button>
+              </div>
+
+
 
               {/* Hand (right side, takes remaining space) */}
               <DropZone id="hand" className="flex-1 min-w-0 overflow-visible">
@@ -480,30 +569,33 @@ export function GameBoard() {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
       {/* Drag overlay - shows the card being dragged */}
       <DragOverlay>
-        {activeCard && (
-          <motion.div
-            className={`${allOpponentsPopped && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}
-            initial={{ scale: 1.5 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-          >
-            <Card
-              card={activeCard}
-              zone={activeZone || 'hand'}
-              isDragOverlay
-            />
-          </motion.div>
-        )}
-      </DragOverlay>
+        {
+          activeCard && (
+            <motion.div
+              className={`${allOpponentsPopped && activeZone === 'battlefield' ? 'w-40' : 'w-28'} pointer-events-none`}
+              initial={{ scale: 1.5 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+            >
+              <Card
+                card={activeCard}
+                zone={activeZone || 'hand'}
+                isDragOverlay
+              />
+            </motion.div>
+          )
+        }
+      </DragOverlay >
 
       {/* Card preview pane */}
-      <CardPreviewPane
+      < CardPreviewPane
         card={previewCard}
-        onClose={() => setPreviewCard(null)}
+        onClose={() => setPreviewCard(null)
+        }
       />
 
       {/* Card edit modal */}
@@ -512,6 +604,6 @@ export function GameBoard() {
         card={editingCard}
         onClose={() => setEditingCard(null)}
       />
-    </DndContext>
+    </DndContext >
   );
 }
