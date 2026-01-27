@@ -90,68 +90,73 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
   return (
     <div
       className={`h-full relative overflow-hidden transition-colors duration-500 game-battlefield ${fullScreen ? 'min-h-screen' : ''}`}
+      style={{
+        backgroundImage: 'url(/battlefield-background.png)',
+        backgroundRepeat: 'repeat',
+        backgroundSize: 'auto',
+      }}
     >
       {/* Placement guides - only shown for player's battlefield */}
       {showPlacementGuides && !isOpponent && (
         <div className="absolute inset-0 flex pointer-events-none z-0">
           {/* Creatures zone - left third */}
           <div className="flex-1 border-r flex flex-col items-center justify-center" style={{ borderColor: 'var(--theme-border-subtle)' }}>
-            <div className="flex flex-col items-center gap-1 opacity-30">
+            <div className="flex flex-col items-center gap-2 magical-rune-container">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="28"
+                height="28"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ color: 'var(--theme-accent)' }}
+                className="magical-rune-icon"
               >
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
                 <path d="M2 12l10 5 10-5" />
               </svg>
-              <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>Creatures</span>
+              <span className="magical-rune-text" style={{ animationDelay: '0s' }}>Creatures</span>
             </div>
           </div>
 
           {/* Permanents zone - middle third */}
           <div className="flex-1 border-r flex flex-col items-center justify-center" style={{ borderColor: 'var(--theme-border-subtle)' }}>
-            <div className="flex flex-col items-center gap-1 opacity-30">
+            <div className="flex flex-col items-center gap-2 magical-rune-container">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="28"
+                height="28"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ color: 'var(--theme-accent)' }}
+                className="magical-rune-icon"
               >
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
-              <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>Permanents</span>
+              <span className="magical-rune-text" style={{ animationDelay: '0.7s' }}>Permanents</span>
             </div>
           </div>
 
           {/* Lands zone - right third */}
           <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center gap-1 opacity-30">
+            <div className="flex flex-col items-center gap-2 magical-rune-container">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="28"
+                height="28"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ color: 'var(--theme-accent)' }}
+                className="magical-rune-icon"
               >
                 <path d="M2 22L12 12 22 22" />
                 <path d="M12 12L7 7" />
@@ -159,7 +164,7 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
                 <circle cx="7" cy="7" r="2" />
                 <circle cx="17" cy="7" r="2" />
               </svg>
-              <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>Lands</span>
+              <span className="magical-rune-text" style={{ animationDelay: '1.4s' }}>Lands</span>
             </div>
           </div>
         </div>

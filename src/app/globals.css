@@ -349,6 +349,84 @@ body {
   @apply ring-2 ring-blue-500 ring-opacity-50;
 }
 
+/* Magical runic text for battlefield zone guides */
+.magical-rune-container {
+  opacity: 0.6;
+}
+
+.magical-rune-text {
+  font-family: 'MedievalSharp', 'Cinzel', serif;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--theme-accent);
+  text-shadow:
+    0 0 10px var(--theme-accent),
+    0 0 20px var(--theme-accent),
+    0 0 30px var(--theme-accent-glow),
+    0 0 40px var(--theme-accent-glow);
+  animation: magical-flicker 4s ease-in-out infinite;
+}
+
+.magical-rune-icon {
+  color: var(--theme-accent);
+  filter: drop-shadow(0 0 8px var(--theme-accent)) drop-shadow(0 0 15px var(--theme-accent-glow));
+  animation: magical-flicker 4s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+@keyframes magical-flicker {
+  0%, 100% {
+    opacity: 0.7;
+    filter: drop-shadow(0 0 8px var(--theme-accent)) drop-shadow(0 0 15px var(--theme-accent-glow));
+  }
+  5% {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 4px var(--theme-accent)) drop-shadow(0 0 8px var(--theme-accent-glow));
+  }
+  10% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 12px var(--theme-accent)) drop-shadow(0 0 25px var(--theme-accent-glow));
+  }
+  15% {
+    opacity: 0.6;
+  }
+  20% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 10px var(--theme-accent)) drop-shadow(0 0 20px var(--theme-accent-glow));
+  }
+  25% {
+    opacity: 0.5;
+    filter: drop-shadow(0 0 6px var(--theme-accent)) drop-shadow(0 0 12px var(--theme-accent-glow));
+  }
+  30% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 8px var(--theme-accent)) drop-shadow(0 0 18px var(--theme-accent-glow));
+  }
+  70% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 14px var(--theme-accent)) drop-shadow(0 0 28px var(--theme-accent-glow));
+  }
+  75% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 5px var(--theme-accent)) drop-shadow(0 0 10px var(--theme-accent-glow));
+  }
+  80% {
+    opacity: 0.85;
+  }
+  90% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 7px var(--theme-accent)) drop-shadow(0 0 14px var(--theme-accent-glow));
+  }
+  95% {
+    opacity: 0.95;
+    filter: drop-shadow(0 0 16px var(--theme-accent)) drop-shadow(0 0 32px var(--theme-accent-glow));
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
