@@ -205,8 +205,8 @@ export function Battlefield({ cards, isOpponent, ownerId, allowTakeControl = fal
         />
       ))}
 
-      {/* Empty state */}
-      {cards.length === 0 && (
+      {/* Empty state - only show for opponent */}
+      {cards.length === 0 && isOpponent && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span className="text-sm transition-colors duration-500" style={{ color: 'var(--theme-text-secondary)' }}>Battlefield</span>
         </div>
