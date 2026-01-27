@@ -4,13 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
-import { TokenSearch } from './TokenSearch';
 import { FancyButton } from './FancyButton';
 
 export function GameControls() {
   const router = useRouter();
-  const { shuffle, restart, roomKey } = useGameStore();
-  const [showTokenSearch, setShowTokenSearch] = useState(false);
+  const { restart, roomKey } = useGameStore();
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const menuButtonRef = useRef<HTMLDivElement>(null);
@@ -72,19 +70,7 @@ export function GameControls() {
   return (
     <>
       <div className="flex items-center gap-2">
-        <FancyButton
-          onClick={shuffle}
-          cutoutImage="/ShuffleCutout.png"
-          title="Shuffle library"
-        />
-
-        <FancyButton
-          onClick={() => setShowTokenSearch(true)}
-          cutoutImage="/TokensCutout.png"
-          title="Search for tokens"
-        />
-
-        <div ref={menuButtonRef}>
+        <div ref={menuButtonRef} className="flex items-center">
           <FancyButton
             onClick={handleMenuToggle}
             cutoutImage="/MenuCutout.png"
@@ -124,10 +110,6 @@ export function GameControls() {
           document.body
         )}
       </div>
-
-      {showTokenSearch && (
-        <TokenSearch onClose={() => setShowTokenSearch(false)} />
-      )}
     </>
   );
 }

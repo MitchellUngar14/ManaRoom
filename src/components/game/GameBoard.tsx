@@ -28,6 +28,7 @@ import { CardEditModal } from './CardEditModal';
 import { AmbientEffects } from './AmbientEffects';
 import { ZoneGlowEffect } from './ZoneGlowEffect';
 import { FancyButton } from './FancyButton';
+import { TokenSearch } from './TokenSearch';
 import { useTheme } from '@/hooks/useTheme';
 import type { GameCard, BoardCard, ZoneType, PlayerState } from '@/types';
 
@@ -96,7 +97,7 @@ function DropZone({
 }
 
 export function GameBoard() {
-  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll } = useGameStore();
+  const { myId, players, roomKey, moveCard, repositionCard, removeCard, previewCard, setPreviewCard, untapAll, shuffle } = useGameStore();
   const { poppedOutIds, openPopout, closePopout, hasAnyPopouts } = useMultiPopoutWindow();
   const { theme } = useTheme();
   const [activeCard, setActiveCard] = useState<GameCard | null>(null);
@@ -113,6 +114,7 @@ export function GameBoard() {
   const [sideZonesCollapsed, setSideZonesCollapsed] = useState(false);
   const [editingCard, setEditingCard] = useState<BoardCard | null>(null);
   const [showPlacementGuides, setShowPlacementGuides] = useState(true);
+  const [showTokenSearch, setShowTokenSearch] = useState(false);
 
   // Configure drag sensor to require movement before activating (allows clicks to work)
   const pointerSensor = useSensor(PointerSensor, {
@@ -404,7 +406,7 @@ export function GameBoard() {
               {/* Decorative rail above entire bottom section */}
               {/* Zones Rail (Left) */}
               <div
-                className="absolute left-0 z-0 pointer-events-none transition-all duration-700 ease-in-out overflow-hidden"
+                className="absolute left-0 z-40 transition-all duration-700 ease-in-out overflow-hidden"
                 style={{
                   top: '-40px',
                   width: sideZonesCollapsed ? '0px' : '500px',
@@ -413,9 +415,24 @@ export function GameBoard() {
                   backgroundRepeat: 'repeat-x',
                   backgroundSize: 'auto 100%',
                   clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', // Clean edges
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.5)'
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.5)',
+                  pointerEvents: 'none'
                 }}
-              />
+              >
+                {/* Rail buttons - Zones rail */}
+                <div className="absolute left-4 top-[40%] -translate-y-1/2 flex items-center gap-3 pointer-events-auto">
+                  <FancyButton
+                    onClick={shuffle}
+                    cutoutImage="/ShuffleCutout.png"
+                    title="Shuffle library"
+                  />
+                  <FancyButton
+                    onClick={() => setShowTokenSearch(true)}
+                    cutoutImage="/TokensCutout.png"
+                    title="Search for tokens"
+                  />
+                </div>
+              </div>
 
               {/* Hand Rail (Right) - Flexes with remaining space */}
               <div
@@ -432,7 +449,7 @@ export function GameBoard() {
                 }}
               >
                 {/* Rail buttons - Right side */}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3 pointer-events-auto">
+                <div className="absolute right-4 top-[40%] -translate-y-1/2 flex items-center gap-3 pointer-events-auto">
                   <FancyButton
                     onClick={untapAll}
                     cutoutImage="/UntapAllCutout.png"
@@ -607,6 +624,11 @@ export function GameBoard() {
         card={editingCard}
         onClose={() => setEditingCard(null)}
       />
+
+      {/* Token search modal */}
+      {showTokenSearch && (
+        <TokenSearch onClose={() => setShowTokenSearch(false)} />
+      )}
     </DndContext >
   );
 }

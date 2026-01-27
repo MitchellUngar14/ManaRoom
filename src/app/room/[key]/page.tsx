@@ -199,7 +199,7 @@ export default function RoomPage() {
       >
         {/* Rail texture background - flipped so gold trim is at bottom */}
         <div
-          className="relative h-12"
+          className="relative h-14"
           style={{
             backgroundImage: 'url(/rail-texture.png)',
             backgroundRepeat: 'repeat-x',
@@ -214,7 +214,7 @@ export default function RoomPage() {
             style={{ transform: 'scaleY(-1)' }}
           >
           {/* Left section - Logo and Room */}
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-4">
+          <div className="absolute left-4 top-[40%] -translate-y-1/2 flex items-center gap-4">
             <h1
               className="font-semibold text-sm"
               style={{
@@ -238,12 +238,12 @@ export default function RoomPage() {
           </div>
 
           {/* Center section - Life Counter */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2">
             <LifeCounter />
           </div>
 
           {/* Right section - Controls */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+          <div className="absolute right-4 top-[40%] -translate-y-1/2 flex items-center gap-3">
             <FancySquareButton
               onClick={toggleFullscreen}
               cutoutImage={isFullscreen ? '/ExpandInCutout.png' : '/ExpandOutCutout.png'}
@@ -297,7 +297,7 @@ export default function RoomPage() {
       {/* Spacer for fixed header */}
       <div
         className={`shrink-0 transition-all duration-700 ease-in-out ${
-          headerCollapsed ? 'h-0' : 'h-12'
+          headerCollapsed ? 'h-0' : 'h-14'
         }`}
       />
 

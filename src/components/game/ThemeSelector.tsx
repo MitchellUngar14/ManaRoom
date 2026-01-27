@@ -59,29 +59,56 @@ export function ThemeSelector({ currentTheme, onThemeChange }: ThemeSelectorProp
       <button
         ref={buttonRef}
         onClick={handleToggle}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-800/80 hover:bg-gray-700/80 rounded-lg border border-gray-700 transition-colors"
+        className="group relative cursor-pointer transition-all duration-200 hover:brightness-110 active:brightness-90"
         title="Change battlefield theme"
+        style={{
+          width: '140px',
+          height: '36px',
+        }}
       >
-        {/* Color swatch preview */}
-        <div className="flex gap-0.5">
-          <div
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: currentTheme.colors.bgPrimary }}
-          />
-          <div
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: currentTheme.colors.accent }}
-          />
+        {/* Button frame background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'url(/DropDownButton.png)',
+            backgroundSize: '100% 100%',
+            backgroundPosition: 'center',
+          }}
+        />
+
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex items-center px-2">
+          {/* Left side - stacked color boxes with glow effect */}
+          <div className="flex flex-col gap-1 ml-1 mt-px">
+            <div
+              className="w-4 h-2 rounded-sm"
+              style={{
+                backgroundColor: currentTheme.colors.bgPrimary,
+                boxShadow: `0 0 6px ${currentTheme.colors.bgPrimary}, 0 0 12px ${currentTheme.colors.bgPrimary}, 0 0 18px ${currentTheme.colors.bgPrimary}, inset 0 0 4px rgba(255,255,255,0.3)`,
+              }}
+            />
+            <div
+              className="w-4 h-2 rounded-sm"
+              style={{
+                backgroundColor: currentTheme.colors.accent,
+                boxShadow: `0 0 6px ${currentTheme.colors.accent}, 0 0 12px ${currentTheme.colors.accent}, 0 0 18px ${currentTheme.colors.accent}, inset 0 0 4px rgba(255,255,255,0.3)`,
+              }}
+            />
+          </div>
+
+          {/* Right side - centered theme name */}
+          <div className="flex-1 flex items-center justify-center pr-2">
+            <span
+              className="text-xs font-bold"
+              style={{
+                color: 'var(--theme-accent)',
+                textShadow: '0 0 8px var(--theme-accent-glow)',
+              }}
+            >
+              {currentTheme.name}
+            </span>
+          </div>
         </div>
-        <span className="text-gray-300">{currentTheme.name}</span>
-        <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
       </button>
 
       {isOpen && createPortal(

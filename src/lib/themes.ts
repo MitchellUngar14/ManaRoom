@@ -31,7 +31,7 @@ export interface BattlefieldTheme {
 export const themes: Record<string, BattlefieldTheme> = {
   'classic-arena': {
     id: 'classic-arena',
-    name: 'Classic Arena',
+    name: 'Classic',
     description: 'Timeless tournament feel with clean dark panels',
     colors: {
       bgPrimary: '#1a1a1a',
@@ -53,7 +53,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'dominaria-sunset': {
     id: 'dominaria-sunset',
-    name: 'Dominaria Sunset',
+    name: 'Dominaria',
     description: 'Warm nostalgic vibes of the home plane',
     colors: {
       bgPrimary: '#2d1810',
@@ -81,7 +81,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'phyrexian-corruption': {
     id: 'phyrexian-corruption',
-    name: 'Phyrexian Corruption',
+    name: 'Phyrexia',
     description: 'Dark biomechanical horror with toxic green',
     colors: {
       bgPrimary: '#0a0a0a',
@@ -103,7 +103,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'ravnica-cityscape': {
     id: 'ravnica-cityscape',
-    name: 'Ravnica Cityscape',
+    name: 'Ravnica',
     description: 'Urban fantasy with art deco guild architecture',
     colors: {
       bgPrimary: '#1a1a24',
@@ -125,7 +125,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'innistrad-manor': {
     id: 'innistrad-manor',
-    name: 'Innistrad Manor',
+    name: 'Innistrad',
     description: 'Gothic horror with flickering candlelight',
     colors: {
       bgPrimary: '#1a0a0a',
@@ -147,7 +147,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'zendikar-hedron': {
     id: 'zendikar-hedron',
-    name: 'Zendikar Hedron Field',
+    name: 'Zendikar',
     description: 'Ancient floating stones with crackling energy',
     colors: {
       bgPrimary: '#0c1929',
@@ -169,7 +169,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'theros-starfield': {
     id: 'theros-starfield',
-    name: 'Theros Starfield',
+    name: 'Theros',
     description: 'Divine constellations in the night sky',
     colors: {
       bgPrimary: '#0a0a1a',
@@ -191,7 +191,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'kamigawa-neon': {
     id: 'kamigawa-neon',
-    name: 'Kamigawa Neon Dynasty',
+    name: 'Kamigawa',
     description: 'Cyberpunk shrines with neon circuits',
     colors: {
       bgPrimary: '#0a0a12',
@@ -213,7 +213,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'eldraine-forest': {
     id: 'eldraine-forest',
-    name: 'Eldraine Enchanted Forest',
+    name: 'Eldraine',
     description: 'Dark fairy tale with mystical fog',
     colors: {
       bgPrimary: '#0a1a0a',
@@ -235,7 +235,7 @@ export const themes: Record<string, BattlefieldTheme> = {
 
   'amonkhet-pyramid': {
     id: 'amonkhet-pyramid',
-    name: 'Amonkhet Pyramid',
+    name: 'Amonkhet',
     description: 'Egyptian grandeur with golden sands',
     colors: {
       bgPrimary: '#1a1408',

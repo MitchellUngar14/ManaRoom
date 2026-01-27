@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import type { GameCard } from '@/types';
 import { Card } from '../Card';
@@ -95,7 +96,7 @@ export function Exile({ cards, isOpponent }: ExileProps) {
       />
 
       {/* Expanded view modal */}
-      {expanded && (
+      {expanded && createPortal(
         <div
           className="game-modal-overlay"
           onClick={() => setExpanded(false)}
@@ -198,7 +199,8 @@ export function Exile({ cards, isOpponent }: ExileProps) {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
