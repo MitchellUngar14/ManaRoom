@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ManaRoom is a multiplayer Commander (Magic: The Gathering) web application for playing games online with friends. Players import decks from Moxfield, create/join game rooms with shareable codes, and play cards in real-time with drag-and-drop interactions.
+ManaRoom is a multiplayer Commander (Magic: The Gathering) web application for playing games online with friends. Players import decks from Moxfield, create/join game rooms with shareable codes, and play cards in real-time with drag-and-drop interactions. Supports 1-4 players.
 
 ## Tech Stack
 
@@ -15,7 +15,7 @@ ManaRoom is a multiplayer Commander (Magic: The Gathering) web application for p
 - **Drag & Drop:** @dnd-kit/core with Framer Motion animations
 - **Desktop:** Electron wrapper for standalone app
 - **Card Data:** Scryfall API with database caching
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS with CSS custom properties for theming
 
 ## Commands
 
@@ -123,7 +123,11 @@ gameHistory  → id, roomKey, players (JSONB), startedAt, endedAt (optional, not
 - `useDroppable` on zones, `useDraggable` on cards with data payload `{ card, zone }`
 
 ### Card Instances
-Each card in-game has a unique `instanceId` (UUID) separate from `scryfallId`. This enables tracking multiple copies, tokens, and per-card state (tapped, counters, power/toughness modifiers).
+Each card in-game has a unique `instanceId` (UUID) separate from `scryfallId`. This enables tracking multiple copies, tokens, and per-card state (tapped, counters, power/toughness modifiers, attachments).
+
+### Card Types (src/types/game.ts)
+- `GameCard` - Base card with instanceId, cardName, scryfallId, imageUrl, card data
+- `BoardCard extends GameCard` - Adds position, tapped, faceDown, counters, modifiedPower/Toughness, isToken, isCopy, attachedTo
 
 ### Popout Windows / Spectator Mode
 The `/room/[key]/opponent-view` route is a spectator-mode page designed for multi-monitor setups. It reads room context from `sessionStorage` and connects as a spectator via socket using `connectAsSpectator()`. The `actingAsPlayerId` state enables spectators to emit actions on behalf of a player.
@@ -142,6 +146,23 @@ JWT tokens stored in HTTP-only cookies with 7-day expiry. All API routes use `ge
 - Fuzzy search fallback when exact match fails
 - Cards cached in `cardCache` table to avoid repeated API calls
 - Double-faced cards handled via `card_faces[0].image_uris`
+
+## Theming System
+
+Themes are defined in `src/lib/themes.ts` with CSS custom properties applied via `src/hooks/useTheme.ts`. Each theme defines:
+- Colors (accent, glow, text, backgrounds, borders)
+- Ambient effects (particles, fire, etc.)
+- Optional playmat backgrounds (player/opponent images)
+
+Theme changes are synchronized across components via custom events (`manaroom-theme-change`).
+
+## Keyboard Shortcuts
+
+Defined in `GameControls.tsx` and handled in `GameBoard.tsx`:
+- D: Draw card, G: Send to graveyard, L: View library
+- P: Preview card, T: Tap/untap, E: Edit card
+- S: Shuffle, O: Order battlefield, U: Untap all
+- +/-: Adjust life, Esc: Cancel/close, Ctrl: Toggle bottom bar
 
 ## Development Setup
 
