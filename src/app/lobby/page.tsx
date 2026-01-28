@@ -313,6 +313,9 @@ export default function LobbyPage() {
         <DeckViewer
           deckId={selectedDeckId}
           onClose={() => setShowDeckViewer(false)}
+          onDeckNameChange={(id, newName) => {
+            setDecks(decks.map(d => d.id === id ? { ...d, name: newName } : d));
+          }}
         />
       )}
     </main>

@@ -25,6 +25,7 @@ interface DeckData {
 interface DeckViewerProps {
   deckId: string;
   onClose: () => void;
+  onDeckNameChange?: (id: string, newName: string) => void;
 }
 
 type CardCategory = 'Commanders' | 'Creatures' | 'Instants' | 'Sorceries' | 'Artifacts' | 'Enchantments' | 'Planeswalkers' | 'Lands' | 'Other';
@@ -54,13 +55,40 @@ function categorizeCard(typeLine: string | undefined): CardCategory {
   return 'Other';
 }
 
-export function DeckViewer({ deckId, onClose }: DeckViewerProps) {
+export function DeckViewer({ deckId, onClose, onDeckNameChange }: DeckViewerProps) {
   const [deck, setDeck] = useState<DeckData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [previewCard, setPreviewCard] = useState<EnrichedCard | null>(null);
   const [previewFaceIndex, setPreviewFaceIndex] = useState(0);
   const [expandedCategories, setExpandedCategories] = useState<Set<CardCategory>>(new Set(CATEGORY_ORDER));
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
+
+  const handleNameSave = async () => {
+    const trimmed = editName.trim();
+    if (!trimmed || !deck || trimmed === deck.name) {
+      setIsEditingName(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/decks/${deckId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed }),
+      });
+
+      if (res.ok) {
+        setDeck({ ...deck, name: trimmed });
+        onDeckNameChange?.(deckId, trimmed);
+      }
+    } catch (err) {
+      console.error('Failed to update deck name:', err);
+    }
+
+    setIsEditingName(false);
+  };
 
   const toggleCategory = (category: CardCategory) => {
     setExpandedCategories(prev => {
@@ -178,7 +206,31 @@ export function DeckViewer({ deckId, onClose }: DeckViewerProps) {
         {/* Header */}
         <div className="deck-viewer-header">
           <div>
-            <h2 className="deck-viewer-title">{deck?.name || 'Loading...'}</h2>
+            {isEditingName ? (
+              <input
+                className="deck-viewer-title-input"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onBlur={handleNameSave}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleNameSave();
+                  if (e.key === 'Escape') setIsEditingName(false);
+                }}
+                maxLength={100}
+                autoFocus
+              />
+            ) : (
+              <h2
+                className="deck-viewer-title editable"
+                onClick={() => {
+                  setEditName(deck?.name || '');
+                  setIsEditingName(true);
+                }}
+                title="Click to rename"
+              >
+                {deck?.name || 'Loading...'}
+              </h2>
+            )}
             {deck && <p className="deck-viewer-subtitle">{totalCards} cards</p>}
           </div>
           <button onClick={onClose} className="deck-viewer-close">

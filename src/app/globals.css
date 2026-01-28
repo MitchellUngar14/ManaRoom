@@ -3450,6 +3450,37 @@ body {
   text-align: center;
 }
 
+.deck-viewer-title.editable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  border-bottom: 1px dashed rgba(42, 26, 10, 0.3);
+  padding-bottom: 2px;
+}
+
+.deck-viewer-title.editable:hover {
+  color: #1a0e04;
+  border-bottom-color: rgba(42, 26, 10, 0.6);
+}
+
+.deck-viewer-title-input {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2a1a0a;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(80, 50, 20, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  width: 100%;
+  text-align: center;
+  outline: none;
+}
+
+.deck-viewer-title-input:focus {
+  border-color: rgba(80, 50, 20, 0.5);
+  background: rgba(0, 0, 0, 0.08);
+}
+
 .deck-viewer-close {
   width: 36px;
   height: 36px;
