@@ -1012,11 +1012,10 @@ body {
 .study-back-wall {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 70% 40%, var(--sanctum-amber-soft) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 50% at 30% 70%, var(--sanctum-purple-glow) 0%, transparent 40%),
-    radial-gradient(ellipse 100% 100% at 50% 0%, rgba(20, 25, 35, 0.8) 0%, transparent 50%),
-    var(--sanctum-bg-deep);
+  background-image: url('/lobby-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   z-index: 0;
 }
 
@@ -1038,12 +1037,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 24px 40px;
   gap: 24px;
   position: relative;
-  overflow-y: auto;
-  overflow-x: visible;
+  overflow: hidden;
 }
 
 /* Remove old table styling */
@@ -1212,6 +1210,60 @@ body {
   width: 420px;
   cursor: pointer;
   transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+/* Subtle magical glow for selected grimoire */
+.grimoire-book:not(.grimoire-empty) {
+  filter: drop-shadow(0 0 15px rgba(100, 160, 255, 0.5)) drop-shadow(0 0 30px rgba(80, 140, 255, 0.3));
+  animation: grimoire-glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes grimoire-glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(100, 160, 255, 0.4)) drop-shadow(0 0 30px rgba(80, 140, 255, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(100, 160, 255, 0.6)) drop-shadow(0 0 40px rgba(80, 140, 255, 0.4));
+  }
+}
+
+/* Hover particles - expanding outward from behind */
+.grimoire-book:not(.grimoire-empty)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  background-image:
+    radial-gradient(3px 3px, rgba(150, 200, 255, 1) 0%, transparent 100%),
+    radial-gradient(2px 2px, rgba(180, 220, 255, 1) 0%, transparent 100%),
+    radial-gradient(3px 3px, rgba(170, 210, 255, 1) 0%, transparent 100%);
+  background-size: 120px 150px;
+  background-position: 25% 30%, 75% 70%, 50% 50%;
+  animation: particles-expand 3s ease-out infinite;
+}
+
+.grimoire-book:not(.grimoire-empty):hover::before {
+  opacity: 1;
+}
+
+@keyframes particles-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+  }
 }
 
 .grimoire-book:hover {
@@ -1419,19 +1471,25 @@ body {
 
 .sanctum-split-layout {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   gap: 48px;
   width: 100%;
-  max-width: 950px;
+  height: 100%;
+  position: relative;
 }
 
-/* Grimoire section (left) */
+/* Grimoire section (right side) */
 .sanctum-grimoire-section {
-  flex: 0 0 auto;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) scale(1.25);
+  transform-origin: right center;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 /* Placeholder when no deck selected */
@@ -1471,27 +1529,22 @@ body {
 
 /* Vertical divider */
 .sanctum-divider {
-  width: 1px;
-  align-self: stretch;
-  background: linear-gradient(to bottom,
-      transparent,
-      var(--sanctum-border) 20%,
-      var(--sanctum-gold-muted) 50%,
-      var(--sanctum-border) 80%,
-      transparent);
+  display: none;
   flex-shrink: 0;
 }
 
 /* Portals section (right) */
 .sanctum-portals-section {
-  flex: 1 1 auto;
+  position: fixed;
+  left: 50%;
+  top: 65%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 8px;
-  min-width: 420px;
-  padding: 80px 20px 0;
+  z-index: 5;
 }
 
 .portals-heading {
@@ -1607,57 +1660,65 @@ body {
   bottom: auto;
   width: 100%;
   height: 100%;
-  background: var(--sanctum-bg-panel);
-  border: none;
-  border-right: 1px solid var(--sanctum-border);
-  border-radius: 0;
-  box-shadow:
-    4px 0 32px rgba(0, 0, 0, 0.3),
-    inset -1px 0 0 var(--sanctum-border-subtle);
   display: flex;
   flex-direction: column;
   z-index: 20;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  margin-left: 32px;
+}
+
+/* Bookshelf back panel (behind books) */
+.bookshelf-back {
+  position: absolute;
+  inset: 0;
+  background-image: url('/bookshelf-sidebar.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Bookshelf front frame (in front of books) */
+.bookshelf-frame {
+  position: absolute;
+  inset: 0;
+  background-image: url('/bookshelf-frame-sidebar.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .bookshelf-title-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 20px;
-  border-bottom: 1px solid var(--sanctum-border);
+  padding: 20px 28px 16px;
   background: transparent;
   position: relative;
-  z-index: 1;
-}
-
-/* Subtle glow line under title */
-.bookshelf-title-bar::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--sanctum-gold-glow), transparent);
+  z-index: 2;
 }
 
 .bookshelf-title {
   font-family: 'Cinzel', serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--sanctum-text-primary);
+  color: var(--sanctum-gold);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .bookshelf-add-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--sanctum-bg-elevated);
-  border: 1px solid var(--sanctum-border);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--sanctum-gold-muted);
   color: var(--sanctum-gold);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 300;
   display: flex;
   align-items: center;
@@ -1667,36 +1728,29 @@ body {
 }
 
 .bookshelf-add-btn:hover {
-  background: var(--sanctum-bg-surface);
-  border-color: var(--sanctum-gold-muted);
-  box-shadow: 0 0 20px var(--sanctum-gold-glow);
+  background: rgba(0, 0, 0, 0.6);
+  border-color: var(--sanctum-gold);
+  box-shadow: 0 0 15px var(--sanctum-gold-glow);
   transform: translateY(-1px);
 }
 
 .bookshelf-scroll-area {
   flex: 1;
   overflow-y: auto;
-  overflow-x: visible;
-  padding: 12px 24px 12px 12px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--sanctum-border) transparent;
+  overflow-x: hidden;
+  padding: 12px 28px 20px;
+  position: absolute;
+  top: 95px;
+  left: 0;
+  right: 0;
+  bottom: 70px;
+  z-index: 1;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
 .bookshelf-scroll-area::-webkit-scrollbar {
-  width: 6px;
-}
-
-.bookshelf-scroll-area::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.bookshelf-scroll-area::-webkit-scrollbar-thumb {
-  background: var(--sanctum-border);
-  border-radius: 3px;
-}
-
-.bookshelf-scroll-area::-webkit-scrollbar-thumb:hover {
-  background: var(--sanctum-text-muted);
+  display: none; /* Chrome/Safari/Opera */
 }
 
 .bookshelf-empty {
@@ -1714,32 +1768,90 @@ body {
 }
 
 /* ========================================
+   Bookshelf Shelves with Books
+   ======================================== */
+
+.bookshelf-shelves {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 80px;
+  padding-bottom: 60px;
+}
+
+.bookshelf-shelf {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The shelf image sits below the books */
+.bookshelf-shelf-image {
+  width: 90%;
+  height: auto;
+  display: block;
+  position: relative;
+  z-index: 1;
+  margin: -8px auto 0;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* Container for books on this shelf */
+.bookshelf-shelf-books {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  z-index: 2;
+  padding: 0 32px;
+  min-height: 20px;
+}
+
+/* Scale book spines within shelves */
+.bookshelf-shelf-books .book-spine {
+  width: 100%;
+  transform-origin: center;
+  transform: scale(0.85);
+  margin-bottom: -6px;
+}
+
+.bookshelf-shelf-books .book-spine-bg {
+  width: 100%;
+  height: auto;
+}
+
+/* ========================================
    Header - Minimal Top Bar
    ======================================== */
 
 .study-header {
-  grid-column: 2;
+  grid-column: 1 / -1;
   grid-row: 1;
   position: relative;
   top: auto;
   left: auto;
   right: auto;
-  padding: 20px 32px;
+  padding: 24px 32px;
+  padding-left: calc(320px + 120px); /* Account for bookshelf width + extra spacing */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: transparent;
-  z-index: 100;
-  border-bottom: 1px solid var(--sanctum-border-subtle);
+  background-image: url('/lobby-header-tile.png');
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  background-position: center;
+  z-index: 15;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .study-header h1 {
   font-family: 'Cinzel', serif !important;
-  font-size: 20px !important;
-  font-weight: 500 !important;
-  color: var(--sanctum-text-primary) !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  color: #2a1a0a !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 235, 200, 0.5);
 }
 
 .study-header-btn {
@@ -1994,20 +2106,52 @@ body {
     grid-column: 1;
     grid-row: 3;
     border-right: none;
-    border-top: 1px solid var(--sanctum-border);
     max-height: 45vh;
+  }
+
+  .bookshelf-frame,
+  .bookshelf-back {
+    display: none;
+  }
+
+  .study-bookshelf-tall {
+    background: var(--sanctum-bg-panel);
+    border-top: 1px solid var(--sanctum-border);
+  }
+
+  .bookshelf-shelves {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 8px;
+  }
+
+  .bookshelf-shelf {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .bookshelf-shelf-image {
+    display: none;
+  }
+
+  .bookshelf-shelf-books {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .study-header {
     grid-column: 1;
     grid-row: 1;
+    padding-left: 32px;
   }
 
   .study-desk-area {
     grid-column: 1;
     grid-row: 2;
     padding: 16px 24px;
-    justify-content: flex-start;
+    justify-content: center;
   }
 }
 
@@ -2137,16 +2281,16 @@ body {
 }
 
 .book-spine:hover {
-  transform: translateX(8px) scale(1.02);
+  transform: scale(1.02);
   z-index: 10;
 }
 
 .book-spine:active {
-  transform: translateX(4px) scale(1.01);
+  transform: scale(1.01);
 }
 
 .book-spine.selected {
-  transform: translateX(12px) scale(1.03);
+  transform: scale(1.03);
   z-index: 11;
 }
 
@@ -2270,6 +2414,43 @@ body {
   border-color: rgba(255, 100, 100, 0.6);
   color: white;
   transform: translateY(-50%) scale(1.15);
+}
+
+/* Add Grimoire book spine */
+.book-spine-add {
+  opacity: 0.7;
+  filter: grayscale(0.3) brightness(0.85);
+}
+
+.book-spine-add:hover {
+  opacity: 1;
+  filter: grayscale(0) brightness(1);
+}
+
+.book-spine-add .book-spine-text {
+  flex-direction: row;
+  gap: 8px;
+  width: 60%;
+}
+
+.book-spine-add-icon {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #3d2a14;
+  text-shadow: 0 1px 0 rgba(255, 235, 200, 0.3);
+}
+
+.book-spine-add .book-spine-commander {
+  font-size: 11px;
+  font-style: normal;
+  color: #3d2a14;
+  text-shadow: 0 1px 0 rgba(255, 235, 200, 0.3);
+}
+
+.book-spine-add:hover .book-spine-add-icon,
+.book-spine-add:hover .book-spine-commander {
+  color: #2a1a0a;
 }
 
 /* Responsive adjustments */
@@ -3196,18 +3377,29 @@ body {
 .deck-viewer-modal {
   width: 100%;
   max-width: 1100px;
-  height: 85vh;
+  aspect-ratio: 1365 / 879;
   max-height: 90vh;
-  background: var(--sanctum-bg-panel);
-  border: 1px solid var(--sanctum-border);
-  border-radius: 16px;
-  box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.6),
-    0 0 0 1px var(--sanctum-border-subtle);
+  background: transparent;
+  border: none;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: deck-viewer-slide-up 0.3s ease-out;
+  position: relative;
+  filter: drop-shadow(0 24px 60px rgba(0, 0, 0, 0.7));
+}
+
+/* Open book background */
+.deck-viewer-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/open-book-modal.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes deck-viewer-slide-up {
@@ -3223,28 +3415,39 @@ body {
 }
 
 .deck-viewer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--sanctum-border);
-  background: var(--sanctum-bg-elevated);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14%;
+  padding: 8% 12% 0;
+  border-bottom: none;
+  background: transparent;
+  position: relative;
+  z-index: 1;
 }
+
+.deck-viewer-header > div:first-child {
+  text-align: center;
+}
+
 
 .deck-viewer-title {
   font-family: 'Cinzel', serif;
   font-size: 20px;
   font-weight: 600;
-  color: var(--sanctum-text-primary);
+  color: #2a1a0a;
   letter-spacing: 0.02em;
   margin: 0;
+  text-shadow: 0 1px 0 rgba(255, 235, 200, 0.3);
+  text-align: center;
+  width: 100%;
 }
 
 .deck-viewer-subtitle {
   font-family: 'Crimson Text', serif;
   font-size: 14px;
-  color: var(--sanctum-text-muted);
+  color: #5a4230;
   margin: 4px 0 0;
+  text-align: center;
 }
 
 .deck-viewer-close {
@@ -3253,18 +3456,69 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--sanctum-bg-surface);
-  border: 1px solid var(--sanctum-border);
-  border-radius: 8px;
-  color: var(--sanctum-text-muted);
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: 21%;
+  right: 3.25%;
+  z-index: 10;
+  padding: 0;
+  color: rgba(200, 230, 255, 0.95);
+}
+
+/* Oval red jewel */
+.deck-viewer-close::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 40px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 35% 30%, rgba(255, 180, 180, 0.8) 0%, transparent 35%),
+    radial-gradient(ellipse at 50% 50%, rgba(220, 40, 40, 0.9) 0%, rgba(140, 15, 15, 1) 50%, rgba(60, 5, 5, 1) 100%);
+  border: 1px solid rgba(255, 100, 100, 0.5);
+  box-shadow:
+    0 0 12px rgba(255, 50, 50, 0.6),
+    0 0 30px rgba(200, 30, 30, 0.3),
+    inset 0 0 8px rgba(255, 100, 100, 0.2);
+  pointer-events: none;
+}
+
+/* Facet highlight */
+.deck-viewer-close::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 6px;
+  top: 8px;
+  left: 9px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+  transform: rotate(-5deg);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.deck-viewer-close:hover::before {
+  background:
+    radial-gradient(ellipse at 35% 30%, rgba(255, 200, 200, 0.9) 0%, transparent 35%),
+    radial-gradient(ellipse at 50% 50%, rgba(240, 50, 50, 1) 0%, rgba(170, 20, 20, 1) 50%, rgba(80, 10, 10, 1) 100%);
+  border-color: rgba(255, 140, 140, 0.8);
+  box-shadow:
+    0 0 18px rgba(255, 50, 50, 0.8),
+    0 0 40px rgba(200, 30, 30, 0.5),
+    inset 0 0 12px rgba(255, 120, 120, 0.3);
 }
 
 .deck-viewer-close:hover {
-  background: var(--sanctum-bg-panel);
-  border-color: var(--sanctum-text-muted);
-  color: var(--sanctum-text-primary);
+  transform: scale(1.15);
+}
+
+.deck-viewer-close svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 3px rgba(255, 200, 200, 0.9));
 }
 
 .deck-viewer-loading,
@@ -3274,36 +3528,51 @@ body {
   align-items: center;
   justify-content: center;
   padding: 80px 24px;
-  color: var(--sanctum-text-muted);
+  color: #5a3a1a;
   font-family: 'Crimson Text', serif;
   font-size: 16px;
   gap: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .deck-viewer-spinner {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--sanctum-border);
-  border-top-color: var(--sanctum-gold);
+  border: 2px solid rgba(80, 50, 20, 0.2);
+  border-top-color: #5a3a1a;
   animation: sanctum-spin 1s linear infinite;
 }
 
 .deck-viewer-content {
   display: grid;
-  grid-template-columns: minmax(280px, 350px) 1fr;
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  /* Inset to fit within the book pages */
+  padding: 0 12% 14%;
+  gap: 14%;
+}
+
+/* Right page extends taller */
+.deck-viewer-preview {
+  margin-top: -12%;
+  margin-bottom: -12%;
 }
 
 /* Card List Panel */
 .deck-viewer-list {
   overflow-y: auto;
-  padding: 20px 24px;
-  border-right: 1px solid var(--sanctum-border-subtle);
+  padding: 12px 20px;
+  border-right: none;
   min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(60, 40, 20, 0.3) transparent;
 }
 
 .deck-viewer-category {
@@ -3318,13 +3587,13 @@ body {
   font-family: 'Cinzel', serif;
   font-size: 12px;
   font-weight: 600;
-  color: var(--sanctum-gold);
+  color: #5a3a1a;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin: 0 0 10px;
   padding: 8px 0;
   border: none;
-  border-bottom: 1px solid var(--sanctum-border-subtle);
+  border-bottom: 1px solid rgba(80, 50, 20, 0.2);
   background: transparent;
   display: flex;
   align-items: center;
@@ -3335,14 +3604,14 @@ body {
 }
 
 .deck-viewer-category-title:hover {
-  color: var(--sanctum-gold-bright);
+  color: #3a2008;
 }
 
 .deck-viewer-category-chevron {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sanctum-text-muted);
+  color: #7a5a3a;
   transition: transform 0.2s ease;
 }
 
@@ -3354,7 +3623,7 @@ body {
   font-family: 'Crimson Text', serif;
   font-size: 12px;
   font-weight: 400;
-  color: var(--sanctum-text-muted);
+  color: #7a5a3a;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -3369,10 +3638,10 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
@@ -3380,44 +3649,45 @@ body {
 }
 
 .deck-viewer-card-row:hover {
-  background: var(--sanctum-bg-elevated);
-  border-color: var(--sanctum-border-subtle);
+  background: rgba(80, 50, 20, 0.08);
+  border-color: rgba(80, 50, 20, 0.15);
 }
 
 .deck-viewer-card-row.selected {
-  background: var(--sanctum-bg-surface);
-  border-color: var(--sanctum-gold-muted);
-  box-shadow: 0 0 16px var(--sanctum-gold-glow);
+  background: rgba(80, 50, 20, 0.12);
+  border-color: rgba(100, 60, 20, 0.3);
+  box-shadow: none;
 }
 
 .deck-viewer-card-quantity {
   font-family: 'Crimson Text', serif;
   font-size: 14px;
-  color: var(--sanctum-text-muted);
+  color: #7a5a3a;
   min-width: 24px;
 }
 
 .deck-viewer-card-name {
   font-family: 'Crimson Text', serif;
   font-size: 15px;
-  color: var(--sanctum-text-primary);
+  color: #2a1a0a;
   flex: 1;
 }
 
 .deck-viewer-card-row.selected .deck-viewer-card-name {
-  color: var(--sanctum-gold);
+  color: #3a1a00;
+  font-weight: 600;
 }
 
 .deck-viewer-card-mana {
   font-family: monospace;
   font-size: 12px;
-  color: var(--sanctum-text-muted);
+  color: #7a5a3a;
   opacity: 0.7;
 }
 
 /* Card Preview Panel */
 .deck-viewer-preview {
-  background: var(--sanctum-bg-elevated);
+  background: transparent;
   overflow: hidden;
   min-height: 0;
   position: relative;
@@ -3426,25 +3696,25 @@ body {
 .deck-viewer-preview-scroll {
   position: absolute;
   inset: 0;
-  padding: 24px;
+  padding: 0 10px 12px;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(60, 40, 20, 0.3) transparent;
 }
 
 .deck-viewer-preview-image {
   width: 100%;
-  max-width: 480px;
+  max-width: 320px;
   aspect-ratio: 626 / 457;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  background: var(--sanctum-bg-deep);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 1px var(--sanctum-border);
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   position: relative;
   flex-shrink: 0;
 }
@@ -3504,21 +3774,21 @@ body {
   font-family: 'Cinzel', serif;
   font-size: 16px;
   font-weight: 600;
-  color: var(--sanctum-text-primary);
+  color: #2a1a0a;
   margin: 0 0 6px;
 }
 
 .deck-viewer-preview-type {
   font-family: 'Crimson Text', serif;
   font-size: 13px;
-  color: var(--sanctum-gold-muted);
+  color: #5a3a1a;
   margin: 0 0 12px;
 }
 
 .deck-viewer-preview-text {
   font-family: 'Crimson Text', serif;
   font-size: 14px;
-  color: var(--sanctum-text-secondary);
+  color: #3d2a14;
   line-height: 1.5;
   margin: 0 0 12px;
   white-space: pre-wrap;
@@ -3531,7 +3801,7 @@ body {
   font-family: 'Cinzel', serif;
   font-size: 18px;
   font-weight: 600;
-  color: var(--sanctum-text-primary);
+  color: #2a1a0a;
   margin: 0;
 }
 
@@ -3540,7 +3810,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: var(--sanctum-text-muted);
+  color: #7a5a3a;
   font-family: 'Crimson Text', serif;
 }
 

@@ -142,49 +142,32 @@ export default function LobbyPage() {
 
         {/* Grimoire Library Panel - Left Sidebar */}
         <div className="study-bookshelf-tall">
-          {/* Header bar */}
-          <div className="bookshelf-title-bar">
-            <h2 className="bookshelf-title">{user ? `${user.displayName}'s` : ''} Grimoires</h2>
-            <button
-              onClick={() => setShowImporter(true)}
-              className="bookshelf-add-btn"
-              title="Add Grimoire"
-            >
-              +
-            </button>
-          </div>
+          {/* Bookshelf back panel (behind books) */}
+          <div className="bookshelf-back" />
+
+          {/* Bookshelf front frame (in front of books) */}
+          <div className="bookshelf-frame" />
+
 
           {/* Scrollable book area */}
           <div className="bookshelf-scroll-area">
-            {decks.length > 0 ? (
-              <DeckList
-                decks={decks}
-                selectedId={selectedDeckId}
-                onSelect={setSelectedDeckId}
-                onDelete={(id) => {
-                  setDecks(decks.filter((d) => d.id !== id));
-                  if (selectedDeckId === id) setSelectedDeckId(null);
-                }}
-              />
-            ) : (
-              <div className="bookshelf-empty">
-                <p className="text-sm" style={{ color: 'var(--sanctum-text-muted)' }}>No grimoires yet</p>
-                <button
-                  onClick={() => setShowImporter(true)}
-                  className="text-xs mt-3 underline transition-colors"
-                  style={{ color: 'var(--sanctum-gold-muted)' }}
-                >
-                  Import from Moxfield
-                </button>
-              </div>
-            )}
+            <DeckList
+              decks={decks}
+              selectedId={selectedDeckId}
+              onSelect={setSelectedDeckId}
+              onDelete={(id) => {
+                setDecks(decks.filter((d) => d.id !== id));
+                if (selectedDeckId === id) setSelectedDeckId(null);
+              }}
+              onAdd={() => setShowImporter(true)}
+            />
           </div>
         </div>
 
         {/* Header */}
         <header className="study-header">
           <div>
-            <h1>Arcanist&apos;s Sanctum</h1>
+            <h1>{user ? `${user.displayName}'s` : 'Arcanist\'s'} Sanctum</h1>
           </div>
           <div className="flex items-center gap-3">
             <button

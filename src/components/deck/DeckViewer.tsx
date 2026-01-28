@@ -189,9 +189,14 @@ export function DeckViewer({ deckId, onClose }: DeckViewerProps) {
         </div>
 
         {loading ? (
-          <div className="deck-viewer-loading">
-            <div className="deck-viewer-spinner" />
-            <p>Loading grimoire...</p>
+          <div className="deck-viewer-content">
+            <div className="deck-viewer-loading">
+              <p>Loading...</p>
+            </div>
+            <div className="deck-viewer-loading">
+              <div className="deck-viewer-spinner" />
+              <p>Loading grimoire...</p>
+            </div>
           </div>
         ) : error ? (
           <div className="deck-viewer-error">
